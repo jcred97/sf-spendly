@@ -1,0 +1,9 @@
+.date-format-hide .slds-form-element__help {
+    display: none;
+}
+
+.empty-state {
+    border: 1px dashed #d8dde6;
+    border-radius: 0.5rem;
+    color: #706e6b;
+}

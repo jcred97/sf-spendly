@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
-    <actionOverrides>
-        <actionName>Tab</actionName>
-        <content>Home_Page_Default</content>
-        <formFactor>Large</formFactor>
-        <skipRecordTypeSelect>false</skipRecordTypeSelect>
-        <type>Flexipage</type>
-        <pageOrSobjectType>standard-home</pageOrSobjectType>
-    </actionOverrides>
-    <brand>
+<brand>
         <headerColor>#0070D2</headerColor>
         <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
     </brand>
@@ -18,14 +10,15 @@
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
-    <label>Track Spend</label>
+    <label>Spendly</label>
     <navType>Standard</navType>
     <tabs>standard-home</tabs>
+    <tabs>Spendly</tabs>
     <tabs>Expense__c</tabs>
     <tabs>standard-report</tabs>
     <tabs>Category__c</tabs>
     <tabs>Spending__c</tabs>
     <tabs>standard-Dashboard</tabs>
     <uiType>Lightning</uiType>
-    <utilityBar>TrackSpend_UtilityBar</utilityBar>
+    <utilityBar>Spendly_UtilityBar</utilityBar>
 </CustomApplication>

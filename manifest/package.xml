@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>TrackSpendController</members>
-        <members>TrackSpendControllerTest</members>
+        <members>SpendlyController</members>
+        <members>SpendlyControllerTest</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>TrackSpend</members>
+        <members>Spendly</members>
         <name>CustomApplication</name>
     </types>
     <types>
@@ -19,11 +19,13 @@
         <members>Category__c</members>
         <members>Expense__c</members>
         <members>Spending__c</members>
+        <members>Spendly</members>
         <name>CustomTab</name>
     </types>
     <types>
         <members>Expense_Record_Page</members>
-        <members>TrackSpend_UtilityBar</members>
+        <members>Spendly</members>
+        <members>Spendly_UtilityBar</members>
         <name>FlexiPage</name>
     </types>
     <types>
@@ -37,9 +39,13 @@
         <name>Layout</name>
     </types>
     <types>
-        <members>trackSpendApp</members>
-        <members>trackSpendExpenseModal</members>
+        <members>spendlyApp</members>
+        <members>spendlyExpenseModal</members>
         <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>Spendly_All_Access</members>
+        <name>PermissionSet</name>
     </types>
     <types>
         <members>RemoveDateFormatStyle</members>

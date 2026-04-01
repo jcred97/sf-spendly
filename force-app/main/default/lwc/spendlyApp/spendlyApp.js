@@ -5,12 +5,12 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import removeDateFormatStyle from '@salesforce/resourceUrl/RemoveDateFormatStyle';
 
-import getAllSpendings from '@salesforce/apex/TrackSpendController.getAllSpendings';
-import getCategoriesBySpending from '@salesforce/apex/TrackSpendController.getCategoriesBySpending';
-import getExpensesByFilters from '@salesforce/apex/TrackSpendController.getExpensesByFilters';
-import deleteExpense from '@salesforce/apex/TrackSpendController.deleteExpense';
+import getAllSpendings from '@salesforce/apex/SpendlyController.getAllSpendings';
+import getCategoriesBySpending from '@salesforce/apex/SpendlyController.getCategoriesBySpending';
+import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpensesByFilters';
+import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 
-export default class TrackSpendApp extends LightningElement {
+export default class SpendlyApp extends LightningElement {
 
     startDate;
     endDate;
@@ -27,9 +27,11 @@ export default class TrackSpendApp extends LightningElement {
     sortedDirection = 'asc';
     isLoading = false;
     isModalOpen = false;
+    editRecordId = null;
 
     visibleCount = 20;
     wiredExpenseResult;
+    dateError = '';
 
     columns = [
         { label: 'Date', fieldName: 'expenseDate', type: 'date', sortable: true },
@@ -52,13 +54,12 @@ export default class TrackSpendApp extends LightningElement {
             sortable: true
         },
         {
-            type: 'button-icon',
-            fixedWidth: 50,
+            type: 'action',
             typeAttributes: {
-                iconName: 'utility:delete',
-                title: 'Delete',
-                variant: 'bare',
-                alternativeText: 'Delete'
+                rowActions: [
+                    { label: 'Edit', name: 'edit' },
+                    { label: 'Delete', name: 'delete' }
+                ]
             }
         }
     ];
@@ -134,12 +135,39 @@ export default class TrackSpendApp extends LightningElement {
         }
     }
 
+    get hasNoRows() {
+        return this.allRows.length === 0 && !this.isLoading;
+    }
+
+    get totalAmount() {
+        return this.allRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+    }
+
+    get formattedTotal() {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP'
+        }).format(this.totalAmount);
+    }
+
     handleChange(e) {
         const field = e.target.dataset.field;
         this[field] = e.detail.value;
 
         if (field === 'spendingId') {
             this.categoryId = 'All';
+        }
+
+        if (field === 'startDate' || field === 'endDate') {
+            this.validateDates();
+        }
+    }
+
+    validateDates() {
+        if (this.startDate && this.endDate && this.startDate > this.endDate) {
+            this.dateError = 'End Date cannot be before Start Date.';
+        } else {
+            this.dateError = '';
         }
     }
 
@@ -168,36 +196,47 @@ export default class TrackSpendApp extends LightningElement {
     }
 
     async handleRowAction(event) {
+        const actionName = event.detail.action.name;
         const recordId = event.detail.row.id;
         if (!recordId) return;
 
-        const confirmed = await LightningConfirm.open({
-            message: 'Are you sure you want to delete this expense?',
-            variant: 'header',
-            label: 'Confirm Deletion'
-        });
+        if (actionName === 'edit') {
+            this.editRecordId = recordId;
+            this.isModalOpen = true;
+            return;
+        }
 
-        if (!confirmed) return;
+        if (actionName === 'delete') {
+            const confirmed = await LightningConfirm.open({
+                message: 'Are you sure you want to delete this expense?',
+                variant: 'header',
+                label: 'Confirm Deletion'
+            });
 
-        try {
-            await deleteExpense({ expenseId: recordId });
-            this.showToast('Deleted', 'Expense deleted successfully!', 'success');
-            await refreshApex(this.wiredExpenseResult);
-        } catch (error) {
-            this.showToast(
-                'Error',
-                error?.body?.message || 'Failed to delete expense.',
-                'error'
-            );
+            if (!confirmed) return;
+
+            try {
+                await deleteExpense({ expenseId: recordId });
+                this.showToast('Deleted', 'Expense deleted successfully!', 'success');
+                await refreshApex(this.wiredExpenseResult);
+            } catch (error) {
+                this.showToast(
+                    'Error',
+                    error?.body?.message || 'Failed to delete expense.',
+                    'error'
+                );
+            }
         }
     }
 
     openModal() {
+        this.editRecordId = null;
         this.isModalOpen = true;
     }
 
     handleModalClose() {
         this.isModalOpen = false;
+        this.editRecordId = null;
     }
 
     async handleSuccess() {

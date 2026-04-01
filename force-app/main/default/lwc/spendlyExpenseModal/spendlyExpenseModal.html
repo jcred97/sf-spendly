@@ -3,7 +3,7 @@
         <section role="dialog" tabindex="-1" class={modalClass}>
             <div class="slds-modal__container">
                 <header class="slds-modal__header">
-                    <h2 class="slds-text-heading_medium">Add Expense</h2>
+                    <h2 class="slds-text-heading_medium">{modalTitle}</h2>
                     <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
                             title="Close"
                             onclick={handleClose}>
@@ -14,9 +14,10 @@
                 <div class="slds-modal__content slds-p-around_medium">
                     <lightning-record-edit-form
                         object-api-name="Expense__c"
+                        record-id={recordId}
                         onsuccess={handleSuccess}
                         onerror={handleError}>
-                        
+
                         <lightning-input-field field-name="Name"></lightning-input-field>
                         <lightning-input-field field-name="Amount__c"></lightning-input-field>
                         <lightning-input-field field-name="Category__c"></lightning-input-field>
@@ -35,4 +36,3 @@
         <div class={backdropClass}></div>
     </template>
 </template>
-

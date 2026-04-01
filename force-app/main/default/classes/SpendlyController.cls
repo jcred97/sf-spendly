@@ -1,4 +1,4 @@
-public with sharing class TrackSpendController {
+public with sharing class SpendlyController {
 
     @AuraEnabled(cacheable=true)
     public static List<Spending__c> getAllSpendings() {

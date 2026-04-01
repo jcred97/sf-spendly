@@ -1,5 +1,5 @@
 @IsTest
-private class TrackSpendControllerTest {
+private class SpendlyControllerTest {
 
     // ----------------------------
     // Test Data Factory
@@ -55,7 +55,7 @@ private class TrackSpendControllerTest {
     @IsTest
     static void testGetAllSpendings() {
         Test.startTest();
-        List<Spending__c> result = TrackSpendController.getAllSpendings();
+        List<Spending__c> result = SpendlyController.getAllSpendings();
         Test.stopTest();
 
         System.assertEquals(2, result.size(), 'Should return all spendings');
@@ -65,7 +65,7 @@ private class TrackSpendControllerTest {
     @IsTest
     static void testGetCategories_All() {
         Test.startTest();
-        List<Category__c> result = TrackSpendController.getCategoriesBySpending('All');
+        List<Category__c> result = SpendlyController.getCategoriesBySpending('All');
         Test.stopTest();
 
         System.assertEquals(3, result.size(), 'Should return all categories');
@@ -78,7 +78,7 @@ private class TrackSpendControllerTest {
         Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
-        List<Category__c> result = TrackSpendController.getCategoriesBySpending(food.Id);
+        List<Category__c> result = SpendlyController.getCategoriesBySpending(food.Id);
         Test.stopTest();
 
         System.assertEquals(2, result.size(), 'Food should have 2 categories');
@@ -89,7 +89,7 @@ private class TrackSpendControllerTest {
     static void testGetExpenses_NoFilters() {
 
         Test.startTest();
-        List<Expense__c> result = TrackSpendController.getExpensesByFilters('All', 'All', null, null);
+        List<Expense__c> result = SpendlyController.getExpensesByFilters('All', 'All', null, null);
         Test.stopTest();
 
         System.assertEquals(3, result.size(), 'Should return all expenses');
@@ -102,7 +102,7 @@ private class TrackSpendControllerTest {
         Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
-        List<Expense__c> result = TrackSpendController.getExpensesByFilters(food.Id, 'All', null, null);
+        List<Expense__c> result = SpendlyController.getExpensesByFilters(food.Id, 'All', null, null);
         Test.stopTest();
 
         System.assertEquals(2, result.size(), 'Food spending should return 2 expenses');
@@ -118,7 +118,7 @@ private class TrackSpendControllerTest {
         Date endDate   = Date.today().addDays(-1);
 
         Test.startTest();
-        List<Expense__c> result = TrackSpendController.getExpensesByFilters('All', groceries.Id, startDate, endDate);
+        List<Expense__c> result = SpendlyController.getExpensesByFilters('All', groceries.Id, startDate, endDate);
         Test.stopTest();
 
         System.assertEquals(1, result.size(), 'Should return only Groceries expense');
@@ -131,7 +131,7 @@ private class TrackSpendControllerTest {
         Expense__c exp = [SELECT Id FROM Expense__c LIMIT 1];
 
         Test.startTest();
-        TrackSpendController.deleteExpense(exp.Id);
+        SpendlyController.deleteExpense(exp.Id);
         Test.stopTest();
 
         Integer count = [SELECT COUNT() FROM Expense__c WHERE Id = :exp.Id];
@@ -147,7 +147,7 @@ private class TrackSpendControllerTest {
 
         try {
             Test.startTest();
-            TrackSpendController.deleteExpense(null);
+            SpendlyController.deleteExpense(null);
             Test.stopTest();
         } catch (Exception e) {
             exceptionThrown = true;
@@ -164,7 +164,7 @@ private class TrackSpendControllerTest {
         try {
             Test.startTest();
             // Passing UserId triggers forced exception
-            TrackSpendController.deleteExpense(UserInfo.getUserId());
+            SpendlyController.deleteExpense(UserInfo.getUserId());
             Test.stopTest();
         } catch (Exception e) {
             exceptionThrown = true;

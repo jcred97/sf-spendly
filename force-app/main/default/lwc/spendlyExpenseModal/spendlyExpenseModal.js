@@ -1,9 +1,10 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-export default class TrackSpendExpenseModal extends LightningElement {
+export default class SpendlyExpenseModal extends LightningElement {
 
     @api isOpen = false;
+    @api recordId = null;
 
     @track isClosing = false;
     @track isRendered = false;
@@ -99,14 +100,19 @@ export default class TrackSpendExpenseModal extends LightningElement {
     }
 
     handleSuccess() {
-        this.template.querySelectorAll('lightning-input-field').forEach(field => {
-            if (field && 'value' in field) {
-                field.value = null;
-            }
-        });
+        if (!this.isEditMode) {
+            this.template.querySelectorAll('lightning-input-field').forEach(field => {
+                if (field && 'value' in field) {
+                    field.value = null;
+                }
+            });
+        }
 
-        //this.handleClose();
         this.dispatchEvent(new CustomEvent('success'));
+
+        if (this.isEditMode) {
+            this.handleClose();
+        }
     }
 
     handleError(event) {
@@ -118,6 +124,14 @@ export default class TrackSpendExpenseModal extends LightningElement {
                 variant: 'error'
             })
         );
+    }
+
+    get isEditMode() {
+        return this.recordId != null;
+    }
+
+    get modalTitle() {
+        return this.isEditMode ? 'Edit Expense' : 'Add Expense';
     }
 
     get modalClass() {

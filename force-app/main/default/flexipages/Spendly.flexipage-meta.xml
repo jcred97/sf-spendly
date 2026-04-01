@@ -3,8 +3,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>trackSpendApp</componentName>
-                <identifier>c_trackSpendApp</identifier>
+                <componentName>spendlyApp</componentName>
+                <identifier>c_spendlyApp</identifier>
             </componentInstance>
         </itemInstances>
         <name>region1</name>
@@ -18,7 +18,7 @@
         <name>region3</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>Track Spend Page</masterLabel>
+    <masterLabel>Spendly</masterLabel>
     <template>
         <name>flexipage:appHomeTemplateTwoColumnsStacked</name>
     </template>
