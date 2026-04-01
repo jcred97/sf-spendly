@@ -150,9 +150,11 @@ export default class TrackSpendApp extends LightningElement {
 
         const isAsc = sortDirection === 'asc';
 
-        this.rowsToDisplay = [...this.rowsToDisplay].sort((a, b) =>
+        this.allRows = [...this.allRows].sort((a, b) =>
             a[fieldName] > b[fieldName] ? (isAsc ? 1 : -1) : (isAsc ? -1 : 1)
         );
+
+        this.rowsToDisplay = this.allRows.slice(0, this.visibleCount);
     }
 
     async handleLoadMore() {

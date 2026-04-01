@@ -1,4 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class TrackSpendExpenseModal extends LightningElement {
 
@@ -109,7 +110,14 @@ export default class TrackSpendExpenseModal extends LightningElement {
     }
 
     handleError(event) {
-        console.error('Error creating expense:', event.detail);
+        const message = event.detail?.detail || 'Failed to save expense.';
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title: 'Error',
+                message,
+                variant: 'error'
+            })
+        );
     }
 
     get modalClass() {
