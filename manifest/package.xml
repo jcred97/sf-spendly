@@ -48,6 +48,10 @@
         <name>PermissionSet</name>
     </types>
     <types>
+        <members>spendly</members>
+        <name>ContentAsset</name>
+    </types>
+    <types>
         <members>RemoveDateFormatStyle</members>
         <name>StaticResource</name>
     </types>
