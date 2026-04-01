@@ -27,7 +27,10 @@
 
                         <div class="slds-m-top_medium slds-text-align_right">
                             <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
-                            <lightning-button class="slds-m-left_small" variant="brand" type="submit" label="Save"></lightning-button>
+                            <template if:false={isEditMode}>
+                                <lightning-button class="slds-m-left_small" variant="neutral" type="submit" label="Save &amp; New" onclick={handleSaveAndNew}></lightning-button>
+                            </template>
+                            <lightning-button class="slds-m-left_small" variant="brand" type="submit" label="Save" onclick={handleSave}></lightning-button>
                         </div>
                     </lightning-record-edit-form>
                 </div>

@@ -11,6 +11,7 @@ export default class SpendlyExpenseModal extends LightningElement {
 
     _handleKeyDown;
     _previouslyFocusedElement;
+    _saveAndNew = false;
 
     renderedCallback() {
         if (this.isOpen && !this.isRendered) {
@@ -99,18 +100,25 @@ export default class SpendlyExpenseModal extends LightningElement {
         );
     }
 
+    handleSaveAndNew() {
+        this._saveAndNew = true;
+    }
+
+    handleSave() {
+        this._saveAndNew = false;
+    }
+
     handleSuccess() {
-        if (!this.isEditMode) {
+        this.dispatchEvent(new CustomEvent('success'));
+
+        if (this._saveAndNew) {
             this.template.querySelectorAll('lightning-input-field').forEach(field => {
                 if (field && 'value' in field) {
                     field.value = null;
                 }
             });
-        }
-
-        this.dispatchEvent(new CustomEvent('success'));
-
-        if (this.isEditMode) {
+            this._saveAndNew = false;
+        } else {
             this.handleClose();
         }
     }
