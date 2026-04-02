@@ -156,6 +156,34 @@ private class SpendlyControllerTest {
         System.assertEquals(true, exceptionThrown,'Exception should have been thrown for null Id');
     }
 
+    // deleteExpenses() - Success
+    @IsTest
+    static void testDeleteExpenses_Success() {
+        List<Expense__c> expenses = [SELECT Id FROM Expense__c LIMIT 2];
+        List<Id> ids = new List<Id>{ expenses[0].Id, expenses[1].Id };
+
+        Test.startTest();
+        SpendlyController.deleteExpenses(ids);
+        Test.stopTest();
+
+        Integer count = [SELECT COUNT() FROM Expense__c WHERE Id IN :ids];
+        System.assertEquals(0, count, 'Both expenses should be deleted');
+    }
+
+    // deleteExpenses() - Empty list
+    @IsTest
+    static void testDeleteExpenses_EmptyList() {
+        Boolean exceptionThrown = false;
+        try {
+            Test.startTest();
+            SpendlyController.deleteExpenses(new List<Id>());
+            Test.stopTest();
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        System.assertEquals(true, exceptionThrown, 'Exception should be thrown for empty list');
+    }
+
     @IsTest
     static void testDeleteExpense_ForcedDmlFailure() {
 

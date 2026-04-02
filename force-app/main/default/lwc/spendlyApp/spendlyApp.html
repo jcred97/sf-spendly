@@ -169,19 +169,31 @@
                     </div>
                 </template>
                 <template lwc:else>
+                    <template lwc:if={hasSelectedRows}>
+                        <div class="selection-bar">
+                            <span class="selection-count">{selectedCount} row(s) selected</span>
+                            <lightning-button
+                                variant="destructive-text"
+                                label="Delete Selected"
+                                icon-name="utility:delete"
+                                onclick={handleBulkDelete}>
+                            </lightning-button>
+                        </div>
+                    </template>
                     <div class="table-wrap">
                         <lightning-datatable
                             key-field="id"
                             data={rowsToDisplay}
                             columns={columns}
+                            selected-rows={selectedRows}
                             sorted-by={sortedBy}
                             sorted-direction={sortedDirection}
                             onsort={handleSort}
                             onrowaction={handleRowAction}
+                            onrowselection={handleRowSelection}
                             enable-infinite-loading
                             onloadmore={handleLoadMore}
-                            is-loading={isLoading}
-                            hide-checkbox-column>
+                            is-loading={isLoading}>
                         </lightning-datatable>
                     </div>
                     <div class="table-footer">
@@ -195,6 +207,7 @@
     <c-spendly-expense-modal
         is-open={isModalOpen}
         record-id={editRecordId}
+        duplicate-data={duplicateData}
         onsuccess={handleSuccess}
         onclose={handleModalClose}>
     </c-spendly-expense-modal>

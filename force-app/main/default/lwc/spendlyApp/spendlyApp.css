@@ -195,6 +195,21 @@
     padding: 2rem 0;
 }
 
+/* ── Selection Bar ── */
+.selection-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.375rem 1rem;
+    background: #EAF4FF;
+    border-bottom: 1px solid #C7E0F4;
+}
+.selection-count {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0070D2;
+}
+
 /* ── Table Panel ── */
 .table-panel {
     flex: 1;

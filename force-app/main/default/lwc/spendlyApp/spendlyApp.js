@@ -8,6 +8,7 @@ import getAllSpendings from '@salesforce/apex/SpendlyController.getAllSpendings'
 import getCategoriesBySpending from '@salesforce/apex/SpendlyController.getCategoriesBySpending';
 import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpensesByFilters';
 import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
+import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
 
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 
@@ -42,6 +43,7 @@ const ALL_COLUMNS = [
         typeAttributes: {
             rowActions: [
                 { label: 'Edit', name: 'edit' },
+                { label: 'Duplicate', name: 'duplicate' },
                 { label: 'Delete', name: 'delete' }
             ]
         }
@@ -70,12 +72,14 @@ export default class SpendlyApp extends LightningElement {
     categoryOptions = [{ label: 'All', value: 'All' }];
 
     allRows = [];
+    selectedRows = [];
 
     sortedBy = 'expenseDate';
     sortedDirection = 'desc';
     isLoading = false;
     isModalOpen = false;
     editRecordId = null;
+    duplicateData = null;
     isColumnPickerOpen = false;
 
     visibleCount = 20;
@@ -136,6 +140,7 @@ export default class SpendlyApp extends LightningElement {
 
     async loadExpenses() {
         this.isLoading = true;
+        this.selectedRows = [];
         try {
             const data = await getExpensesByFilters({
                 spendingId: this.spendingId,
@@ -150,6 +155,7 @@ export default class SpendlyApp extends LightningElement {
                 name: r.Name,
                 recordLink: '/' + r.Id,
                 category: r.Category__r?.Name,
+                categoryId: r.Category__c,
                 spending: r.Category__r?.Spending__r?.Name,
                 bank: r.Bank__c,
                 transactionType: r.Transaction_Type__c,
@@ -202,6 +208,14 @@ export default class SpendlyApp extends LightningElement {
 
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
+    }
+
+    get hasSelectedRows() {
+        return this.selectedRows.length > 0;
+    }
+
+    get selectedCount() {
+        return this.selectedRows.length;
     }
 
     get totalAmount() {
@@ -314,6 +328,10 @@ export default class SpendlyApp extends LightningElement {
         this.columnVisibility = { ...this.columnVisibility, [key]: e.target.checked };
     }
 
+    handleRowSelection(event) {
+        this.selectedRows = event.detail.selectedRows.map(r => r.id);
+    }
+
     validateDates() {
         if (this.startDate && this.endDate && this.startDate > this.endDate) {
             this.dateError = 'End Date cannot be before Start Date.';
@@ -344,11 +362,27 @@ export default class SpendlyApp extends LightningElement {
 
     async handleRowAction(event) {
         const actionName = event.detail.action.name;
-        const recordId = event.detail.row.id;
+        const row = event.detail.row;
+        const recordId = row.id;
         if (!recordId) return;
 
         if (actionName === 'edit') {
+            this.duplicateData = null;
             this.editRecordId = recordId;
+            this.isModalOpen = true;
+            return;
+        }
+
+        if (actionName === 'duplicate') {
+            this.editRecordId = null;
+            this.duplicateData = {
+                Name: 'Copy of ' + row.name,
+                Amount__c: row.amount,
+                Category__c: row.categoryId,
+                Expense_Date__c: row.expenseDate,
+                Transaction_Type__c: row.transactionType,
+                Bank__c: row.bank
+            };
             this.isModalOpen = true;
             return;
         }
@@ -359,27 +393,70 @@ export default class SpendlyApp extends LightningElement {
                 variant: 'header',
                 label: 'Confirm Deletion'
             });
-
             if (!confirmed) return;
+
+            // Optimistic: remove row immediately
+            const idx = this.allRows.findIndex(r => r.id === recordId);
+            const removed = this.allRows[idx];
+            this.allRows = this.allRows.filter(r => r.id !== recordId);
 
             try {
                 await deleteExpense({ expenseId: recordId });
                 this.showToast('Deleted', 'Expense deleted successfully!', 'success');
-                await this.loadExpenses();
             } catch (error) {
+                // Revert on failure
+                this.allRows = [
+                    ...this.allRows.slice(0, idx),
+                    removed,
+                    ...this.allRows.slice(idx)
+                ];
                 this.showToast('Error', error?.body?.message || 'Failed to delete expense.', 'error');
             }
         }
     }
 
+    async handleBulkDelete() {
+        const count = this.selectedRows.length;
+        const confirmed = await LightningConfirm.open({
+            message: `Are you sure you want to delete ${count} expense(s)?`,
+            variant: 'header',
+            label: 'Confirm Bulk Deletion'
+        });
+        if (!confirmed) return;
+
+        const idsToDelete = [...this.selectedRows];
+        const removedRows = this.allRows.filter(r => idsToDelete.includes(r.id));
+        const removedIndexes = removedRows.map(r => this.allRows.findIndex(a => a.id === r.id));
+
+        // Optimistic: remove all selected rows immediately
+        this.allRows = this.allRows.filter(r => !idsToDelete.includes(r.id));
+        this.selectedRows = [];
+
+        try {
+            await deleteExpenses({ expenseIds: idsToDelete });
+            this.showToast('Deleted', `${count} expense(s) deleted successfully!`, 'success');
+        } catch (error) {
+            // Revert on failure — restore rows at their original positions
+            const restored = [...this.allRows];
+            removedRows.forEach((row, i) => {
+                restored.splice(removedIndexes[i], 0, row);
+            });
+            this.allRows = restored;
+            this.selectedRows = idsToDelete;
+            this.showToast('Error', error?.body?.message || 'Failed to delete expenses.', 'error');
+        }
+    }
+
     openModal() {
         this.editRecordId = null;
+        this.duplicateData = null;
         this.isModalOpen = true;
     }
 
     handleModalClose() {
         this.isModalOpen = false;
         this.editRecordId = null;
+        this.duplicateData = null;
     }
 
     async handleSuccess() {

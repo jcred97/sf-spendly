@@ -59,6 +59,19 @@ public with sharing class SpendlyController {
     }
 
     @AuraEnabled
+    public static void deleteExpenses(List<Id> expenseIds) {
+        if (expenseIds == null || expenseIds.isEmpty()) {
+            throw new AuraHandledException('No expense IDs provided.');
+        }
+        try {
+            List<Expense__c> expenses = [SELECT Id FROM Expense__c WHERE Id IN :expenseIds];
+            delete expenses;
+        } catch (DmlException e) {
+            throw new AuraHandledException('Failed to delete expenses: ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
     public static void deleteExpense(Id expenseId) {
         if (expenseId == null) {
             throw new AuraHandledException('Expense Id is required for deletion.');

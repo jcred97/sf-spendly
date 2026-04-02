@@ -5,6 +5,7 @@ export default class SpendlyExpenseModal extends LightningElement {
 
     @api isOpen = false;
     @api recordId = null;
+    @api duplicateData = null;
 
     @track isClosing = false;
     @track isRendered = false;
@@ -27,8 +28,8 @@ export default class SpendlyExpenseModal extends LightningElement {
             this._handleKeyDown = this.handleKeyDown.bind(this);
             document.addEventListener('keydown', this._handleKeyDown);
 
-            // 🎯 Focus first focusable element
             setTimeout(() => {
+                // 🎯 Focus first focusable element
                 const focusable = this.getFocusableElements();
                 if (focusable.length > 0) {
                     focusable[0].focus();
@@ -134,6 +135,10 @@ export default class SpendlyExpenseModal extends LightningElement {
         );
     }
 
+    get fieldValue() {
+        return this.duplicateData || {};
+    }
+
     get isEditMode() {
         return this.recordId != null;
     }
@@ -143,6 +148,7 @@ export default class SpendlyExpenseModal extends LightningElement {
     }
 
     get modalTitle() {
+        if (this.duplicateData) return 'Duplicate Expense';
         return this.isEditMode ? 'Edit Expense' : 'Add Expense';
     }
 
