@@ -27,7 +27,7 @@ public with sharing class SpendlyController {
         ];
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<Expense__c> getExpensesByFilters(
         String spendingId,
         String categoryId,

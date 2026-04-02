@@ -1,9 +1,177 @@
-.date-format-hide .slds-form-element__help {
-    display: none;
+/* ── Page ── */
+.spendly-page {
+    min-height: 100vh;
+    background: #f3f2f2;
 }
 
-.empty-state {
-    border: 1px dashed #d8dde6;
+/* ── Top Bar ── */
+.top-bar {
+    background: white;
+    border-bottom: 1px solid #dddbda;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+.top-bar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #181818;
+}
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ── Filters ── */
+.filters-panel {
+    background: white;
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px solid #dddbda;
+}
+.filter-col {
+    min-width: 160px;
+    max-width: 210px;
+}
+
+/* ── Summary Cards ── */
+.summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+}
+.stat-card {
+    background: white;
     border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.stat-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
     color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+}
+.stat-value {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.stat-value_name {
+    font-size: 1.0625rem;
+}
+.stat-sub {
+    font-size: 0.75rem;
+    color: #706e6b;
+}
+
+/* ── Main Row ── */
+.main-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1.5rem 1.5rem;
+    align-items: flex-start;
+}
+
+/* ── Chart Panel ── */
+.chart-panel {
+    flex: 0 0 300px;
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.panel-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+}
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+}
+.bar-label {
+    font-size: 0.8125rem;
+    color: #3e3e3c;
+    width: 75px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.bar-track {
+    flex: 1;
+    height: 10px;
+    background: #f3f2f2;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+}
+.bar-amount {
+    font-size: 0.6875rem;
+    color: #706e6b;
+    width: 64px;
+    text-align: right;
+    flex-shrink: 0;
+}
+.no-data-msg {
+    text-align: center;
+    color: #706e6b;
+    font-size: 0.875rem;
+    padding: 2rem 0;
+}
+
+/* ── Table Panel ── */
+.table-panel {
+    flex: 1;
+    min-width: 0;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.table-wrap {
+    height: 500px;
+}
+.table-footer {
+    padding: 0.5rem 1rem;
+    text-align: right;
+    border-top: 1px solid #dddbda;
+    font-size: 0.875rem;
+    color: #3e3e3c;
+}
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #706e6b;
+}
+
+/* ── Date format helper hide ── */
+.date-format-hide .slds-form-element__help {
+    display: none;
 }
