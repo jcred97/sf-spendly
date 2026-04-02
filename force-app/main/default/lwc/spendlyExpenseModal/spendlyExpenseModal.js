@@ -138,6 +138,10 @@ export default class SpendlyExpenseModal extends LightningElement {
         return this.recordId != null;
     }
 
+    get isAddMode() {
+        return this.recordId == null;
+    }
+
     get modalTitle() {
         return this.isEditMode ? 'Edit Expense' : 'Add Expense';
     }

@@ -66,7 +66,7 @@
                     </lightning-combobox>
                 </div>
             </div>
-            <template if:true={dateError}>
+            <template lwc:if={dateError}>
                 <div class="slds-text-color_error slds-m-top_x-small">{dateError}</div>
             </template>
         </div>
@@ -101,7 +101,7 @@
             <!-- Chart -->
             <div class="chart-panel">
                 <div class="panel-title">Spending by Category</div>
-                <template if:true={hasChartData}>
+                <template lwc:if={hasChartData}>
                     <div class="chart-bars">
                         <template for:each={categoryChartData} for:item="item">
                             <div key={item.key} class="bar-row">
@@ -114,14 +114,21 @@
                         </template>
                     </div>
                 </template>
-                <template if:false={hasChartData}>
+                <template lwc:else>
                     <div class="no-data-msg">No data for current filters</div>
                 </template>
             </div>
 
             <!-- Table -->
             <div class="table-panel">
-                <template if:false={hasNoRows}>
+                <template lwc:if={hasNoRows}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
+                        <p class="slds-text-body_regular slds-text-color_weak">Try adjusting your filters or add a new expense.</p>
+                    </div>
+                </template>
+                <template lwc:else>
                     <div class="table-wrap">
                         <lightning-datatable
                             key-field="id"
@@ -139,13 +146,6 @@
                     </div>
                     <div class="table-footer">
                         <strong>Total: {formattedTotal}</strong>
-                    </div>
-                </template>
-                <template if:true={hasNoRows}>
-                    <div class="empty-state">
-                        <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
-                        <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
-                        <p class="slds-text-body_regular slds-text-color_weak">Try adjusting your filters or add a new expense.</p>
                     </div>
                 </template>
             </div>

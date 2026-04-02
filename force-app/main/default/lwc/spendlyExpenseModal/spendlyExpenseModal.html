@@ -1,5 +1,5 @@
 <template>
-    <template if:true={isOpen}>
+    <template lwc:if={isOpen}>
         <section role="dialog" tabindex="-1" class={modalClass}>
             <div class="slds-modal__container">
                 <header class="slds-modal__header">
@@ -27,7 +27,7 @@
 
                         <div class="slds-m-top_medium slds-text-align_right">
                             <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
-                            <template if:false={isEditMode}>
+                            <template lwc:if={isAddMode}>
                                 <lightning-button class="slds-m-left_small" variant="neutral" type="submit" label="Save &amp; New" onclick={handleSaveAndNew}></lightning-button>
                             </template>
                             <lightning-button class="slds-m-left_small" variant="brand" type="submit" label="Save" onclick={handleSave}></lightning-button>

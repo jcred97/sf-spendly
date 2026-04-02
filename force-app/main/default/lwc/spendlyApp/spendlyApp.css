@@ -129,6 +129,8 @@
     height: 100%;
     border-radius: 5px;
     transition: width 0.4s ease;
+    background-color: var(--bar-color);
+    width: var(--bar-width);
 }
 .bar-amount {
     font-size: 0.6875rem;
