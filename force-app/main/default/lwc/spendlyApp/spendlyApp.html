@@ -8,6 +8,29 @@
                 <span class="top-bar-title">Spendly</span>
             </div>
             <div class="top-bar-right">
+                <div class="column-picker-wrapper">
+                    <lightning-button
+                        variant="neutral"
+                        label="Columns"
+                        icon-name="utility:table"
+                        onclick={handleToggleColumnPicker}>
+                    </lightning-button>
+                    <template lwc:if={isColumnPickerOpen}>
+                        <div class="column-picker">
+                            <p class="column-picker-title">Show / Hide Columns</p>
+                            <template for:each={columnPickerOptions} for:item="col">
+                                <label key={col.key} class="column-picker-item">
+                                    <input
+                                        type="checkbox"
+                                        data-key={col.key}
+                                        checked={col.checked}
+                                        onchange={handleColumnToggle} />
+                                    {col.label}
+                                </label>
+                            </template>
+                        </div>
+                    </template>
+                </div>
                 <lightning-button
                     variant="neutral"
                     label="Export CSV"
@@ -64,6 +87,23 @@
                         onchange={handleChange}
                         data-field="categoryId">
                     </lightning-combobox>
+                </div>
+                <div class="slds-col search-col">
+                    <lightning-input
+                        type="search"
+                        label="Search"
+                        placeholder="Search by name, category, bank..."
+                        value={searchTerm}
+                        onchange={handleSearch}>
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-no-flex reset-col">
+                    <lightning-button
+                        variant="neutral"
+                        label="Reset"
+                        icon-name="utility:refresh"
+                        onclick={handleReset}>
+                    </lightning-button>
                 </div>
             </div>
             <template lwc:if={dateError}>

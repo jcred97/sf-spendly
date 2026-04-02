@@ -11,64 +11,85 @@ import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 
+const ALL_COLUMNS = [
+    {
+        label: 'Date',
+        fieldName: 'expenseDate',
+        type: 'date',
+        sortable: true,
+        typeAttributes: { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }
+    },
+    {
+        label: 'Expense Name',
+        fieldName: 'recordLink',
+        type: 'url',
+        sortable: true,
+        typeAttributes: { label: { fieldName: 'name' }, target: '_blank' }
+    },
+    { label: 'Category', fieldName: 'category', sortable: true },
+    { label: 'Spending', fieldName: 'spending', sortable: true },
+    { label: 'Bank', fieldName: 'bank', sortable: true },
+    { label: 'Type', fieldName: 'transactionType', sortable: true },
+    {
+        label: 'Amount',
+        fieldName: 'amount',
+        type: 'currency',
+        typeAttributes: { currencyCode: 'PHP' },
+        sortable: true
+    },
+    {
+        type: 'action',
+        typeAttributes: {
+            rowActions: [
+                { label: 'Edit', name: 'edit' },
+                { label: 'Delete', name: 'delete' }
+            ]
+        }
+    }
+];
+
+const COLUMN_OPTIONS = [
+    { key: 'expenseDate', label: 'Date' },
+    { key: 'recordLink', label: 'Expense Name' },
+    { key: 'category', label: 'Category' },
+    { key: 'spending', label: 'Spending' },
+    { key: 'bank', label: 'Bank' },
+    { key: 'transactionType', label: 'Type' },
+    { key: 'amount', label: 'Amount' }
+];
+
 export default class SpendlyApp extends LightningElement {
 
     startDate;
     endDate;
     spendingId = 'All';
     categoryId = 'All';
+    searchTerm = '';
 
     spendingOptions = [{ label: 'All', value: 'All' }];
     categoryOptions = [{ label: 'All', value: 'All' }];
 
     allRows = [];
-    rowsToDisplay = [];
 
     sortedBy = 'expenseDate';
     sortedDirection = 'desc';
     isLoading = false;
     isModalOpen = false;
     editRecordId = null;
+    isColumnPickerOpen = false;
 
     visibleCount = 20;
     dateError = '';
 
-    columns = [
-        {
-            label: 'Date',
-            fieldName: 'expenseDate',
-            type: 'date',
-            sortable: true,
-            typeAttributes: { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }
-        },
-        {
-            label: 'Expense Name',
-            fieldName: 'recordLink',
-            type: 'url',
-            sortable: true,
-            typeAttributes: { label: { fieldName: 'name' }, target: '_blank' }
-        },
-        { label: 'Category', fieldName: 'category', sortable: true },
-        { label: 'Spending', fieldName: 'spending', sortable: true },
-        { label: 'Bank', fieldName: 'bank', sortable: true },
-        { label: 'Type', fieldName: 'transactionType', sortable: true },
-        {
-            label: 'Amount',
-            fieldName: 'amount',
-            type: 'currency',
-            typeAttributes: { currencyCode: 'PHP' },
-            sortable: true
-        },
-        {
-            type: 'action',
-            typeAttributes: {
-                rowActions: [
-                    { label: 'Edit', name: 'edit' },
-                    { label: 'Delete', name: 'delete' }
-                ]
-            }
-        }
-    ];
+    columnVisibility = {
+        expenseDate: true,
+        recordLink: true,
+        category: true,
+        spending: true,
+        bank: true,
+        transactionType: true,
+        amount: true
+    };
 
     renderedCallback() {
         loadStyle(this, removeDateFormatStyle);
@@ -136,7 +157,6 @@ export default class SpendlyApp extends LightningElement {
             }));
 
             this.visibleCount = 20;
-            this.rowsToDisplay = this.allRows.slice(0, this.visibleCount);
         } catch (error) {
             this.showToast('Error', 'Failed to load expenses.', 'error');
         } finally {
@@ -144,35 +164,68 @@ export default class SpendlyApp extends LightningElement {
         }
     }
 
+    // ── Computed rows ──
+
+    get filteredRows() {
+        if (!this.searchTerm) return this.allRows;
+        const term = this.searchTerm.toLowerCase();
+        return this.allRows.filter(r =>
+            (r.name || '').toLowerCase().includes(term) ||
+            (r.category || '').toLowerCase().includes(term) ||
+            (r.spending || '').toLowerCase().includes(term) ||
+            (r.bank || '').toLowerCase().includes(term) ||
+            (r.transactionType || '').toLowerCase().includes(term)
+        );
+    }
+
+    get rowsToDisplay() {
+        return this.filteredRows.slice(0, this.visibleCount);
+    }
+
+    // ── Column visibility ──
+
+    get columns() {
+        return ALL_COLUMNS.filter(col =>
+            col.type === 'action' || this.columnVisibility[col.fieldName] !== false
+        );
+    }
+
+    get columnPickerOptions() {
+        return COLUMN_OPTIONS.map(col => ({
+            key: col.key,
+            label: col.label,
+            checked: this.columnVisibility[col.key]
+        }));
+    }
+
+    // ── Stats & chart ──
+
     get hasNoRows() {
-        return this.allRows.length === 0 && !this.isLoading;
+        return this.filteredRows.length === 0 && !this.isLoading;
     }
 
     get totalAmount() {
-        return this.allRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+        return this.filteredRows.reduce((sum, row) => sum + (row.amount || 0), 0);
     }
 
     get formattedTotal() {
-        return new Intl.NumberFormat('en-PH', {
-            style: 'currency',
-            currency: 'PHP'
-        }).format(this.totalAmount);
+        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(this.totalAmount);
     }
 
     get expenseCount() {
-        return this.allRows.length;
+        return this.filteredRows.length;
     }
 
     get averageExpense() {
-        if (this.allRows.length === 0) return '₱0.00';
-        const avg = this.totalAmount / this.allRows.length;
+        if (this.filteredRows.length === 0) return '₱0.00';
+        const avg = this.totalAmount / this.filteredRows.length;
         return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(avg);
     }
 
     get topCategory() {
-        if (this.allRows.length === 0) return { name: '—', amount: '₱0.00' };
+        if (this.filteredRows.length === 0) return { name: '—', amount: '₱0.00' };
         const map = {};
-        this.allRows.forEach(r => {
+        this.filteredRows.forEach(r => {
             const cat = r.category || 'Unknown';
             map[cat] = (map[cat] || 0) + (r.amount || 0);
         });
@@ -184,9 +237,9 @@ export default class SpendlyApp extends LightningElement {
     }
 
     get topBank() {
-        if (this.allRows.length === 0) return { name: '—', count: 0 };
+        if (this.filteredRows.length === 0) return { name: '—', count: 0 };
         const map = {};
-        this.allRows.forEach(r => {
+        this.filteredRows.forEach(r => {
             const bank = r.bank || 'Unknown';
             map[bank] = (map[bank] || 0) + 1;
         });
@@ -195,15 +248,13 @@ export default class SpendlyApp extends LightningElement {
     }
 
     get categoryChartData() {
-        if (this.allRows.length === 0) return [];
+        if (this.filteredRows.length === 0) return [];
         const map = {};
-        this.allRows.forEach(r => {
+        this.filteredRows.forEach(r => {
             const cat = r.category || 'Unknown';
             map[cat] = (map[cat] || 0) + (r.amount || 0);
         });
-        const entries = Object.entries(map)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 6);
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 6);
         const max = entries[0]?.[1] || 1;
         return entries.map(([name, total], i) => ({
             key: `${name}-${i}`,
@@ -216,6 +267,8 @@ export default class SpendlyApp extends LightningElement {
     get hasChartData() {
         return this.categoryChartData.length > 0;
     }
+
+    // ── Handlers ──
 
     handleChange(e) {
         const field = e.target.dataset.field;
@@ -233,6 +286,34 @@ export default class SpendlyApp extends LightningElement {
         this.loadExpenses();
     }
 
+    handleSearch(e) {
+        this.searchTerm = e.detail.value;
+        this.visibleCount = 20;
+    }
+
+    handleReset() {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const format = (d) =>
+            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+        this.startDate = format(firstDay);
+        this.endDate = format(today);
+        this.spendingId = 'All';
+        this.categoryId = 'All';
+        this.searchTerm = '';
+        this.loadExpenses();
+    }
+
+    handleToggleColumnPicker() {
+        this.isColumnPickerOpen = !this.isColumnPickerOpen;
+    }
+
+    handleColumnToggle(e) {
+        const key = e.target.dataset.key;
+        this.columnVisibility = { ...this.columnVisibility, [key]: e.target.checked };
+    }
+
     validateDates() {
         if (this.startDate && this.endDate && this.startDate > this.endDate) {
             this.dateError = 'End Date cannot be before Start Date.';
@@ -247,21 +328,17 @@ export default class SpendlyApp extends LightningElement {
         this.sortedDirection = sortDirection;
 
         const isAsc = sortDirection === 'asc';
-
         this.allRows = [...this.allRows].sort((a, b) =>
             a[fieldName] > b[fieldName] ? (isAsc ? 1 : -1) : (isAsc ? -1 : 1)
         );
-
-        this.rowsToDisplay = this.allRows.slice(0, this.visibleCount);
     }
 
     async handleLoadMore() {
-        if (this.rowsToDisplay.length >= this.allRows.length) return;
+        if (this.visibleCount >= this.filteredRows.length) return;
 
         this.isLoading = true;
         await new Promise(r => setTimeout(r, 500));
         this.visibleCount += 10;
-        this.rowsToDisplay = this.allRows.slice(0, this.visibleCount);
         this.isLoading = false;
     }
 
@@ -290,11 +367,7 @@ export default class SpendlyApp extends LightningElement {
                 this.showToast('Deleted', 'Expense deleted successfully!', 'success');
                 await this.loadExpenses();
             } catch (error) {
-                this.showToast(
-                    'Error',
-                    error?.body?.message || 'Failed to delete expense.',
-                    'error'
-                );
+                this.showToast('Error', error?.body?.message || 'Failed to delete expense.', 'error');
             }
         }
     }
@@ -318,7 +391,7 @@ export default class SpendlyApp extends LightningElement {
         if (this.hasNoRows) return;
 
         const headers = ['Date', 'Expense Name', 'Category', 'Spending', 'Bank', 'Type', 'Amount (PHP)'];
-        const rows = this.allRows.map(r => [
+        const rows = this.filteredRows.map(r => [
             r.expenseDate || '',
             r.name || '',
             r.category || '',
@@ -341,12 +414,6 @@ export default class SpendlyApp extends LightningElement {
     }
 
     showToast(title, message, variant) {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title,
-                message,
-                variant
-            })
-        );
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 }
