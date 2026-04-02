@@ -209,7 +209,7 @@ export default class SpendlyApp extends LightningElement {
             key: `${name}-${i}`,
             name,
             formattedTotal: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total),
-            barStyle: `background-color:${CHART_COLORS[i % CHART_COLORS.length]};width:${Math.round((total / max) * 100)}%`
+            barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
         }));
     }
 
