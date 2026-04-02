@@ -1,10 +1,33 @@
 <template>
-    <lightning-card title="Spendly" icon-name="custom:custom63">
-        <div class="slds-p-around_medium">
+    <div class="spendly-page">
 
-            <!-- Filters -->
-            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_medium">
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 slds-p-around_x-small">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <lightning-icon icon-name="custom:custom63" size="small"></lightning-icon>
+                <span class="top-bar-title">Spendly</span>
+            </div>
+            <div class="top-bar-right">
+                <lightning-button
+                    variant="neutral"
+                    label="Export CSV"
+                    icon-name="utility:download"
+                    onclick={handleExportCsv}
+                    disabled={hasNoRows}>
+                </lightning-button>
+                <lightning-button
+                    variant="brand"
+                    label="Add Expense"
+                    icon-name="utility:add"
+                    onclick={openModal}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-panel">
+            <div class="slds-grid slds-gutters_small slds-wrap slds-grid_vertical-align-end">
+                <div class="slds-col filter-col">
                     <lightning-input
                         class="date-format-hide"
                         type="date"
@@ -14,8 +37,7 @@
                         data-field="startDate">
                     </lightning-input>
                 </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 slds-p-around_x-small">
+                <div class="slds-col filter-col">
                     <lightning-input
                         class="date-format-hide"
                         type="date"
@@ -25,8 +47,7 @@
                         data-field="endDate">
                     </lightning-input>
                 </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 slds-p-around_x-small">
+                <div class="slds-col filter-col">
                     <lightning-combobox
                         label="Spending"
                         value={spendingId}
@@ -35,8 +56,7 @@
                         data-field="spendingId">
                     </lightning-combobox>
                 </div>
-
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-5 slds-p-around_x-small">
+                <div class="slds-col filter-col">
                     <lightning-combobox
                         label="Category"
                         value={categoryId}
@@ -46,61 +66,92 @@
                     </lightning-combobox>
                 </div>
             </div>
-
-            <!-- Date Validation Error -->
             <template if:true={dateError}>
-                <div class="slds-text-color_error slds-m-bottom_small slds-p-left_x-small">
-                    {dateError}
-                </div>
+                <div class="slds-text-color_error slds-m-top_x-small">{dateError}</div>
             </template>
+        </div>
 
-            <!-- Table -->
-            <template if:false={hasNoRows}>
-                <div class="slds-m-top_medium" style="height: 500px">
-                    <lightning-datatable
-                        key-field="id"
-                        data={rowsToDisplay}
-                        columns={columns}
-                        sorted-by={sortedBy}
-                        sorted-direction={sortedDirection}
-                        onsort={handleSort}
-                        onrowaction={handleRowAction}
-                        enable-infinite-loading
-                        onloadmore={handleLoadMore}
-                        is-loading={isLoading}
-                        hide-checkbox-column>
-                    </lightning-datatable>
-                </div>
-
-                <!-- Total -->
-                <div class="slds-grid slds-m-top_small slds-p-horizontal_small">
-                    <div class="slds-col slds-text-align_right">
-                        <strong>Total: {formattedTotal}</strong>
-                    </div>
-                </div>
-            </template>
-
-            <!-- Empty State -->
-            <template if:true={hasNoRows}>
-                <div class="empty-state slds-m-top_medium slds-p-around_large slds-text-align_center">
-                    <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
-                    <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
-                    <p class="slds-text-body_regular slds-text-color_weak">Try adjusting your filters or add a new expense.</p>
-                </div>
-            </template>
-
-            <!-- Add Expense Button -->
-            <div class="slds-align_absolute-center slds-m-top_medium">
-                <lightning-button
-                    variant="brand"
-                    label="Add Expense"
-                    onclick={openModal}>
-                </lightning-button>
+        <!-- Summary Cards -->
+        <div class="summary-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Spent</div>
+                <div class="stat-value">{formattedTotal}</div>
+                <div class="stat-sub">{expenseCount} transactions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Average</div>
+                <div class="stat-value">{averageExpense}</div>
+                <div class="stat-sub">per transaction</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Top Category</div>
+                <div class="stat-value stat-value_name">{topCategory.name}</div>
+                <div class="stat-sub">{topCategory.amount}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Top Bank</div>
+                <div class="stat-value stat-value_name">{topBank.name}</div>
+                <div class="stat-sub">{topBank.count} transactions</div>
             </div>
         </div>
-    </lightning-card>
 
-    <!-- Extracted Modal Component -->
+        <!-- Main Content: Chart + Table -->
+        <div class="main-row">
+
+            <!-- Chart -->
+            <div class="chart-panel">
+                <div class="panel-title">Spending by Category</div>
+                <template if:true={hasChartData}>
+                    <div class="chart-bars">
+                        <template for:each={categoryChartData} for:item="item">
+                            <div key={item.key} class="bar-row">
+                                <div class="bar-label" title={item.name}>{item.name}</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style={item.barStyle}></div>
+                                </div>
+                                <div class="bar-amount">{item.formattedTotal}</div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasChartData}>
+                    <div class="no-data-msg">No data for current filters</div>
+                </template>
+            </div>
+
+            <!-- Table -->
+            <div class="table-panel">
+                <template if:false={hasNoRows}>
+                    <div class="table-wrap">
+                        <lightning-datatable
+                            key-field="id"
+                            data={rowsToDisplay}
+                            columns={columns}
+                            sorted-by={sortedBy}
+                            sorted-direction={sortedDirection}
+                            onsort={handleSort}
+                            onrowaction={handleRowAction}
+                            enable-infinite-loading
+                            onloadmore={handleLoadMore}
+                            is-loading={isLoading}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+                    </div>
+                    <div class="table-footer">
+                        <strong>Total: {formattedTotal}</strong>
+                    </div>
+                </template>
+                <template if:true={hasNoRows}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
+                        <p class="slds-text-body_regular slds-text-color_weak">Try adjusting your filters or add a new expense.</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
     <c-spendly-expense-modal
         is-open={isModalOpen}
         record-id={editRecordId}
