@@ -184,6 +184,28 @@ private class SpendlyControllerTest {
         System.assertEquals(true, exceptionThrown, 'Exception should be thrown for empty list');
     }
 
+    // getMonthlyTrend() - All spendings
+    @IsTest
+    static void testGetMonthlyTrend_All() {
+        Test.startTest();
+        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend('All');
+        Test.stopTest();
+
+        System.assert(result.size() > 0, 'Should return monthly trend data');
+    }
+
+    // getMonthlyTrend() - Specific spending
+    @IsTest
+    static void testGetMonthlyTrend_BySpending() {
+        Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
+
+        Test.startTest();
+        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend(food.Id);
+        Test.stopTest();
+
+        System.assert(result != null, 'Should return trend data for spending');
+    }
+
     @IsTest
     static void testDeleteExpense_ForcedDmlFailure() {
 

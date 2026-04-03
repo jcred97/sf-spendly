@@ -40,7 +40,10 @@
     </types>
     <types>
         <members>spendlyApp</members>
+        <members>spendlyBarChart</members>
         <members>spendlyExpenseModal</members>
+        <members>spendlySummaryCards</members>
+        <members>spendlyTrendChart</members>
         <name>LightningComponentBundle</name>
     </types>
     <types>

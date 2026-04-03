@@ -119,93 +119,32 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="summary-row">
-            <div class="stat-card">
-                <div class="stat-label">Total Spent</div>
-                <div class="stat-value">{formattedTotal}</div>
-                <div class="stat-sub">{expenseCount} transactions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Average</div>
-                <div class="stat-value">{averageExpense}</div>
-                <div class="stat-sub">per transaction</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Top Category</div>
-                <div class="stat-value stat-value_name">{topCategory.name}</div>
-                <div class="stat-sub">{topCategory.amount}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Top Bank</div>
-                <div class="stat-value stat-value_name">{topBank.name}</div>
-                <div class="stat-sub">{topBank.count} transactions</div>
-            </div>
-        </div>
+        <c-spendly-summary-cards
+            formatted-total={formattedTotal}
+            expense-count={expenseCount}
+            average-expense={averageExpense}
+            top-category-name={topCategory.name}
+            top-category-amount={topCategory.amount}
+            top-bank-name={topBank.name}
+            top-bank-count={topBank.count}>
+        </c-spendly-summary-cards>
 
         <!-- Charts Row -->
         <div class="charts-row">
+            <c-spendly-bar-chart
+                title="By Category"
+                chart-data={categoryChartData}>
+            </c-spendly-bar-chart>
 
-            <!-- Category Breakdown -->
-            <div class="chart-panel">
-                <div class="panel-title">By Category</div>
-                <template lwc:if={hasChartData}>
-                    <div class="chart-bars">
-                        <template for:each={categoryChartData} for:item="item">
-                            <div key={item.key} class="bar-row">
-                                <div class="bar-label" title={item.name}>{item.name}</div>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style={item.barStyle}></div>
-                                </div>
-                                <div class="bar-amount">{item.formattedTotal}</div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-                <template lwc:else>
-                    <div class="no-data-msg">No data for current filters</div>
-                </template>
-            </div>
+            <c-spendly-trend-chart
+                title="Monthly Trend"
+                trend-data={monthlyTrendData}>
+            </c-spendly-trend-chart>
 
-            <!-- Monthly Trend -->
-            <div class="chart-panel">
-                <div class="panel-title">Monthly Trend</div>
-                <div class="vbar-bars">
-                    <template for:each={monthlyTrendData} for:item="item">
-                        <div key={item.key} class="vbar-fill" style={item.barStyle}></div>
-                    </template>
-                </div>
-                <div class="vbar-labels">
-                    <template for:each={monthlyTrendData} for:item="item">
-                        <div key={item.key} class="vbar-label">{item.label}</div>
-                    </template>
-                </div>
-                <template lwc:if={hasTrendData}>
-                </template>
-                <template lwc:else>
-                    <div class="no-data-msg">No trend data available</div>
-                </template>
-            </div>
-
-            <!-- Bank Summary -->
-            <div class="chart-panel">
-                <div class="panel-title">By Bank</div>
-                <template lwc:if={hasBankData}>
-                    <div class="chart-bars">
-                        <template for:each={bankChartData} for:item="item">
-                            <div key={item.key} class="bar-row">
-                                <div class="bar-label" title={item.name}>{item.name}</div>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style={item.barStyle}></div>
-                                </div>
-                                <div class="bar-amount">{item.formattedTotal}</div>
-                            </div>
-                        </template>
-                    </div>
-                </template>
-                <template lwc:else>
-                    <div class="no-data-msg">No data for current filters</div>
-                </template>
-            </div>
+            <c-spendly-bar-chart
+                title="By Bank"
+                chart-data={bankChartData}>
+            </c-spendly-bar-chart>
         </div>
 
         <!-- Table Row -->

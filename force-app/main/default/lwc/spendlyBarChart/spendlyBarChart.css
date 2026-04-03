@@ -1,0 +1,69 @@
+:host {
+    display: block;
+}
+
+.chart-panel {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.panel-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+}
+
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+}
+
+.bar-label {
+    font-size: 0.8125rem;
+    color: #3e3e3c;
+    width: 75px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar-track {
+    flex: 1;
+    height: 10px;
+    background: #f3f2f2;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.4s ease;
+    background-color: var(--bar-color);
+    width: var(--bar-width);
+}
+
+.bar-amount {
+    font-size: 0.6875rem;
+    color: #706e6b;
+    width: 64px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.no-data-msg {
+    text-align: center;
+    color: #706e6b;
+    font-size: 0.875rem;
+    padding: 2rem 0;
+}

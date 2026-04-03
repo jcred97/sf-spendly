@@ -1,0 +1,20 @@
+<template>
+    <div class="chart-panel">
+        <div class="panel-title">{title}</div>
+        <template lwc:if={hasData}>
+            <div class="vbar-bars">
+                <template for:each={trendData} for:item="item">
+                    <div key={item.key} class="vbar-fill" style={item.barStyle}></div>
+                </template>
+            </div>
+            <div class="vbar-labels">
+                <template for:each={trendData} for:item="item">
+                    <div key={item.key} class="vbar-label">{item.label}</div>
+                </template>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="no-data-msg">{emptyMessage}</div>
+        </template>
+    </div>
+</template>
