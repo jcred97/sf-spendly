@@ -8,18 +8,24 @@ public with sharing class SpendlyController {
     }
 
     @AuraEnabled
-    public static List<MonthlyTotal> getMonthlyTrend() {
+    public static List<MonthlyTotal> getMonthlyTrend(String spendingId) {
         Date sixMonthsAgo = Date.today().addMonths(-5).toStartOfMonth();
-        List<AggregateResult> results = [
-            SELECT CALENDAR_YEAR(Expense_Date__c) yr,
-                   CALENDAR_MONTH(Expense_Date__c) mo,
-                   SUM(Amount__c) total
-            FROM Expense__c
-            WHERE Expense_Date__c >= :sixMonthsAgo
-              AND Expense_Date__c != null
-            GROUP BY CALENDAR_YEAR(Expense_Date__c), CALENDAR_MONTH(Expense_Date__c)
-            ORDER BY CALENDAR_YEAR(Expense_Date__c) ASC, CALENDAR_MONTH(Expense_Date__c) ASC
-        ];
+
+        String query = 'SELECT CALENDAR_YEAR(Expense_Date__c) yr, ' +
+            'CALENDAR_MONTH(Expense_Date__c) mo, ' +
+            'SUM(Amount__c) total ' +
+            'FROM Expense__c ' +
+            'WHERE Expense_Date__c >= :sixMonthsAgo ' +
+            'AND Expense_Date__c != null ';
+
+        if (String.isNotBlank(spendingId) && spendingId != 'All') {
+            query += 'AND Category__r.Spending__c = :spendingId ';
+        }
+
+        query += 'GROUP BY CALENDAR_YEAR(Expense_Date__c), CALENDAR_MONTH(Expense_Date__c) ' +
+            'ORDER BY CALENDAR_YEAR(Expense_Date__c) ASC, CALENDAR_MONTH(Expense_Date__c) ASC';
+
+        List<AggregateResult> results = Database.query(query);
 
         String[] monthNames = new String[]{
             'Jan','Feb','Mar','Apr','May','Jun',

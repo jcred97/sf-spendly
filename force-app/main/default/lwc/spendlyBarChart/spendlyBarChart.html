@@ -1,0 +1,21 @@
+<template>
+    <div class="chart-panel">
+        <div class="panel-title">{title}</div>
+        <template lwc:if={hasData}>
+            <div class="chart-bars">
+                <template for:each={chartData} for:item="item">
+                    <div key={item.key} class="bar-row">
+                        <div class="bar-label" title={item.name}>{item.name}</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style={item.barStyle}></div>
+                        </div>
+                        <div class="bar-amount">{item.formattedTotal}</div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <template lwc:else>
+            <div class="no-data-msg">{emptyMessage}</div>
+        </template>
+    </div>
+</template>

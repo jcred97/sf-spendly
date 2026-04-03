@@ -11,7 +11,15 @@ import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
 import getMonthlyTrend from '@salesforce/apex/SpendlyController.getMonthlyTrend';
 
+// ── Constants ────────────────────────────────────────────────────────────────
+
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const PAGE_SIZE = 20;
+const LOAD_MORE_SIZE = 10;
+
+const PHP_CURRENCY = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' });
 
 const ALL_COLUMNS = [
     {
@@ -61,30 +69,85 @@ const COLUMN_OPTIONS = [
     { key: 'amount', label: 'Amount' }
 ];
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatPHP(value) {
+    return PHP_CURRENCY.format(value);
+}
+
+function formatDate(isoDate) {
+    return isoDate ? DATE_FORMAT.format(new Date(isoDate)) : '—';
+}
+
+function formatDateISO(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+/** Group rows by a field and sum amounts. Returns sorted [name, total] entries. */
+function groupByAmount(rows, field) {
+    const map = {};
+    rows.forEach(r => {
+        const key = r[field] || 'Unknown';
+        map[key] = (map[key] || 0) + (r.amount || 0);
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+/** Group rows by a field and count occurrences. Returns sorted [name, count] entries. */
+function groupByCount(rows, field) {
+    const map = {};
+    rows.forEach(r => {
+        const key = r[field] || 'Unknown';
+        map[key] = (map[key] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+/** Build horizontal bar chart data from [name, total] entries. */
+function buildBarChartData(entries, prefix) {
+    const max = entries[0]?.[1] || 1;
+    return entries.map(([name, total], i) => ({
+        key: `${prefix}-${name}-${i}`,
+        name,
+        formattedTotal: formatPHP(total),
+        barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
+    }));
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
+
 export default class SpendlyApp extends LightningElement {
 
+    // Filter state
     startDate;
     endDate;
     spendingId = 'All';
     categoryId = 'All';
     searchTerm = '';
 
+    // Combobox options
     spendingOptions = [{ label: 'All', value: 'All' }];
     categoryOptions = [{ label: 'All', value: 'All' }];
 
+    // Data
     allRows = [];
     selectedRows = [];
     monthlyTrendRaw = [];
 
+    // Table state
     sortedBy = 'expenseDate';
     sortedDirection = 'desc';
+    visibleCount = PAGE_SIZE;
+
+    // UI state
     isLoading = false;
     isModalOpen = false;
     editRecordId = null;
     duplicateData = null;
     isColumnPickerOpen = false;
-
-    visibleCount = 20;
     dateError = '';
 
     columnVisibility = {
@@ -97,6 +160,8 @@ export default class SpendlyApp extends LightningElement {
         amount: true
     };
 
+    // ── Lifecycle ────────────────────────────────────────────────────────────
+
     renderedCallback() {
         loadStyle(this, removeDateFormatStyle);
     }
@@ -105,16 +170,13 @@ export default class SpendlyApp extends LightningElement {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        const format = (d) =>
-            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-                d.getDate()
-            ).padStart(2, '0')}`;
-
-        this.startDate = format(firstDay);
-        this.endDate = format(today);
+        this.startDate = formatDateISO(firstDay);
+        this.endDate = formatDateISO(today);
 
         this.loadExpenses();
     }
+
+    // ── Wire Adapters ────────────────────────────────────────────────────────
 
     @wire(getAllSpendings)
     wiredSpendings({ error, data }) {
@@ -140,6 +202,8 @@ export default class SpendlyApp extends LightningElement {
         }
     }
 
+    // ── Data Loading ─────────────────────────────────────────────────────────
+
     async loadExpenses() {
         this.isLoading = true;
         this.selectedRows = [];
@@ -151,11 +215,10 @@ export default class SpendlyApp extends LightningElement {
                     startDate: this.startDate,
                     endDate: this.endDate
                 }),
-                getMonthlyTrend()
+                getMonthlyTrend({ spendingId: this.spendingId })
             ]);
 
             this.monthlyTrendRaw = trendData || [];
-
             this.allRows = data.map(r => ({
                 id: r.Id,
                 expenseDate: r.Expense_Date__c,
@@ -168,8 +231,7 @@ export default class SpendlyApp extends LightningElement {
                 transactionType: r.Transaction_Type__c,
                 amount: r.Amount__c
             }));
-
-            this.visibleCount = 20;
+            this.visibleCount = PAGE_SIZE;
         } catch (error) {
             this.showToast('Error', 'Failed to load expenses.', 'error');
         } finally {
@@ -177,7 +239,7 @@ export default class SpendlyApp extends LightningElement {
         }
     }
 
-    // ── Computed rows ──
+    // ── Computed: Rows ───────────────────────────────────────────────────────
 
     get filteredRows() {
         if (!this.searchTerm) return this.allRows;
@@ -195,7 +257,7 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.slice(0, this.visibleCount);
     }
 
-    // ── Column visibility ──
+    // ── Computed: Column Visibility ──────────────────────────────────────────
 
     get columns() {
         return ALL_COLUMNS.filter(col =>
@@ -211,7 +273,7 @@ export default class SpendlyApp extends LightningElement {
         }));
     }
 
-    // ── Stats & chart ──
+    // ── Computed: Summary Stats ──────────────────────────────────────────────
 
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
@@ -230,7 +292,7 @@ export default class SpendlyApp extends LightningElement {
     }
 
     get formattedTotal() {
-        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(this.totalAmount);
+        return formatPHP(this.totalAmount);
     }
 
     get expenseCount() {
@@ -239,81 +301,43 @@ export default class SpendlyApp extends LightningElement {
 
     get averageExpense() {
         if (this.filteredRows.length === 0) return '₱0.00';
-        const avg = this.totalAmount / this.filteredRows.length;
-        return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(avg);
+        return formatPHP(this.totalAmount / this.filteredRows.length);
     }
 
     get topCategory() {
         if (this.filteredRows.length === 0) return { name: '—', amount: '₱0.00' };
-        const map = {};
-        this.filteredRows.forEach(r => {
-            const cat = r.category || 'Unknown';
-            map[cat] = (map[cat] || 0) + (r.amount || 0);
-        });
-        const top = Object.entries(map).sort((a, b) => b[1] - a[1])[0];
-        return {
-            name: top[0],
-            amount: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(top[1])
-        };
+        const [name, total] = groupByAmount(this.filteredRows, 'category')[0];
+        return { name, amount: formatPHP(total) };
     }
 
     get topBank() {
         if (this.filteredRows.length === 0) return { name: '—', count: 0 };
-        const map = {};
-        this.filteredRows.forEach(r => {
-            const bank = r.bank || 'Unknown';
-            map[bank] = (map[bank] || 0) + 1;
-        });
-        const top = Object.entries(map).sort((a, b) => b[1] - a[1])[0];
-        return { name: top[0], count: top[1] };
+        const [name, count] = groupByCount(this.filteredRows, 'bank')[0];
+        return { name, count };
     }
+
+    // ── Computed: Charts ─────────────────────────────────────────────────────
 
     get categoryChartData() {
         if (this.filteredRows.length === 0) return [];
-        const map = {};
-        this.filteredRows.forEach(r => {
-            const cat = r.category || 'Unknown';
-            map[cat] = (map[cat] || 0) + (r.amount || 0);
-        });
-        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 6);
-        const max = entries[0]?.[1] || 1;
-        return entries.map(([name, total], i) => ({
-            key: `${name}-${i}`,
-            name,
-            formattedTotal: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total),
-            barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
-        }));
+        const entries = groupByAmount(this.filteredRows, 'category').slice(0, 6);
+        return buildBarChartData(entries, 'cat');
     }
 
-    get hasChartData() {
-        return this.categoryChartData.length > 0;
-    }
-
-    get printDateRange() {
-        return `${this.startDate || ''} — ${this.endDate || ''}`;
-    }
-
-    get printRows() {
-        const fmt = new Intl.DateTimeFormat('en-PH', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' });
-        const php = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
-        return this.filteredRows.map(r => ({
-            ...r,
-            expenseDateFormatted: r.expenseDate ? fmt.format(new Date(r.expenseDate)) : '—',
-            amountFormatted: r.amount != null ? php.format(r.amount) : '—'
-        }));
+    get bankChartData() {
+        if (this.filteredRows.length === 0) return [];
+        const entries = groupByAmount(this.filteredRows, 'bank');
+        return buildBarChartData(entries, 'bank');
     }
 
     get monthlyTrendData() {
-        const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const today = new Date();
 
-        // Build last 6 months as reference
         const last6 = Array.from({ length: 6 }, (_, i) => {
             const d = new Date(today.getFullYear(), today.getMonth() - (5 - i), 1);
             return { year: d.getFullYear(), monthNum: d.getMonth() + 1 };
         });
 
-        // Index raw data by year-month key
         const rawMap = {};
         this.monthlyTrendRaw.forEach(m => {
             rawMap[`${m.year}-${m.monthNum}`] = m.total || 0;
@@ -322,43 +346,29 @@ export default class SpendlyApp extends LightningElement {
         const totals = last6.map(m => rawMap[`${m.year}-${m.monthNum}`] || 0);
         const max = Math.max(...totals, 1);
 
-        return last6.map((m, i) => {
-            const total = totals[i];
-            return {
-                key: `trend-${m.year}-${m.monthNum}`,
-                label: MONTH_NAMES[m.monthNum - 1],
-                barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((total / max) * 110))}px`,
-                hasValue: total > 0
-            };
-        });
-    }
-
-    get hasTrendData() {
-        return this.monthlyTrendRaw.length > 0;
-    }
-
-    get bankChartData() {
-        if (this.filteredRows.length === 0) return [];
-        const map = {};
-        this.filteredRows.forEach(r => {
-            const bank = r.bank || 'Unknown';
-            map[bank] = (map[bank] || 0) + (r.amount || 0);
-        });
-        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
-        const max = entries[0]?.[1] || 1;
-        return entries.map(([name, total], i) => ({
-            key: `bank-${name}-${i}`,
-            name,
-            formattedTotal: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total),
-            barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
+        return last6.map((m, i) => ({
+            key: `trend-${m.year}-${m.monthNum}`,
+            label: MONTH_NAMES[m.monthNum - 1],
+            barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((totals[i] / max) * 110))}px`,
+            hasValue: totals[i] > 0
         }));
     }
 
-    get hasBankData() {
-        return this.bankChartData.length > 0;
+    // ── Computed: Print ──────────────────────────────────────────────────────
+
+    get printDateRange() {
+        return `${this.startDate || ''} — ${this.endDate || ''}`;
     }
 
-    // ── Handlers ──
+    get printRows() {
+        return this.filteredRows.map(r => ({
+            ...r,
+            expenseDateFormatted: formatDate(r.expenseDate),
+            amountFormatted: r.amount != null ? formatPHP(r.amount) : '—'
+        }));
+    }
+
+    // ── Handlers: Filters ────────────────────────────────────────────────────
 
     handleChange(e) {
         const field = e.target.dataset.field;
@@ -378,22 +388,30 @@ export default class SpendlyApp extends LightningElement {
 
     handleSearch(e) {
         this.searchTerm = e.detail.value;
-        this.visibleCount = 20;
+        this.visibleCount = PAGE_SIZE;
     }
 
     handleReset() {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const format = (d) =>
-            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-        this.startDate = format(firstDay);
-        this.endDate = format(today);
+        this.startDate = formatDateISO(firstDay);
+        this.endDate = formatDateISO(today);
         this.spendingId = 'All';
         this.categoryId = 'All';
         this.searchTerm = '';
         this.loadExpenses();
     }
+
+    validateDates() {
+        if (this.startDate && this.endDate && this.startDate > this.endDate) {
+            this.dateError = 'End Date cannot be before Start Date.';
+        } else {
+            this.dateError = '';
+        }
+    }
+
+    // ── Handlers: Column Picker ──────────────────────────────────────────────
 
     handleToggleColumnPicker() {
         this.isColumnPickerOpen = !this.isColumnPickerOpen;
@@ -404,16 +422,10 @@ export default class SpendlyApp extends LightningElement {
         this.columnVisibility = { ...this.columnVisibility, [key]: e.target.checked };
     }
 
+    // ── Handlers: Table ──────────────────────────────────────────────────────
+
     handleRowSelection(event) {
         this.selectedRows = event.detail.selectedRows.map(r => r.id);
-    }
-
-    validateDates() {
-        if (this.startDate && this.endDate && this.startDate > this.endDate) {
-            this.dateError = 'End Date cannot be before Start Date.';
-        } else {
-            this.dateError = '';
-        }
     }
 
     handleSort(event) {
@@ -431,10 +443,13 @@ export default class SpendlyApp extends LightningElement {
         if (this.visibleCount >= this.filteredRows.length) return;
 
         this.isLoading = true;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
         await new Promise(r => setTimeout(r, 500));
-        this.visibleCount += 10;
+        this.visibleCount += LOAD_MORE_SIZE;
         this.isLoading = false;
     }
+
+    // ── Handlers: Row Actions ────────────────────────────────────────────────
 
     async handleRowAction(event) {
         const actionName = event.detail.action.name;
@@ -464,30 +479,34 @@ export default class SpendlyApp extends LightningElement {
         }
 
         if (actionName === 'delete') {
-            const confirmed = await LightningConfirm.open({
-                message: 'Are you sure you want to delete this expense?',
-                variant: 'header',
-                label: 'Confirm Deletion'
-            });
-            if (!confirmed) return;
+            await this.confirmAndDeleteSingle(recordId);
+        }
+    }
 
-            // Optimistic: remove row immediately
-            const idx = this.allRows.findIndex(r => r.id === recordId);
-            const removed = this.allRows[idx];
-            this.allRows = this.allRows.filter(r => r.id !== recordId);
+    async confirmAndDeleteSingle(recordId) {
+        const confirmed = await LightningConfirm.open({
+            message: 'Are you sure you want to delete this expense?',
+            variant: 'header',
+            label: 'Confirm Deletion'
+        });
+        if (!confirmed) return;
 
-            try {
-                await deleteExpense({ expenseId: recordId });
-                this.showToast('Deleted', 'Expense deleted successfully!', 'success');
-            } catch (error) {
-                // Revert on failure
-                this.allRows = [
-                    ...this.allRows.slice(0, idx),
-                    removed,
-                    ...this.allRows.slice(idx)
-                ];
-                this.showToast('Error', error?.body?.message || 'Failed to delete expense.', 'error');
-            }
+        // Optimistic: remove row immediately
+        const idx = this.allRows.findIndex(r => r.id === recordId);
+        const removed = this.allRows[idx];
+        this.allRows = this.allRows.filter(r => r.id !== recordId);
+
+        try {
+            await deleteExpense({ expenseId: recordId });
+            this.showToast('Deleted', 'Expense deleted successfully!', 'success');
+        } catch (error) {
+            // Revert on failure
+            this.allRows = [
+                ...this.allRows.slice(0, idx),
+                removed,
+                ...this.allRows.slice(idx)
+            ];
+            this.showToast('Error', error?.body?.message || 'Failed to delete expense.', 'error');
         }
     }
 
@@ -523,6 +542,8 @@ export default class SpendlyApp extends LightningElement {
         }
     }
 
+    // ── Handlers: Modal ──────────────────────────────────────────────────────
+
     openModal() {
         this.editRecordId = null;
         this.duplicateData = null;
@@ -539,6 +560,8 @@ export default class SpendlyApp extends LightningElement {
         this.showToast('Success', 'Expense saved successfully!', 'success');
         await this.loadExpenses();
     }
+
+    // ── Handlers: Export ─────────────────────────────────────────────────────
 
     handlePrint() {
         window.print();
@@ -569,6 +592,8 @@ export default class SpendlyApp extends LightningElement {
         link.click();
         document.body.removeChild(link);
     }
+
+    // ── Utilities ────────────────────────────────────────────────────────────
 
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));

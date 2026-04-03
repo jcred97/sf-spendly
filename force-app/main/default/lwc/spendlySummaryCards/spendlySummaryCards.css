@@ -1,0 +1,48 @@
+:host {
+    display: block;
+}
+
+.summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.stat-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #706e6b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-value_name {
+    font-size: 1.0625rem;
+}
+
+.stat-sub {
+    font-size: 0.75rem;
+    color: #706e6b;
+}
