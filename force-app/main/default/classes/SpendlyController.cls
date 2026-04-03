@@ -1,5 +1,44 @@
 public with sharing class SpendlyController {
 
+    public class MonthlyTotal {
+        @AuraEnabled public String month;
+        @AuraEnabled public Integer year;
+        @AuraEnabled public Integer monthNum;
+        @AuraEnabled public Decimal total;
+    }
+
+    @AuraEnabled
+    public static List<MonthlyTotal> getMonthlyTrend() {
+        Date sixMonthsAgo = Date.today().addMonths(-5).toStartOfMonth();
+        List<AggregateResult> results = [
+            SELECT CALENDAR_YEAR(Expense_Date__c) yr,
+                   CALENDAR_MONTH(Expense_Date__c) mo,
+                   SUM(Amount__c) total
+            FROM Expense__c
+            WHERE Expense_Date__c >= :sixMonthsAgo
+              AND Expense_Date__c != null
+            GROUP BY CALENDAR_YEAR(Expense_Date__c), CALENDAR_MONTH(Expense_Date__c)
+            ORDER BY CALENDAR_YEAR(Expense_Date__c) ASC, CALENDAR_MONTH(Expense_Date__c) ASC
+        ];
+
+        String[] monthNames = new String[]{
+            'Jan','Feb','Mar','Apr','May','Jun',
+            'Jul','Aug','Sep','Oct','Nov','Dec'
+        };
+
+        List<MonthlyTotal> trend = new List<MonthlyTotal>();
+        for (AggregateResult ar : results) {
+            MonthlyTotal mt = new MonthlyTotal();
+            mt.year     = (Integer)ar.get('yr');
+            mt.monthNum = (Integer)ar.get('mo');
+            mt.month    = monthNames[mt.monthNum - 1];
+            mt.total    = (Decimal)ar.get('total');
+            trend.add(mt);
+        }
+        return trend;
+    }
+
+
     @AuraEnabled(cacheable=true)
     public static List<Spending__c> getAllSpendings() {
         return [

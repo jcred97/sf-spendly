@@ -39,6 +39,13 @@
                     disabled={hasNoRows}>
                 </lightning-button>
                 <lightning-button
+                    variant="neutral"
+                    label="Print / PDF"
+                    icon-name="utility:print"
+                    onclick={handlePrint}
+                    disabled={hasNoRows}>
+                </lightning-button>
+                <lightning-button
                     variant="brand"
                     label="Add Expense"
                     icon-name="utility:add"
@@ -135,12 +142,12 @@
             </div>
         </div>
 
-        <!-- Main Content: Chart + Table -->
-        <div class="main-row">
+        <!-- Charts Row -->
+        <div class="charts-row">
 
-            <!-- Chart -->
+            <!-- Category Breakdown -->
             <div class="chart-panel">
-                <div class="panel-title">Spending by Category</div>
+                <div class="panel-title">By Category</div>
                 <template lwc:if={hasChartData}>
                     <div class="chart-bars">
                         <template for:each={categoryChartData} for:item="item">
@@ -159,7 +166,50 @@
                 </template>
             </div>
 
-            <!-- Table -->
+            <!-- Monthly Trend -->
+            <div class="chart-panel">
+                <div class="panel-title">Monthly Trend</div>
+                <div class="vbar-bars">
+                    <template for:each={monthlyTrendData} for:item="item">
+                        <div key={item.key} class="vbar-fill" style={item.barStyle}></div>
+                    </template>
+                </div>
+                <div class="vbar-labels">
+                    <template for:each={monthlyTrendData} for:item="item">
+                        <div key={item.key} class="vbar-label">{item.label}</div>
+                    </template>
+                </div>
+                <template lwc:if={hasTrendData}>
+                </template>
+                <template lwc:else>
+                    <div class="no-data-msg">No trend data available</div>
+                </template>
+            </div>
+
+            <!-- Bank Summary -->
+            <div class="chart-panel">
+                <div class="panel-title">By Bank</div>
+                <template lwc:if={hasBankData}>
+                    <div class="chart-bars">
+                        <template for:each={bankChartData} for:item="item">
+                            <div key={item.key} class="bar-row">
+                                <div class="bar-label" title={item.name}>{item.name}</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style={item.barStyle}></div>
+                                </div>
+                                <div class="bar-amount">{item.formattedTotal}</div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="no-data-msg">No data for current filters</div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Table Row -->
+        <div class="table-row">
             <div class="table-panel">
                 <template lwc:if={hasNoRows}>
                     <div class="empty-state">
@@ -202,6 +252,53 @@
                 </template>
             </div>
         </div>
+    </div>
+
+    <!-- Print-only content -->
+    <div class="print-only">
+        <div class="print-header">
+            <div class="print-title">Spendly — Expense Report</div>
+            <div class="print-meta">{printDateRange}</div>
+        </div>
+        <div class="print-summary">
+            <span><strong>Total Spent:</strong> {formattedTotal}</span>
+            <span><strong>Transactions:</strong> {expenseCount}</span>
+            <span><strong>Average:</strong> {averageExpense}</span>
+            <span><strong>Top Category:</strong> {topCategory.name} ({topCategory.amount})</span>
+            <span><strong>Top Bank:</strong> {topBank.name} ({topBank.count} txns)</span>
+        </div>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Expense Name</th>
+                    <th>Category</th>
+                    <th>Spending</th>
+                    <th>Bank</th>
+                    <th>Type</th>
+                    <th class="print-amount-col">Amount (PHP)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={printRows} for:item="row">
+                    <tr key={row.id}>
+                        <td>{row.expenseDateFormatted}</td>
+                        <td>{row.name}</td>
+                        <td>{row.category}</td>
+                        <td>{row.spending}</td>
+                        <td>{row.bank}</td>
+                        <td>{row.transactionType}</td>
+                        <td class="print-amount-col">{row.amountFormatted}</td>
+                    </tr>
+                </template>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6" class="print-total-label">Total</td>
+                    <td class="print-amount-col print-total-value">{formattedTotal}</td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
 
     <c-spendly-expense-modal

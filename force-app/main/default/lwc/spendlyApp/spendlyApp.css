@@ -128,17 +128,21 @@
     color: #706e6b;
 }
 
-/* ── Main Row ── */
-.main-row {
-    display: flex;
+/* ── Charts Row ── */
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
+    padding: 0 1.5rem 1rem;
+}
+
+/* ── Table Row ── */
+.table-row {
     padding: 0 1.5rem 1.5rem;
-    align-items: flex-start;
 }
 
 /* ── Chart Panel ── */
 .chart-panel {
-    flex: 0 0 300px;
     background: white;
     border-radius: 0.5rem;
     padding: 1.25rem;
@@ -188,6 +192,33 @@
     text-align: right;
     flex-shrink: 0;
 }
+/* ── Vertical Bar Chart (Monthly Trend) ── */
+.vbar-bars {
+    display: flex;
+    align-items: flex-end;
+    height: 110px;
+    gap: 6px;
+    border-bottom: 2px solid #f3f2f2;
+    margin-bottom: 6px;
+}
+.vbar-fill {
+    flex: 1;
+    height: var(--vbar-height, 3px);
+    background-color: var(--vbar-color);
+    border-radius: 3px 3px 0 0;
+    transition: height 0.4s ease;
+}
+.vbar-labels {
+    display: flex;
+    gap: 6px;
+}
+.vbar-label {
+    flex: 1;
+    text-align: center;
+    font-size: 0.6875rem;
+    color: #706e6b;
+}
+
 .no-data-msg {
     text-align: center;
     color: #706e6b;
@@ -212,8 +243,6 @@
 
 /* ── Table Panel ── */
 .table-panel {
-    flex: 1;
-    min-width: 0;
     background: white;
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -240,4 +269,97 @@
 /* ── Date format helper hide ── */
 .date-format-hide .slds-form-element__help {
     display: none;
+}
+
+/* ── Print / PDF ── */
+.print-only {
+    display: none;
+}
+
+@media print {
+    .top-bar,
+    .filters-panel,
+    .summary-row,
+    .charts-row,
+    .table-row {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+        font-family: Arial, sans-serif;
+        color: #000;
+        padding: 0;
+        margin: 0;
+        page-break-before: avoid;
+    }
+
+    .print-header {
+        margin-bottom: 0.75rem;
+        border-bottom: 2px solid #000;
+        padding-bottom: 0.5rem;
+    }
+
+    .print-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .print-meta {
+        font-size: 0.8125rem;
+        color: #444;
+        margin-top: 0.2rem;
+    }
+
+    .print-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.8125rem;
+        margin-bottom: 0.875rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+    }
+
+    .print-table th,
+    .print-table td {
+        border: 1px solid #bbb;
+        padding: 0.3rem 0.5rem;
+        text-align: left;
+    }
+
+    .print-table thead th {
+        background: #f0f0f0;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .print-amount-col {
+        text-align: right;
+    }
+
+    .print-table tfoot td {
+        border-top: 2px solid #000;
+    }
+
+    .print-total-label {
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .print-total-value {
+        font-weight: 700;
+    }
+
+    .print-table tbody tr:nth-child(even) {
+        background: #f9f9f9;
+    }
 }

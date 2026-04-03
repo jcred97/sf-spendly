@@ -9,6 +9,7 @@ import getCategoriesBySpending from '@salesforce/apex/SpendlyController.getCateg
 import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpensesByFilters';
 import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
+import getMonthlyTrend from '@salesforce/apex/SpendlyController.getMonthlyTrend';
 
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 
@@ -73,6 +74,7 @@ export default class SpendlyApp extends LightningElement {
 
     allRows = [];
     selectedRows = [];
+    monthlyTrendRaw = [];
 
     sortedBy = 'expenseDate';
     sortedDirection = 'desc';
@@ -142,12 +144,17 @@ export default class SpendlyApp extends LightningElement {
         this.isLoading = true;
         this.selectedRows = [];
         try {
-            const data = await getExpensesByFilters({
-                spendingId: this.spendingId,
-                categoryId: this.categoryId,
-                startDate: this.startDate,
-                endDate: this.endDate
-            });
+            const [data, trendData] = await Promise.all([
+                getExpensesByFilters({
+                    spendingId: this.spendingId,
+                    categoryId: this.categoryId,
+                    startDate: this.startDate,
+                    endDate: this.endDate
+                }),
+                getMonthlyTrend()
+            ]);
+
+            this.monthlyTrendRaw = trendData || [];
 
             this.allRows = data.map(r => ({
                 id: r.Id,
@@ -280,6 +287,75 @@ export default class SpendlyApp extends LightningElement {
 
     get hasChartData() {
         return this.categoryChartData.length > 0;
+    }
+
+    get printDateRange() {
+        return `${this.startDate || ''} — ${this.endDate || ''}`;
+    }
+
+    get printRows() {
+        const fmt = new Intl.DateTimeFormat('en-PH', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' });
+        const php = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+        return this.filteredRows.map(r => ({
+            ...r,
+            expenseDateFormatted: r.expenseDate ? fmt.format(new Date(r.expenseDate)) : '—',
+            amountFormatted: r.amount != null ? php.format(r.amount) : '—'
+        }));
+    }
+
+    get monthlyTrendData() {
+        const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const today = new Date();
+
+        // Build last 6 months as reference
+        const last6 = Array.from({ length: 6 }, (_, i) => {
+            const d = new Date(today.getFullYear(), today.getMonth() - (5 - i), 1);
+            return { year: d.getFullYear(), monthNum: d.getMonth() + 1 };
+        });
+
+        // Index raw data by year-month key
+        const rawMap = {};
+        this.monthlyTrendRaw.forEach(m => {
+            rawMap[`${m.year}-${m.monthNum}`] = m.total || 0;
+        });
+
+        const totals = last6.map(m => rawMap[`${m.year}-${m.monthNum}`] || 0);
+        const max = Math.max(...totals, 1);
+
+        return last6.map((m, i) => {
+            const total = totals[i];
+            return {
+                key: `trend-${m.year}-${m.monthNum}`,
+                label: MONTH_NAMES[m.monthNum - 1],
+                barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((total / max) * 110))}px`,
+                hasValue: total > 0
+            };
+        });
+    }
+
+    get hasTrendData() {
+        return this.monthlyTrendRaw.length > 0;
+    }
+
+    get bankChartData() {
+        if (this.filteredRows.length === 0) return [];
+        const map = {};
+        this.filteredRows.forEach(r => {
+            const bank = r.bank || 'Unknown';
+            map[bank] = (map[bank] || 0) + (r.amount || 0);
+        });
+        const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+        const max = entries[0]?.[1] || 1;
+        return entries.map(([name, total], i) => ({
+            key: `bank-${name}-${i}`,
+            name,
+            formattedTotal: new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total),
+            barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
+        }));
+    }
+
+    get hasBankData() {
+        return this.bankChartData.length > 0;
     }
 
     // ── Handlers ──
@@ -462,6 +538,10 @@ export default class SpendlyApp extends LightningElement {
     async handleSuccess() {
         this.showToast('Success', 'Expense saved successfully!', 'success');
         await this.loadExpenses();
+    }
+
+    handlePrint() {
+        window.print();
     }
 
     handleExportCsv() {
