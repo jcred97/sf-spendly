@@ -188,7 +188,7 @@ private class SpendlyControllerTest {
     @IsTest
     static void testGetMonthlyTrend_All() {
         Test.startTest();
-        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend('All');
+        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend('All', 'All', null, null);
         Test.stopTest();
 
         System.assert(result.size() > 0, 'Should return monthly trend data');
@@ -200,10 +200,27 @@ private class SpendlyControllerTest {
         Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
-        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend(food.Id);
+        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend(food.Id, 'All', null, null);
         Test.stopTest();
 
         System.assert(result != null, 'Should return trend data for spending');
+    }
+
+    @IsTest
+    static void testGetMonthlyTrend_ByCategoryAndDateRange() {
+        Category__c groceries = [SELECT Id FROM Category__c WHERE Name = 'Groceries' LIMIT 1];
+
+        Test.startTest();
+        List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend(
+            'All',
+            groceries.Id,
+            Date.today().addDays(-10),
+            Date.today().addDays(-1)
+        );
+        Test.stopTest();
+
+        System.assertEquals(1, result.size(), 'Should return one monthly bucket for the filtered category');
+        System.assertEquals(100, result[0].total, 'Trend total should match the filtered expense amount');
     }
 
     @IsTest
@@ -221,6 +238,24 @@ private class SpendlyControllerTest {
         }
 
         System.assertEquals(true, exceptionThrown, 'Forced DML exception should have been thrown');
+    }
+
+    @IsTest
+    static void testDeleteExpense_MissingRecord() {
+        Expense__c exp = [SELECT Id FROM Expense__c LIMIT 1];
+        delete exp;
+
+        Boolean exceptionThrown = false;
+        try {
+            Test.startTest();
+            SpendlyController.deleteExpense(exp.Id);
+            Test.stopTest();
+        } catch (AuraHandledException e) {
+            exceptionThrown = true;
+            System.assert(e.getMessage().contains('already deleted'), 'Should surface a friendly missing-record message');
+        }
+
+        System.assertEquals(true, exceptionThrown, 'Missing records should throw a handled exception');
     }
 
 }

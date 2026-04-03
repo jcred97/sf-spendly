@@ -1,10 +1,10 @@
-/* ── Page ── */
+/* Page */
 .spendly-page {
     min-height: 100vh;
     background: #f3f2f2;
 }
 
-/* ── Top Bar ── */
+/* Top Bar */
 .top-bar {
     background: white;
     border-bottom: 1px solid #dddbda;
@@ -13,26 +13,30 @@
     align-items: center;
     justify-content: space-between;
 }
+
 .top-bar-left {
     display: flex;
     align-items: center;
     gap: 0.625rem;
 }
+
 .top-bar-title {
     font-size: 1.25rem;
     font-weight: 700;
     color: #181818;
 }
+
 .top-bar-right {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-/* ── Column Picker ── */
+/* Column Picker */
 .column-picker-wrapper {
     position: relative;
 }
+
 .column-picker {
     position: absolute;
     right: 0;
@@ -45,6 +49,7 @@
     z-index: 100;
     min-width: 170px;
 }
+
 .column-picker-title {
     font-size: 0.6875rem;
     font-weight: 600;
@@ -55,6 +60,7 @@
     margin: 0;
     border-bottom: 1px solid #f3f2f2;
 }
+
 .column-picker-item {
     display: flex;
     align-items: center;
@@ -65,31 +71,35 @@
     color: #3e3e3c;
     transition: background 0.1s;
 }
+
 .column-picker-item:hover {
     background: #f3f2f2;
 }
 
-/* ── Filters ── */
+/* Filters */
 .filters-panel {
     background: white;
     padding: 0.875rem 1.5rem;
     border-bottom: 1px solid #dddbda;
 }
+
 .filter-col {
     min-width: 160px;
     max-width: 210px;
 }
+
 .search-col {
     min-width: 220px;
     flex: 1;
 }
+
 .reset-col {
     display: flex;
     align-items: flex-end;
     padding-bottom: 2px;
 }
 
-/* ── Charts Row ── */
+/* Charts Row */
 .charts-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -97,27 +107,28 @@
     padding: 0 1.5rem 1rem;
 }
 
-/* ── Table Row ── */
+/* Table Row */
 .table-row {
     padding: 0 1.5rem 1.5rem;
 }
 
-/* ── Selection Bar ── */
+/* Selection Bar */
 .selection-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.375rem 1rem;
-    background: #EAF4FF;
-    border-bottom: 1px solid #C7E0F4;
+    background: #eaf4ff;
+    border-bottom: 1px solid #c7e0f4;
 }
+
 .selection-count {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #0070D2;
+    color: #0070d2;
 }
 
-/* ── Table Panel ── */
+/* Table Panel */
 .table-panel {
     background: white;
     border-radius: 0.5rem;
@@ -126,9 +137,11 @@
     flex-direction: column;
     overflow: hidden;
 }
+
 .table-wrap {
     height: 500px;
 }
+
 .table-footer {
     padding: 0.5rem 1rem;
     text-align: right;
@@ -136,18 +149,19 @@
     font-size: 0.875rem;
     color: #3e3e3c;
 }
+
 .empty-state {
     padding: 3rem;
     text-align: center;
     color: #706e6b;
 }
 
-/* ── Date format helper hide ── */
+/* Date format helper hide */
 .date-format-hide .slds-form-element__help {
     display: none;
 }
 
-/* ── Print / PDF ── */
+/* Print / PDF */
 .print-only {
     display: none;
 }
@@ -170,8 +184,8 @@
         display: block !important;
         font-family: Arial, sans-serif;
         color: #000;
-        padding: 1.5rem;
         margin: 0;
+        padding: 1.5rem;
     }
 
     .print-header {
@@ -243,4 +257,3 @@
         background: #f9f9f9;
     }
 }
-

@@ -7,19 +7,38 @@ public with sharing class SpendlyController {
         @AuraEnabled public Decimal total;
     }
 
-    @AuraEnabled
-    public static List<MonthlyTotal> getMonthlyTrend(String spendingId) {
-        Date sixMonthsAgo = Date.today().addMonths(-5).toStartOfMonth();
+    @AuraEnabled(cacheable=true)
+    public static List<MonthlyTotal> getMonthlyTrend(
+        String spendingId,
+        String categoryId,
+        Date startDate,
+        Date endDate
+    ) {
+        Date effectiveStartDate = startDate;
+        Date effectiveEndDate = endDate;
+
+        if (effectiveStartDate == null && effectiveEndDate == null) {
+            effectiveStartDate = Date.today().addMonths(-5).toStartOfMonth();
+        }
 
         String query = 'SELECT CALENDAR_YEAR(Expense_Date__c) yr, ' +
             'CALENDAR_MONTH(Expense_Date__c) mo, ' +
             'SUM(Amount__c) total ' +
             'FROM Expense__c ' +
-            'WHERE Expense_Date__c >= :sixMonthsAgo ' +
-            'AND Expense_Date__c != null ';
+            'WHERE Expense_Date__c != null ';
+
+        if (effectiveStartDate != null) {
+            query += 'AND Expense_Date__c >= :effectiveStartDate ';
+        }
+        if (effectiveEndDate != null) {
+            query += 'AND Expense_Date__c <= :effectiveEndDate ';
+        }
 
         if (String.isNotBlank(spendingId) && spendingId != 'All') {
             query += 'AND Category__r.Spending__c = :spendingId ';
+        }
+        if (String.isNotBlank(categoryId) && categoryId != 'All') {
+            query += 'AND Category__c = :categoryId ';
         }
 
         query += 'GROUP BY CALENDAR_YEAR(Expense_Date__c), CALENDAR_MONTH(Expense_Date__c) ' +
@@ -124,10 +143,15 @@ public with sharing class SpendlyController {
 
         try {
             if (Test.isRunningTest() && expenseId == UserInfo.getUserId()) {
-            throw new DmlException('Forced test exception');
-        }
-            Expense__c exp = [SELECT Id FROM Expense__c WHERE Id = :expenseId LIMIT 1];
-            delete exp;
+                throw new DmlException('Forced test exception');
+            }
+
+            List<Expense__c> expenses = [SELECT Id FROM Expense__c WHERE Id = :expenseId LIMIT 1];
+            if (expenses.isEmpty()) {
+                throw new AuraHandledException('Expense not found or already deleted.');
+            }
+
+            delete expenses[0];
         } catch (DmlException e) {
             throw new AuraHandledException('Failed to delete expense: ' + e.getMessage());
         }

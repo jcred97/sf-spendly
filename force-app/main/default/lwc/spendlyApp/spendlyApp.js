@@ -11,15 +11,18 @@ import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
 import getMonthlyTrend from '@salesforce/apex/SpendlyController.getMonthlyTrend';
 
-// ── Constants ────────────────────────────────────────────────────────────────
-
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const PAGE_SIZE = 20;
 const LOAD_MORE_SIZE = 10;
 
 const PHP_CURRENCY = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
-const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' });
+const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC'
+});
 
 const ALL_COLUMNS = [
     {
@@ -69,14 +72,12 @@ const COLUMN_OPTIONS = [
     { key: 'amount', label: 'Amount' }
 ];
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
 function formatPHP(value) {
     return PHP_CURRENCY.format(value);
 }
 
 function formatDate(isoDate) {
-    return isoDate ? DATE_FORMAT.format(new Date(isoDate)) : '—';
+    return isoDate ? DATE_FORMAT.format(new Date(isoDate)) : '-';
 }
 
 function formatDateISO(date) {
@@ -86,63 +87,60 @@ function formatDateISO(date) {
     return `${y}-${m}-${d}`;
 }
 
-/** Group rows by a field and sum amounts. Returns sorted [name, total] entries. */
+function parseDateString(value) {
+    if (!value) return null;
+    const [year, month, day] = value.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
 function groupByAmount(rows, field) {
     const map = {};
-    rows.forEach(r => {
-        const key = r[field] || 'Unknown';
-        map[key] = (map[key] || 0) + (r.amount || 0);
+    rows.forEach(row => {
+        const key = row[field] || 'Unknown';
+        map[key] = (map[key] || 0) + (row.amount || 0);
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
 
-/** Group rows by a field and count occurrences. Returns sorted [name, count] entries. */
 function groupByCount(rows, field) {
     const map = {};
-    rows.forEach(r => {
-        const key = r[field] || 'Unknown';
+    rows.forEach(row => {
+        const key = row[field] || 'Unknown';
         map[key] = (map[key] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
 
-/** Build horizontal bar chart data from [name, total] entries. */
 function buildBarChartData(entries, prefix) {
     const max = entries[0]?.[1] || 1;
-    return entries.map(([name, total], i) => ({
-        key: `${prefix}-${name}-${i}`,
+    return entries.map(([name, total], index) => ({
+        key: `${prefix}-${name}-${index}`,
         name,
         formattedTotal: formatPHP(total),
-        barStyle: `--bar-color:${CHART_COLORS[i % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
+        barStyle: `--bar-color:${CHART_COLORS[index % CHART_COLORS.length]};--bar-width:${Math.round((total / max) * 100)}%`
     }));
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
-
 export default class SpendlyApp extends LightningElement {
+    _latestLoadRequestId = 0;
 
-    // Filter state
     startDate;
     endDate;
     spendingId = 'All';
     categoryId = 'All';
     searchTerm = '';
 
-    // Combobox options
     spendingOptions = [{ label: 'All', value: 'All' }];
     categoryOptions = [{ label: 'All', value: 'All' }];
 
-    // Data
     allRows = [];
     selectedRows = [];
     monthlyTrendRaw = [];
 
-    // Table state
     sortedBy = 'expenseDate';
     sortedDirection = 'desc';
     visibleCount = PAGE_SIZE;
 
-    // UI state
     isLoading = false;
     isModalOpen = false;
     editRecordId = null;
@@ -160,8 +158,6 @@ export default class SpendlyApp extends LightningElement {
         amount: true
     };
 
-    // ── Lifecycle ────────────────────────────────────────────────────────────
-
     renderedCallback() {
         loadStyle(this, removeDateFormatStyle);
     }
@@ -176,14 +172,12 @@ export default class SpendlyApp extends LightningElement {
         this.loadExpenses();
     }
 
-    // ── Wire Adapters ────────────────────────────────────────────────────────
-
     @wire(getAllSpendings)
     wiredSpendings({ error, data }) {
         if (data) {
             this.spendingOptions = [
                 { label: 'All', value: 'All' },
-                ...data.map(s => ({ label: s.Name, value: s.Id }))
+                ...data.map(spending => ({ label: spending.Name, value: spending.Id }))
             ];
         } else if (error) {
             this.showToast('Error', 'Failed to load spendings.', 'error');
@@ -195,18 +189,18 @@ export default class SpendlyApp extends LightningElement {
         if (data) {
             this.categoryOptions = [
                 { label: 'All', value: 'All' },
-                ...data.map(c => ({ label: c.Name, value: c.Id }))
+                ...data.map(category => ({ label: category.Name, value: category.Id }))
             ];
         } else if (error) {
             this.showToast('Error', 'Failed to load categories.', 'error');
         }
     }
 
-    // ── Data Loading ─────────────────────────────────────────────────────────
-
     async loadExpenses() {
+        const requestId = ++this._latestLoadRequestId;
         this.isLoading = true;
         this.selectedRows = [];
+
         try {
             const [data, trendData] = await Promise.all([
                 getExpensesByFilters({
@@ -215,41 +209,56 @@ export default class SpendlyApp extends LightningElement {
                     startDate: this.startDate,
                     endDate: this.endDate
                 }),
-                getMonthlyTrend({ spendingId: this.spendingId })
+                getMonthlyTrend({
+                    spendingId: this.spendingId,
+                    categoryId: this.categoryId,
+                    startDate: this.startDate,
+                    endDate: this.endDate
+                })
             ]);
 
+            if (requestId !== this._latestLoadRequestId) {
+                return;
+            }
+
             this.monthlyTrendRaw = trendData || [];
-            this.allRows = data.map(r => ({
-                id: r.Id,
-                expenseDate: r.Expense_Date__c,
-                name: r.Name,
-                recordLink: '/' + r.Id,
-                category: r.Category__r?.Name,
-                categoryId: r.Category__c,
-                spending: r.Category__r?.Spending__r?.Name,
-                bank: r.Bank__c,
-                transactionType: r.Transaction_Type__c,
-                amount: r.Amount__c
+            this.allRows = data.map(row => ({
+                id: row.Id,
+                expenseDate: row.Expense_Date__c,
+                name: row.Name,
+                recordLink: `/${row.Id}`,
+                category: row.Category__r?.Name,
+                categoryId: row.Category__c,
+                spending: row.Category__r?.Spending__r?.Name,
+                bank: row.Bank__c,
+                transactionType: row.Transaction_Type__c,
+                amount: row.Amount__c
             }));
             this.visibleCount = PAGE_SIZE;
         } catch (error) {
+            if (requestId !== this._latestLoadRequestId) {
+                return;
+            }
             this.showToast('Error', 'Failed to load expenses.', 'error');
         } finally {
-            this.isLoading = false;
+            if (requestId === this._latestLoadRequestId) {
+                this.isLoading = false;
+            }
         }
     }
 
-    // ── Computed: Rows ───────────────────────────────────────────────────────
-
     get filteredRows() {
-        if (!this.searchTerm) return this.allRows;
+        if (!this.searchTerm) {
+            return this.allRows;
+        }
+
         const term = this.searchTerm.toLowerCase();
-        return this.allRows.filter(r =>
-            (r.name || '').toLowerCase().includes(term) ||
-            (r.category || '').toLowerCase().includes(term) ||
-            (r.spending || '').toLowerCase().includes(term) ||
-            (r.bank || '').toLowerCase().includes(term) ||
-            (r.transactionType || '').toLowerCase().includes(term)
+        return this.allRows.filter(row =>
+            (row.name || '').toLowerCase().includes(term) ||
+            (row.category || '').toLowerCase().includes(term) ||
+            (row.spending || '').toLowerCase().includes(term) ||
+            (row.bank || '').toLowerCase().includes(term) ||
+            (row.transactionType || '').toLowerCase().includes(term)
         );
     }
 
@@ -257,23 +266,19 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.slice(0, this.visibleCount);
     }
 
-    // ── Computed: Column Visibility ──────────────────────────────────────────
-
     get columns() {
-        return ALL_COLUMNS.filter(col =>
-            col.type === 'action' || this.columnVisibility[col.fieldName] !== false
+        return ALL_COLUMNS.filter(column =>
+            column.type === 'action' || this.columnVisibility[column.fieldName] !== false
         );
     }
 
     get columnPickerOptions() {
-        return COLUMN_OPTIONS.map(col => ({
-            key: col.key,
-            label: col.label,
-            checked: this.columnVisibility[col.key]
+        return COLUMN_OPTIONS.map(column => ({
+            key: column.key,
+            label: column.label,
+            checked: this.columnVisibility[column.key]
         }));
     }
-
-    // ── Computed: Summary Stats ──────────────────────────────────────────────
 
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
@@ -300,79 +305,82 @@ export default class SpendlyApp extends LightningElement {
     }
 
     get averageExpense() {
-        if (this.filteredRows.length === 0) return '₱0.00';
+        if (this.filteredRows.length === 0) {
+            return 'PHP 0.00';
+        }
         return formatPHP(this.totalAmount / this.filteredRows.length);
     }
 
     get topCategory() {
-        if (this.filteredRows.length === 0) return { name: '—', amount: '₱0.00' };
+        if (this.filteredRows.length === 0) {
+            return { name: '-', amount: 'PHP 0.00' };
+        }
         const [name, total] = groupByAmount(this.filteredRows, 'category')[0];
         return { name, amount: formatPHP(total) };
     }
 
     get topBank() {
-        if (this.filteredRows.length === 0) return { name: '—', count: 0 };
+        if (this.filteredRows.length === 0) {
+            return { name: '-', count: 0 };
+        }
         const [name, count] = groupByCount(this.filteredRows, 'bank')[0];
         return { name, count };
     }
 
-    // ── Computed: Charts ─────────────────────────────────────────────────────
-
     get categoryChartData() {
-        if (this.filteredRows.length === 0) return [];
+        if (this.filteredRows.length === 0) {
+            return [];
+        }
         const entries = groupByAmount(this.filteredRows, 'category').slice(0, 6);
         return buildBarChartData(entries, 'cat');
     }
 
     get bankChartData() {
-        if (this.filteredRows.length === 0) return [];
+        if (this.filteredRows.length === 0) {
+            return [];
+        }
         const entries = groupByAmount(this.filteredRows, 'bank');
         return buildBarChartData(entries, 'bank');
     }
 
     get monthlyTrendData() {
-        const today = new Date();
-
-        const last6 = Array.from({ length: 6 }, (_, i) => {
-            const d = new Date(today.getFullYear(), today.getMonth() - (5 - i), 1);
-            return { year: d.getFullYear(), monthNum: d.getMonth() + 1 };
+        const end = parseDateString(this.endDate) || new Date();
+        const last6Months = Array.from({ length: 6 }, (_, index) => {
+            const date = new Date(end.getFullYear(), end.getMonth() - (5 - index), 1);
+            return { year: date.getFullYear(), monthNum: date.getMonth() + 1 };
         });
 
         const rawMap = {};
-        this.monthlyTrendRaw.forEach(m => {
-            rawMap[`${m.year}-${m.monthNum}`] = m.total || 0;
+        this.monthlyTrendRaw.forEach(month => {
+            rawMap[`${month.year}-${month.monthNum}`] = month.total || 0;
         });
 
-        const totals = last6.map(m => rawMap[`${m.year}-${m.monthNum}`] || 0);
+        const totals = last6Months.map(month => rawMap[`${month.year}-${month.monthNum}`] || 0);
         const max = Math.max(...totals, 1);
 
-        return last6.map((m, i) => ({
-            key: `trend-${m.year}-${m.monthNum}`,
-            label: MONTH_NAMES[m.monthNum - 1],
-            barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((totals[i] / max) * 110))}px`,
-            hasValue: totals[i] > 0
+        return last6Months.map((month, index) => ({
+            key: `trend-${month.year}-${month.monthNum}`,
+            label: MONTH_NAMES[month.monthNum - 1],
+            barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((totals[index] / max) * 110))}px`,
+            hasValue: totals[index] > 0
         }));
     }
 
-    // ── Computed: Print ──────────────────────────────────────────────────────
-
     get printDateRange() {
-        return `${this.startDate || ''} — ${this.endDate || ''}`;
+        return `${this.startDate || ''} - ${this.endDate || ''}`;
     }
 
     get printRows() {
-        return this.filteredRows.map(r => ({
-            ...r,
-            expenseDateFormatted: formatDate(r.expenseDate),
-            amountFormatted: r.amount != null ? formatPHP(r.amount) : '—'
+        return this.filteredRows.map(row => ({
+            ...row,
+            expenseDateFormatted: formatDate(row.expenseDate),
+            amountFormatted: row.amount != null ? formatPHP(row.amount) : '-'
         }));
     }
 
-    // ── Handlers: Filters ────────────────────────────────────────────────────
-
-    handleChange(e) {
-        const field = e.target.dataset.field;
-        this[field] = e.detail.value;
+    handleChange(event) {
+        const field = event.target.dataset.field;
+        this[field] = event.detail.value;
 
         if (field === 'spendingId') {
             this.categoryId = 'All';
@@ -380,14 +388,16 @@ export default class SpendlyApp extends LightningElement {
 
         if (field === 'startDate' || field === 'endDate') {
             this.validateDates();
-            if (this.dateError) return;
+            if (this.dateError) {
+                return;
+            }
         }
 
         this.loadExpenses();
     }
 
-    handleSearch(e) {
-        this.searchTerm = e.detail.value;
+    handleSearch(event) {
+        this.searchTerm = event.detail.value;
         this.visibleCount = PAGE_SIZE;
     }
 
@@ -411,21 +421,17 @@ export default class SpendlyApp extends LightningElement {
         }
     }
 
-    // ── Handlers: Column Picker ──────────────────────────────────────────────
-
     handleToggleColumnPicker() {
         this.isColumnPickerOpen = !this.isColumnPickerOpen;
     }
 
-    handleColumnToggle(e) {
-        const key = e.target.dataset.key;
-        this.columnVisibility = { ...this.columnVisibility, [key]: e.target.checked };
+    handleColumnToggle(event) {
+        const key = event.target.dataset.key;
+        this.columnVisibility = { ...this.columnVisibility, [key]: event.target.checked };
     }
 
-    // ── Handlers: Table ──────────────────────────────────────────────────────
-
     handleRowSelection(event) {
-        this.selectedRows = event.detail.selectedRows.map(r => r.id);
+        this.selectedRows = event.detail.selectedRows.map(row => row.id);
     }
 
     handleSort(event) {
@@ -440,22 +446,25 @@ export default class SpendlyApp extends LightningElement {
     }
 
     async handleLoadMore() {
-        if (this.visibleCount >= this.filteredRows.length) return;
+        if (this.visibleCount >= this.filteredRows.length) {
+            return;
+        }
 
         this.isLoading = true;
         // eslint-disable-next-line @lwc/lwc/no-async-operation
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         this.visibleCount += LOAD_MORE_SIZE;
         this.isLoading = false;
     }
-
-    // ── Handlers: Row Actions ────────────────────────────────────────────────
 
     async handleRowAction(event) {
         const actionName = event.detail.action.name;
         const row = event.detail.row;
         const recordId = row.id;
-        if (!recordId) return;
+
+        if (!recordId) {
+            return;
+        }
 
         if (actionName === 'edit') {
             this.duplicateData = null;
@@ -467,7 +476,7 @@ export default class SpendlyApp extends LightningElement {
         if (actionName === 'duplicate') {
             this.editRecordId = null;
             this.duplicateData = {
-                Name: 'Copy of ' + row.name,
+                Name: `Copy of ${row.name}`,
                 Amount__c: row.amount,
                 Category__c: row.categoryId,
                 Expense_Date__c: row.expenseDate,
@@ -489,22 +498,22 @@ export default class SpendlyApp extends LightningElement {
             variant: 'header',
             label: 'Confirm Deletion'
         });
-        if (!confirmed) return;
+        if (!confirmed) {
+            return;
+        }
 
-        // Optimistic: remove row immediately
-        const idx = this.allRows.findIndex(r => r.id === recordId);
-        const removed = this.allRows[idx];
-        this.allRows = this.allRows.filter(r => r.id !== recordId);
+        const index = this.allRows.findIndex(row => row.id === recordId);
+        const removed = this.allRows[index];
+        this.allRows = this.allRows.filter(row => row.id !== recordId);
 
         try {
             await deleteExpense({ expenseId: recordId });
             this.showToast('Deleted', 'Expense deleted successfully!', 'success');
         } catch (error) {
-            // Revert on failure
             this.allRows = [
-                ...this.allRows.slice(0, idx),
+                ...this.allRows.slice(0, index),
                 removed,
-                ...this.allRows.slice(idx)
+                ...this.allRows.slice(index)
             ];
             this.showToast('Error', error?.body?.message || 'Failed to delete expense.', 'error');
         }
@@ -517,32 +526,30 @@ export default class SpendlyApp extends LightningElement {
             variant: 'header',
             label: 'Confirm Bulk Deletion'
         });
-        if (!confirmed) return;
+        if (!confirmed) {
+            return;
+        }
 
         const idsToDelete = [...this.selectedRows];
-        const removedRows = this.allRows.filter(r => idsToDelete.includes(r.id));
-        const removedIndexes = removedRows.map(r => this.allRows.findIndex(a => a.id === r.id));
+        const removedRows = this.allRows.filter(row => idsToDelete.includes(row.id));
+        const removedIndexes = removedRows.map(row => this.allRows.findIndex(item => item.id === row.id));
 
-        // Optimistic: remove all selected rows immediately
-        this.allRows = this.allRows.filter(r => !idsToDelete.includes(r.id));
+        this.allRows = this.allRows.filter(row => !idsToDelete.includes(row.id));
         this.selectedRows = [];
 
         try {
             await deleteExpenses({ expenseIds: idsToDelete });
             this.showToast('Deleted', `${count} expense(s) deleted successfully!`, 'success');
         } catch (error) {
-            // Revert on failure — restore rows at their original positions
             const restored = [...this.allRows];
-            removedRows.forEach((row, i) => {
-                restored.splice(removedIndexes[i], 0, row);
+            removedRows.forEach((row, index) => {
+                restored.splice(removedIndexes[index], 0, row);
             });
             this.allRows = restored;
             this.selectedRows = idsToDelete;
             this.showToast('Error', error?.body?.message || 'Failed to delete expenses.', 'error');
         }
     }
-
-    // ── Handlers: Modal ──────────────────────────────────────────────────────
 
     openModal() {
         this.editRecordId = null;
@@ -561,24 +568,24 @@ export default class SpendlyApp extends LightningElement {
         await this.loadExpenses();
     }
 
-    // ── Handlers: Export ─────────────────────────────────────────────────────
-
     handlePrint() {
         window.print();
     }
 
     handleExportCsv() {
-        if (this.hasNoRows) return;
+        if (this.hasNoRows) {
+            return;
+        }
 
         const headers = ['Date', 'Expense Name', 'Category', 'Spending', 'Bank', 'Type', 'Amount (PHP)'];
-        const rows = this.filteredRows.map(r => [
-            r.expenseDate || '',
-            r.name || '',
-            r.category || '',
-            r.spending || '',
-            r.bank || '',
-            r.transactionType || '',
-            r.amount != null ? r.amount : ''
+        const rows = this.filteredRows.map(row => [
+            row.expenseDate || '',
+            row.name || '',
+            row.category || '',
+            row.spending || '',
+            row.bank || '',
+            row.transactionType || '',
+            row.amount != null ? row.amount : ''
         ]);
 
         const csvContent = [headers, ...rows]
@@ -586,14 +593,12 @@ export default class SpendlyApp extends LightningElement {
             .join('\n');
 
         const link = document.createElement('a');
-        link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+        link.setAttribute('href', `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`);
         link.setAttribute('download', `spendly-expenses-${this.endDate || 'export'}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
-
-    // ── Utilities ────────────────────────────────────────────────────────────
 
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
