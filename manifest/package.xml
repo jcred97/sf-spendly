@@ -6,6 +6,11 @@
         <name>ApexClass</name>
     </types>
     <types>
+        <members>spendly</members>
+        <members>spendly1</members>
+        <name>ContentAsset</name>
+    </types>
+    <types>
         <members>Spendly</members>
         <name>CustomApplication</name>
     </types>
@@ -49,10 +54,6 @@
     <types>
         <members>Spendly_All_Access</members>
         <name>PermissionSet</name>
-    </types>
-    <types>
-        <members>spendly</members>
-        <name>ContentAsset</name>
     </types>
     <types>
         <members>RemoveDateFormatStyle</members>
