@@ -34,6 +34,16 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>Recurring_Expense__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
     <!-- Category__c Field Permissions -->
     <fieldPermissions>
         <editable>true</editable>
@@ -74,10 +84,51 @@
         <field>Expense__c.Transaction_Type__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Expense__c.Recurring_Expense__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
+    <!-- Recurring_Expense__c Field Permissions -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.Active__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.Bank__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.Description__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.End_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.Last_Generated_Date__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Recurring_Expense__c.Transaction_Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 
     <!-- Tab Visibility -->
     <tabSettings>
         <tab>Expense__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Recurring_Expense__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>

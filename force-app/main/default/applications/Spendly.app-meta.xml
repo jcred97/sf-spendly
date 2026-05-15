@@ -14,12 +14,12 @@
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>Spendly</label>
     <navType>Standard</navType>
-    <tabs>standard-home</tabs>
     <tabs>Spendly</tabs>
     <tabs>Expense__c</tabs>
-    <tabs>standard-report</tabs>
+    <tabs>Recurring_Expense__c</tabs>
     <tabs>Category__c</tabs>
     <tabs>Spending__c</tabs>
+    <tabs>standard-report</tabs>
     <tabs>standard-Dashboard</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Spendly_UtilityBar</utilityBar>
