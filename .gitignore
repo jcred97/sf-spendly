@@ -49,8 +49,6 @@ $RECYCLE.BIN/
 
 # Claude Code
 .claude/
-CLAUDE.md
-AGENTS.md
 
 # Local destructive deployment package
 destructive/
