@@ -6,6 +6,8 @@
         <members>RecurringExpenseTriggerTest</members>
         <members>SpendlyRecurringExpenseBatch</members>
         <members>SpendlyRecurringExpenseBatchTest</members>
+        <members>SpendlyRecurringExpenseCalculator</members>
+        <members>SpendlyRecurringExpenseCalculatorTest</members>
         <members>SpendlyRecurringExpenseScheduler</members>
         <members>SpendlyRecurringExpenseSchedulerTest</members>
         <members>SpendlyRecurringExpenseService</members>

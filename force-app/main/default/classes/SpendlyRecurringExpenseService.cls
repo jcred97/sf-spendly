@@ -92,14 +92,18 @@ public with sharing class SpendlyRecurringExpenseService {
             Boolean generatedForTemplate = false;
             Date dueDate = recurringExpense.Next_Run_Date__c;
 
-            while (shouldGenerateForDate(recurringExpense, dueDate, runDate)) {
+            while (SpendlyRecurringExpenseCalculator.shouldGenerateForDate(recurringExpense, dueDate, runDate)) {
                 if (expensesToInsert.size() >= maxExpenses) {
                     result.hitGenerationLimit = true;
                     break;
                 }
 
                 expensesToInsert.add(buildExpense(recurringExpense, dueDate));
-                dueDate = getNextRunDate(dueDate, recurringExpense.Frequency__c, recurringExpense.Start_Date__c);
+                dueDate = SpendlyRecurringExpenseCalculator.getNextRunDate(
+                    dueDate,
+                    recurringExpense.Frequency__c,
+                    recurringExpense.Start_Date__c
+                );
                 recurringExpense.Next_Run_Date__c = dueDate;
                 generatedForTemplate = true;
             }
@@ -127,16 +131,6 @@ public with sharing class SpendlyRecurringExpenseService {
         return result;
     }
 
-    private static Boolean shouldGenerateForDate(
-        Recurring_Expense__c recurringExpense,
-        Date dueDate,
-        Date runDate
-    ) {
-        return dueDate != null
-            && dueDate <= runDate
-            && (recurringExpense.End_Date__c == null || dueDate <= recurringExpense.End_Date__c);
-    }
-
     private static Expense__c buildExpense(Recurring_Expense__c recurringExpense, Date dueDate) {
         return new Expense__c(
             Name = recurringExpense.Name,
@@ -148,38 +142,5 @@ public with sharing class SpendlyRecurringExpenseService {
             Recurring_Expense__c = recurringExpense.Id,
             Transaction_Type__c = recurringExpense.Transaction_Type__c
         );
-    }
-
-    private static Date getNextRunDate(Date dueDate, String frequency, Date anchorDate) {
-        switch on frequency {
-            when 'Daily' {
-                return dueDate.addDays(1);
-            }
-            when 'Weekly' {
-                return dueDate.addDays(7);
-            }
-            when 'Monthly' {
-                Date nextMonth = dueDate.addMonths(1);
-                Integer anchorDay = getAnchorDay(anchorDate, dueDate);
-                return getAnchoredDate(nextMonth.year(), nextMonth.month(), anchorDay);
-            }
-            when 'Yearly' {
-                Integer anchorDay = getAnchorDay(anchorDate, dueDate);
-                Integer anchorMonth = anchorDate == null ? dueDate.month() : anchorDate.month();
-                return getAnchoredDate(dueDate.year() + 1, anchorMonth, anchorDay);
-            }
-            when else {
-                throw new AuraHandledException('Unsupported recurring expense frequency: ' + frequency);
-            }
-        }
-    }
-
-    private static Integer getAnchorDay(Date anchorDate, Date fallbackDate) {
-        return anchorDate == null ? fallbackDate.day() : anchorDate.day();
-    }
-
-    private static Date getAnchoredDate(Integer year, Integer month, Integer anchorDay) {
-        Integer day = Math.min(anchorDay, Date.daysInMonth(year, month));
-        return Date.newInstance(year, month, day);
     }
 }

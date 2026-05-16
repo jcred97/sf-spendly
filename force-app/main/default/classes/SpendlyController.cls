@@ -125,20 +125,20 @@ public with sharing class SpendlyController {
     @AuraEnabled
     public static void deleteExpenses(List<Id> expenseIds) {
         if (expenseIds == null || expenseIds.isEmpty()) {
-            throw new AuraHandledException('No expense IDs provided.');
+            throw handledException('No expense IDs provided.');
         }
         try {
             List<Expense__c> expenses = [SELECT Id FROM Expense__c WHERE Id IN :expenseIds];
             delete expenses;
         } catch (DmlException e) {
-            throw new AuraHandledException('Failed to delete expenses: ' + e.getMessage());
+            throw handledException('Failed to delete expenses: ' + e.getMessage());
         }
     }
 
     @AuraEnabled
     public static void deleteExpense(Id expenseId) {
         if (expenseId == null) {
-            throw new AuraHandledException('Expense Id is required for deletion.');
+            throw handledException('Expense Id is required for deletion.');
         }
 
         try {
@@ -148,12 +148,18 @@ public with sharing class SpendlyController {
 
             List<Expense__c> expenses = [SELECT Id FROM Expense__c WHERE Id = :expenseId LIMIT 1];
             if (expenses.isEmpty()) {
-                throw new AuraHandledException('Expense not found or already deleted.');
+                throw handledException('Expense not found or already deleted.');
             }
 
             delete expenses[0];
         } catch (DmlException e) {
-            throw new AuraHandledException('Failed to delete expense: ' + e.getMessage());
+            throw handledException('Failed to delete expense: ' + e.getMessage());
         }
+    }
+
+    private static AuraHandledException handledException(String message) {
+        AuraHandledException exceptionToThrow = new AuraHandledException(message);
+        exceptionToThrow.setMessage(message);
+        return exceptionToThrow;
     }
 }
