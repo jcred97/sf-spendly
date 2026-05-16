@@ -3,7 +3,7 @@
     <fullName>Next_Run_Date__c</fullName>
     <externalId>false</externalId>
     <label>Next Run Date</label>
-    <required>true</required>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Date</type>
 </CustomField>

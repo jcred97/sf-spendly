@@ -44,12 +44,12 @@ public with sharing class SpendlyRecurringExpenseService {
                 Description__c,
                 End_Date__c,
                 Frequency__c,
-                Last_Generated_Date__c,
                 Next_Run_Date__c,
                 Start_Date__c,
                 Transaction_Type__c
             FROM Recurring_Expense__c
             WHERE Active__c = true
+                AND Next_Run_Date__c != null
                 AND Next_Run_Date__c <= :runDate
             ORDER BY Next_Run_Date__c ASC, CreatedDate ASC
             LIMIT :MAX_EXPENSES_PER_RUN
@@ -66,13 +66,8 @@ public with sharing class SpendlyRecurringExpenseService {
                 }
 
                 expensesToInsert.add(buildExpense(recurringExpense, dueDate));
-                recurringExpense.Last_Generated_Date__c = dueDate;
-                recurringExpense.Next_Run_Date__c = getNextRunDate(
-                    dueDate,
-                    recurringExpense.Frequency__c,
-                    recurringExpense.Start_Date__c
-                );
-                dueDate = recurringExpense.Next_Run_Date__c;
+                dueDate = getNextRunDate(dueDate, recurringExpense.Frequency__c, recurringExpense.Start_Date__c);
+                recurringExpense.Next_Run_Date__c = dueDate;
                 generatedForTemplate = true;
             }
 

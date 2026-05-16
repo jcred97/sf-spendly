@@ -3,11 +3,16 @@
     <types>
         <members>SpendlyController</members>
         <members>SpendlyControllerTest</members>
+        <members>RecurringExpenseTriggerTest</members>
         <members>SpendlyRecurringExpenseScheduler</members>
         <members>SpendlyRecurringExpenseSchedulerTest</members>
         <members>SpendlyRecurringExpenseService</members>
         <members>SpendlyRecurringExpenseServiceTest</members>
         <name>ApexClass</name>
+    </types>
+    <types>
+        <members>RecurringExpenseTrigger</members>
+        <name>ApexTrigger</name>
     </types>
     <types>
         <members>spendly1</members>

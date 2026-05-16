@@ -41,11 +41,10 @@ private class SpendlyRecurringExpenseSchedulerTest {
         System.assertEquals(dueDate, generatedExpenses[0].Expense_Date__c);
 
         Recurring_Expense__c updatedRecurringExpense = [
-            SELECT Last_Generated_Date__c, Next_Run_Date__c
+            SELECT Next_Run_Date__c
             FROM Recurring_Expense__c
             WHERE Id = :recurringExpense.Id
         ];
-        System.assertEquals(dueDate, updatedRecurringExpense.Last_Generated_Date__c);
         System.assertEquals(dueDate.addMonths(1), updatedRecurringExpense.Next_Run_Date__c);
     }
 }

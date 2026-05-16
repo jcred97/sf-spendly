@@ -112,8 +112,8 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
-        <field>Recurring_Expense__c.Last_Generated_Date__c</field>
+        <editable>false</editable>
+        <field>Recurring_Expense__c.Next_Run_Date__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

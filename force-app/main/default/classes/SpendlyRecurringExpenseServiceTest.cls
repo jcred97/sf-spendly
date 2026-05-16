@@ -66,11 +66,10 @@ private class SpendlyRecurringExpenseServiceTest {
         System.assertEquals('Debit Card', generatedExpenses[0].Transaction_Type__c);
 
         Recurring_Expense__c updatedRecurringExpense = [
-            SELECT Last_Generated_Date__c, Next_Run_Date__c
+            SELECT Next_Run_Date__c
             FROM Recurring_Expense__c
             WHERE Id = :recurringExpense.Id
         ];
-        System.assertEquals(Date.newInstance(2026, 5, 1), updatedRecurringExpense.Last_Generated_Date__c);
         System.assertEquals(Date.newInstance(2026, 6, 1), updatedRecurringExpense.Next_Run_Date__c);
     }
 
@@ -99,11 +98,10 @@ private class SpendlyRecurringExpenseServiceTest {
         System.assertEquals(1, result.expensesCreated, 'Only the January occurrence is within the end date');
 
         Recurring_Expense__c updatedRecurringExpense = [
-            SELECT Last_Generated_Date__c, Next_Run_Date__c
+            SELECT Next_Run_Date__c
             FROM Recurring_Expense__c
             WHERE Id = :recurringExpense.Id
         ];
-        System.assertEquals(Date.newInstance(2026, 1, 1), updatedRecurringExpense.Last_Generated_Date__c);
         System.assertEquals(Date.newInstance(2026, 2, 1), updatedRecurringExpense.Next_Run_Date__c);
     }
 
@@ -142,12 +140,50 @@ private class SpendlyRecurringExpenseServiceTest {
         System.assertEquals(Date.newInstance(2026, 3, 30), generatedExpenses[2].Expense_Date__c);
 
         Recurring_Expense__c updatedRecurringExpense = [
-            SELECT Last_Generated_Date__c, Next_Run_Date__c
+            SELECT Next_Run_Date__c
             FROM Recurring_Expense__c
             WHERE Id = :recurringExpense.Id
         ];
-        System.assertEquals(Date.newInstance(2026, 3, 30), updatedRecurringExpense.Last_Generated_Date__c);
         System.assertEquals(Date.newInstance(2026, 4, 30), updatedRecurringExpense.Next_Run_Date__c);
+    }
+
+    @IsTest
+    static void testGenerateDueExpenses_ContinuesFromNextRunDate() {
+        Category__c category = [SELECT Id FROM Category__c WHERE Name = 'Fitness' LIMIT 1];
+
+        Recurring_Expense__c recurringExpense = new Recurring_Expense__c(
+            Name = 'Existing Gym',
+            Active__c = true,
+            Amount__c = 1500,
+            Category__c = category.Id,
+            Frequency__c = 'Monthly',
+            Next_Run_Date__c = Date.newInstance(2026, 6, 1),
+            Start_Date__c = Date.newInstance(2026, 1, 1)
+        );
+        insert recurringExpense;
+
+        Test.startTest();
+        SpendlyRecurringExpenseService.GenerationResult result =
+            SpendlyRecurringExpenseService.generateDueExpenses(Date.newInstance(2026, 7, 16));
+        Test.stopTest();
+
+        System.assertEquals(2, result.expensesCreated, 'June and July should be generated after the last generated date');
+
+        List<Expense__c> generatedExpenses = [
+            SELECT Expense_Date__c
+            FROM Expense__c
+            WHERE Recurring_Expense__c = :recurringExpense.Id
+            ORDER BY Expense_Date__c ASC
+        ];
+        System.assertEquals(Date.newInstance(2026, 6, 1), generatedExpenses[0].Expense_Date__c);
+        System.assertEquals(Date.newInstance(2026, 7, 1), generatedExpenses[1].Expense_Date__c);
+
+        Recurring_Expense__c updatedRecurringExpense = [
+            SELECT Next_Run_Date__c
+            FROM Recurring_Expense__c
+            WHERE Id = :recurringExpense.Id
+        ];
+        System.assertEquals(Date.newInstance(2026, 8, 1), updatedRecurringExpense.Next_Run_Date__c);
     }
 
     @IsTest
