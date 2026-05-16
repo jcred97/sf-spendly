@@ -3,6 +3,10 @@
     <types>
         <members>SpendlyController</members>
         <members>SpendlyControllerTest</members>
+        <members>SpendlyRecurringExpenseScheduler</members>
+        <members>SpendlyRecurringExpenseSchedulerTest</members>
+        <members>SpendlyRecurringExpenseService</members>
+        <members>SpendlyRecurringExpenseServiceTest</members>
         <name>ApexClass</name>
     </types>
     <types>

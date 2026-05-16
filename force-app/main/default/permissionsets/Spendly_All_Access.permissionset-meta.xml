@@ -149,5 +149,13 @@
         <apexClass>SpendlyController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>SpendlyRecurringExpenseService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SpendlyRecurringExpenseScheduler</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
 </PermissionSet>
