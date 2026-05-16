@@ -25,6 +25,14 @@ public with sharing class SpendlyRecurringExpenseService {
         return generateDueExpenses(Date.today());
     }
 
+    @AuraEnabled
+    public static Id runDueExpensesBatch() {
+        return Database.executeBatch(
+            new SpendlyRecurringExpenseBatch(),
+            SpendlyRecurringExpenseBatch.DEFAULT_BATCH_SIZE
+        );
+    }
+
     @TestVisible
     private static GenerationResult generateDueExpenses(Date runDate) {
         if (runDate == null) {

@@ -46,6 +46,13 @@
                     disabled={hasNoRows}>
                 </lightning-button>
                 <lightning-button
+                    variant="neutral"
+                    label={recurringRunLabel}
+                    icon-name="utility:sync"
+                    onclick={handleRunRecurringExpenses}
+                    disabled={isRecurringRunLoading}>
+                </lightning-button>
+                <lightning-button
                     variant="brand"
                     label="Add Expense"
                     icon-name="utility:add"

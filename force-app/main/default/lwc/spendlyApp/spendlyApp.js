@@ -10,6 +10,7 @@ import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpenses
 import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
 import getMonthlyTrend from '@salesforce/apex/SpendlyController.getMonthlyTrend';
+import runDueExpensesBatch from '@salesforce/apex/SpendlyRecurringExpenseService.runDueExpensesBatch';
 
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -146,6 +147,7 @@ export default class SpendlyApp extends LightningElement {
     editRecordId = null;
     duplicateData = null;
     isColumnPickerOpen = false;
+    isRecurringRunLoading = false;
     dateError = '';
 
     columnVisibility = {
@@ -282,6 +284,10 @@ export default class SpendlyApp extends LightningElement {
 
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
+    }
+
+    get recurringRunLabel() {
+        return this.isRecurringRunLoading ? 'Running...' : 'Run Recurring';
     }
 
     get hasSelectedRows() {
@@ -566,6 +572,28 @@ export default class SpendlyApp extends LightningElement {
     async handleSuccess() {
         this.showToast('Success', 'Expense saved successfully!', 'success');
         await this.loadExpenses();
+    }
+
+    async handleRunRecurringExpenses() {
+        this.isRecurringRunLoading = true;
+
+        try {
+            await runDueExpensesBatch();
+            this.showToast(
+                'Recurring run started',
+                'Due recurring expenses are being generated. Refresh shortly to see the latest records.',
+                'success'
+            );
+            await this.loadExpenses();
+        } catch (error) {
+            this.showToast(
+                'Error',
+                error?.body?.message || 'Failed to start recurring expense generation.',
+                'error'
+            );
+        } finally {
+            this.isRecurringRunLoading = false;
+        }
     }
 
     handlePrint() {

@@ -222,6 +222,39 @@ private class SpendlyRecurringExpenseServiceTest {
     }
 
     @IsTest
+    static void testRunDueExpensesBatchStartsBatch() {
+        Category__c category = [SELECT Id FROM Category__c WHERE Name = 'Fitness' LIMIT 1];
+        Date dueDate = Date.today();
+
+        Recurring_Expense__c recurringExpense = new Recurring_Expense__c(
+            Name = 'Manual Gym',
+            Active__c = true,
+            Amount__c = 1500,
+            Category__c = category.Id,
+            Frequency__c = 'Monthly',
+            Next_Run_Date__c = dueDate,
+            Start_Date__c = dueDate
+        );
+        insert recurringExpense;
+
+        Id jobId;
+        Test.startTest();
+        jobId = SpendlyRecurringExpenseService.runDueExpensesBatch();
+        Test.stopTest();
+
+        System.assertNotEquals(null, jobId, 'The manual run should return the batch job id');
+        System.assertEquals(
+            1,
+            [
+                SELECT COUNT()
+                FROM Expense__c
+                WHERE Recurring_Expense__c = :recurringExpense.Id
+            ],
+            'The manual batch run should generate the due expense'
+        );
+    }
+
+    @IsTest
     static void testGenerateDueExpenses_RequiresRunDate() {
         Boolean exceptionThrown = false;
 
