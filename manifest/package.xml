@@ -4,6 +4,8 @@
         <members>SpendlyController</members>
         <members>SpendlyControllerTest</members>
         <members>RecurringExpenseTriggerTest</members>
+        <members>SpendlyRecurringExpenseBatch</members>
+        <members>SpendlyRecurringExpenseBatchTest</members>
         <members>SpendlyRecurringExpenseScheduler</members>
         <members>SpendlyRecurringExpenseSchedulerTest</members>
         <members>SpendlyRecurringExpenseService</members>

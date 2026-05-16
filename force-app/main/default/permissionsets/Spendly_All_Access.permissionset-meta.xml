@@ -157,5 +157,9 @@
         <apexClass>SpendlyRecurringExpenseScheduler</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>SpendlyRecurringExpenseBatch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 
 </PermissionSet>

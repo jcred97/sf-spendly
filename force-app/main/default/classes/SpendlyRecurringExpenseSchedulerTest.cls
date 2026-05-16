@@ -1,7 +1,7 @@
 @IsTest
 private class SpendlyRecurringExpenseSchedulerTest {
     @IsTest
-    static void testScheduledRunGeneratesDueExpenses() {
+    static void testScheduledRunStartsBatch() {
         Spending__c spending = new Spending__c(Name = 'Health');
         insert spending;
 
@@ -24,11 +24,7 @@ private class SpendlyRecurringExpenseSchedulerTest {
         insert recurringExpense;
 
         Test.startTest();
-        System.schedule(
-            'Spendly Recurring Expense Scheduler Test',
-            '0 0 8 1 1 ? 2099',
-            new SpendlyRecurringExpenseScheduler()
-        );
+        new SpendlyRecurringExpenseScheduler().execute(null);
         Test.stopTest();
 
         List<Expense__c> generatedExpenses = [
@@ -36,7 +32,7 @@ private class SpendlyRecurringExpenseSchedulerTest {
             FROM Expense__c
             WHERE Recurring_Expense__c = :recurringExpense.Id
         ];
-        System.assertEquals(1, generatedExpenses.size(), 'The scheduled job should create one due expense');
+        System.assertEquals(1, generatedExpenses.size(), 'The scheduled batch should create one due expense');
         System.assertEquals('Gym', generatedExpenses[0].Name);
         System.assertEquals(dueDate, generatedExpenses[0].Expense_Date__c);
 

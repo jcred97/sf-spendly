@@ -1,6 +1,8 @@
 public with sharing class SpendlyRecurringExpenseService {
     @TestVisible
     private static final Integer MAX_EXPENSES_PER_RUN = 200;
+    @TestVisible
+    private static final Integer MAX_EXPENSES_PER_TRANSACTION = 9000;
 
     public class GenerationResult {
         @AuraEnabled public Date runDate;
@@ -29,10 +31,6 @@ public with sharing class SpendlyRecurringExpenseService {
             throw new AuraHandledException('Run date is required.');
         }
 
-        GenerationResult result = new GenerationResult(runDate);
-        List<Expense__c> expensesToInsert = new List<Expense__c>();
-        List<Recurring_Expense__c> recurringExpensesToUpdate = new List<Recurring_Expense__c>();
-
         List<Recurring_Expense__c> dueRecurringExpenses = [
             SELECT
                 Id,
@@ -55,12 +53,39 @@ public with sharing class SpendlyRecurringExpenseService {
             LIMIT :MAX_EXPENSES_PER_RUN
         ];
 
+        return generateDueExpenses(dueRecurringExpenses, runDate);
+    }
+
+    public static GenerationResult generateDueExpenses(
+        List<Recurring_Expense__c> dueRecurringExpenses,
+        Date runDate
+    ) {
+        return generateDueExpenses(dueRecurringExpenses, runDate, MAX_EXPENSES_PER_TRANSACTION);
+    }
+
+    private static GenerationResult generateDueExpenses(
+        List<Recurring_Expense__c> dueRecurringExpenses,
+        Date runDate,
+        Integer maxExpenses
+    ) {
+        if (runDate == null) {
+            throw new AuraHandledException('Run date is required.');
+        }
+
+        GenerationResult result = new GenerationResult(runDate);
+        if (dueRecurringExpenses == null || dueRecurringExpenses.isEmpty()) {
+            return result;
+        }
+
+        List<Expense__c> expensesToInsert = new List<Expense__c>();
+        List<Recurring_Expense__c> recurringExpensesToUpdate = new List<Recurring_Expense__c>();
+
         for (Recurring_Expense__c recurringExpense : dueRecurringExpenses) {
             Boolean generatedForTemplate = false;
             Date dueDate = recurringExpense.Next_Run_Date__c;
 
             while (shouldGenerateForDate(recurringExpense, dueDate, runDate)) {
-                if (expensesToInsert.size() >= MAX_EXPENSES_PER_RUN) {
+                if (expensesToInsert.size() >= maxExpenses) {
                     result.hitGenerationLimit = true;
                     break;
                 }
