@@ -21,6 +21,7 @@
     <tabs>Spending__c</tabs>
     <tabs>standard-report</tabs>
     <tabs>standard-Dashboard</tabs>
+    <tabs>Spendly_Settings</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Spendly_UtilityBar</utilityBar>
 </CustomApplication>

@@ -1,7 +1,9 @@
-public with sharing class SpendlyRecurringExpenseBatch implements Database.Batchable<SObject> {
+public with sharing class SpendlyRecurringExpenseBatch implements Database.Batchable<SObject>, Database.Stateful {
     public static final Integer DEFAULT_BATCH_SIZE = 50;
 
     private Date runDate;
+    private Integer totalExpensesCreated = 0;
+    private Integer totalRecurringExpensesProcessed = 0;
 
     public SpendlyRecurringExpenseBatch() {
         this(Date.today());
@@ -44,8 +46,16 @@ public with sharing class SpendlyRecurringExpenseBatch implements Database.Batch
             recurringExpenses.add((Recurring_Expense__c)item);
         }
 
-        SpendlyRecurringExpenseService.generateDueExpenses(recurringExpenses, runDate);
+        SpendlyRecurringExpenseService.GenerationResult result =
+            SpendlyRecurringExpenseService.generateDueExpenses(recurringExpenses, runDate);
+        totalExpensesCreated += result.expensesCreated;
+        totalRecurringExpensesProcessed += result.recurringExpensesProcessed;
     }
 
-    public void finish(Database.BatchableContext context) {}
+    public void finish(Database.BatchableContext context) {
+        SpendlySettingsService.markRecurringRunCompleted(
+            totalExpensesCreated,
+            totalRecurringExpensesProcessed
+        );
+    }
 }

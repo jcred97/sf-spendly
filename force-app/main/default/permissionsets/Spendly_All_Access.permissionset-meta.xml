@@ -44,6 +44,16 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>Spendly_Settings__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
     <!-- Category__c Field Permissions -->
     <fieldPermissions>
         <editable>true</editable>
@@ -122,6 +132,28 @@
         <readable>true</readable>
     </fieldPermissions>
 
+    <!-- Spendly_Settings__c Field Permissions -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Spendly_Settings__c.Last_Recurring_Run_DateTime__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Spendly_Settings__c.Last_Recurring_Run_Message__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Spendly_Settings__c.Last_Recurring_Run_Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Spendly_Settings__c.Recurring_Expenses_Enabled__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+
     <!-- Tab Visibility -->
     <tabSettings>
         <tab>Expense__c</tab>
@@ -143,6 +175,10 @@
         <tab>Spendly</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>Spendly_Settings</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 
     <!-- Apex Class Access -->
     <classAccesses>
@@ -159,6 +195,10 @@
     </classAccesses>
     <classAccesses>
         <apexClass>SpendlyRecurringExpenseBatch</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SpendlySettingsService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
 

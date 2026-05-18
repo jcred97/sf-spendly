@@ -1,0 +1,105 @@
+.settings-page {
+    min-height: 100vh;
+    background: #f3f2f2;
+    padding: 1.5rem;
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.settings-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+}
+
+.settings-subtitle {
+    margin: 0.25rem 0 0;
+    color: #706e6b;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.settings-panel {
+    background: white;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.panel-header h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.run-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.schedule-text {
+    color: #706e6b;
+    font-size: 0.875rem;
+}
+
+.status-list {
+    margin: 0;
+}
+
+.status-list div {
+    border-bottom: 1px solid #f3f2f2;
+    padding: 0.625rem 0;
+}
+
+.status-list div:first-child {
+    padding-top: 0;
+}
+
+.status-list div:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.status-list dt {
+    color: #706e6b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-list dd {
+    color: #181818;
+    margin: 0.125rem 0 0;
+}
+
+@media (max-width: 720px) {
+    .settings-header,
+    .run-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+}

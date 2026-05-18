@@ -27,10 +27,16 @@ public with sharing class SpendlyRecurringExpenseService {
 
     @AuraEnabled
     public static Id runDueExpensesBatch() {
-        return Database.executeBatch(
+        if (!SpendlySettingsService.areRecurringExpensesEnabled()) {
+            throw handledException('Recurring expenses are disabled in Spendly Settings.');
+        }
+
+        Id jobId = Database.executeBatch(
             new SpendlyRecurringExpenseBatch(),
             SpendlyRecurringExpenseBatch.DEFAULT_BATCH_SIZE
         );
+        SpendlySettingsService.markRecurringRunQueued(jobId);
+        return jobId;
     }
 
     @TestVisible
@@ -142,5 +148,11 @@ public with sharing class SpendlyRecurringExpenseService {
             Recurring_Expense__c = recurringExpense.Id,
             Transaction_Type__c = recurringExpense.Transaction_Type__c
         );
+    }
+
+    private static AuraHandledException handledException(String message) {
+        AuraHandledException exceptionToThrow = new AuraHandledException(message);
+        exceptionToThrow.setMessage(message);
+        return exceptionToThrow;
     }
 }

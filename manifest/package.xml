@@ -12,10 +12,13 @@
         <members>SpendlyRecurringExpenseSchedulerTest</members>
         <members>SpendlyRecurringExpenseService</members>
         <members>SpendlyRecurringExpenseServiceTest</members>
+        <members>SpendlySettingsService</members>
+        <members>SpendlySettingsServiceTest</members>
         <name>ApexClass</name>
     </types>
     <types>
         <members>RecurringExpenseTrigger</members>
+        <members>SpendlySettingsTrigger</members>
         <name>ApexTrigger</name>
     </types>
     <types>
@@ -31,6 +34,7 @@
         <members>Expense__c</members>
         <members>Recurring_Expense__c</members>
         <members>Spending__c</members>
+        <members>Spendly_Settings__c</members>
         <name>CustomObject</name>
     </types>
     <types>
@@ -39,11 +43,13 @@
         <members>Recurring_Expense__c</members>
         <members>Spending__c</members>
         <members>Spendly</members>
+        <members>Spendly_Settings</members>
         <name>CustomTab</name>
     </types>
     <types>
         <members>Expense_Record_Page</members>
         <members>Spendly</members>
+        <members>Spendly_Settings</members>
         <members>Spendly_UtilityBar</members>
         <name>FlexiPage</name>
     </types>
@@ -55,6 +61,7 @@
         <members>Category__c-Category Layout</members>
         <members>Expense__c-Expense Layout</members>
         <members>Recurring_Expense__c-Recurring Expense Layout</members>
+        <members>Spendly_Settings__c-Spendly Settings Layout</members>
         <members>Spending__c-Spending Layout</members>
         <name>Layout</name>
     </types>
@@ -63,6 +70,7 @@
         <members>spendlyBarChart</members>
         <members>spendlyExpenseModal</members>
         <members>spendlySummaryCards</members>
+        <members>spendlySettings</members>
         <members>spendlyTrendChart</members>
         <name>LightningComponentBundle</name>
     </types>

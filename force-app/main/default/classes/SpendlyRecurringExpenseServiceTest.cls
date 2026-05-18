@@ -255,6 +255,22 @@ private class SpendlyRecurringExpenseServiceTest {
     }
 
     @IsTest
+    static void testRunDueExpensesBatchRespectsDisabledSetting() {
+        SpendlySettingsService.saveSettings(false);
+
+        Boolean exceptionThrown = false;
+        try {
+            Test.startTest();
+            SpendlyRecurringExpenseService.runDueExpensesBatch();
+            Test.stopTest();
+        } catch (AuraHandledException e) {
+            exceptionThrown = true;
+        }
+
+        System.assertEquals(true, exceptionThrown, 'Manual generation should be blocked when disabled');
+    }
+
+    @IsTest
     static void testGenerateDueExpenses_RequiresRunDate() {
         Boolean exceptionThrown = false;
 

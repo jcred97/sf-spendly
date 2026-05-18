@@ -43,4 +43,43 @@ private class SpendlyRecurringExpenseSchedulerTest {
         ];
         System.assertEquals(dueDate.addMonths(1), updatedRecurringExpense.Next_Run_Date__c);
     }
+
+    @IsTest
+    static void testScheduledRunSkipsWhenDisabled() {
+        Spending__c spending = new Spending__c(Name = 'Health');
+        insert spending;
+
+        Category__c category = new Category__c(
+            Name = 'Fitness',
+            Spending__c = spending.Id
+        );
+        insert category;
+
+        Date dueDate = Date.today();
+        Recurring_Expense__c recurringExpense = new Recurring_Expense__c(
+            Name = 'Gym',
+            Active__c = true,
+            Amount__c = 1500,
+            Category__c = category.Id,
+            Frequency__c = 'Monthly',
+            Next_Run_Date__c = dueDate,
+            Start_Date__c = dueDate
+        );
+        insert recurringExpense;
+
+        SpendlySettingsService.saveSettings(false);
+
+        Test.startTest();
+        new SpendlyRecurringExpenseScheduler().execute(null);
+        Test.stopTest();
+
+        System.assertEquals(0, [SELECT COUNT() FROM Expense__c], 'No expenses should generate when disabled');
+
+        Spendly_Settings__c settings = [
+            SELECT Last_Recurring_Run_Status__c
+            FROM Spendly_Settings__c
+            LIMIT 1
+        ];
+        System.assertEquals('Skipped', settings.Last_Recurring_Run_Status__c);
+    }
 }

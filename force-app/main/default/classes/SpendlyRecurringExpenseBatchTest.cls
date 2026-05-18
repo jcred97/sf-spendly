@@ -44,5 +44,16 @@ private class SpendlyRecurringExpenseBatchTest {
             ],
             'Every processed template should advance to the next monthly run date'
         );
+
+        Spendly_Settings__c settings = [
+            SELECT Last_Recurring_Run_Status__c, Last_Recurring_Run_Message__c
+            FROM Spendly_Settings__c
+            LIMIT 1
+        ];
+        System.assertEquals('Completed', settings.Last_Recurring_Run_Status__c);
+        System.assert(
+            settings.Last_Recurring_Run_Message__c.contains('Created 250 expense(s)'),
+            'Batch finish should record the generated expense count'
+        );
     }
 }
