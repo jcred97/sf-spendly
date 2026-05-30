@@ -32,6 +32,7 @@ const ALL_COLUMNS = [
         sortable: true,
         typeAttributes: { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }
     },
+    { label: 'Time', fieldName: 'transactionTimeDisplay', sortable: true },
     {
         label: 'Expense Name',
         fieldName: 'recordLink',
@@ -64,6 +65,7 @@ const ALL_COLUMNS = [
 
 const COLUMN_OPTIONS = [
     { key: 'expenseDate', label: 'Date' },
+    { key: 'transactionTimeDisplay', label: 'Time' },
     { key: 'recordLink', label: 'Expense Name' },
     { key: 'category', label: 'Category' },
     { key: 'spending', label: 'Spending' },
@@ -78,6 +80,32 @@ function formatPHP(value) {
 
 function formatDate(isoDate) {
     return isoDate ? DATE_FORMAT.format(new Date(isoDate)) : '-';
+}
+
+function formatTime(value) {
+    if (!value) {
+        return '-';
+    }
+
+    const timeValue = typeof value === 'number' ? millisecondsToTime(value) : value;
+    const [hourText, minuteText] = String(timeValue).split(':');
+    const hour = Number(hourText);
+    const minute = Number(minuteText);
+
+    if (Number.isNaN(hour) || Number.isNaN(minute)) {
+        return '-';
+    }
+
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${String(minute).padStart(2, '0')} ${period}`;
+}
+
+function millisecondsToTime(value) {
+    const totalMinutes = Math.floor(value / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.000`;
 }
 
 function formatDateISO(date) {
@@ -150,6 +178,7 @@ export default class SpendlyApp extends LightningElement {
 
     columnVisibility = {
         expenseDate: true,
+        transactionTimeDisplay: true,
         recordLink: true,
         category: true,
         spending: true,
@@ -225,6 +254,8 @@ export default class SpendlyApp extends LightningElement {
             this.allRows = data.map(row => ({
                 id: row.Id,
                 expenseDate: row.Expense_Date__c,
+                transactionTime: row.Transaction_Time__c,
+                transactionTimeDisplay: formatTime(row.Transaction_Time__c),
                 name: row.Name,
                 recordLink: `/${row.Id}`,
                 category: row.Category__r?.Name,
@@ -374,6 +405,7 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.map(row => ({
             ...row,
             expenseDateFormatted: formatDate(row.expenseDate),
+            transactionTimeFormatted: row.transactionTimeDisplay,
             amountFormatted: row.amount != null ? formatPHP(row.amount) : '-'
         }));
     }
@@ -440,9 +472,17 @@ export default class SpendlyApp extends LightningElement {
         this.sortedDirection = sortDirection;
 
         const isAsc = sortDirection === 'asc';
-        this.allRows = [...this.allRows].sort((a, b) =>
-            a[fieldName] > b[fieldName] ? (isAsc ? 1 : -1) : (isAsc ? -1 : 1)
-        );
+        const sortField = fieldName === 'transactionTimeDisplay' ? 'transactionTime' : fieldName;
+        this.allRows = [...this.allRows].sort((a, b) => {
+            const left = a[sortField] || '';
+            const right = b[sortField] || '';
+
+            if (left === right) {
+                return 0;
+            }
+
+            return left > right ? (isAsc ? 1 : -1) : (isAsc ? -1 : 1);
+        });
     }
 
     async handleLoadMore() {
@@ -480,6 +520,7 @@ export default class SpendlyApp extends LightningElement {
                 Amount__c: row.amount,
                 Category__c: row.categoryId,
                 Expense_Date__c: row.expenseDate,
+                Transaction_Time__c: row.transactionTime,
                 Transaction_Type__c: row.transactionType,
                 Bank__c: row.bank
             };
@@ -577,9 +618,10 @@ export default class SpendlyApp extends LightningElement {
             return;
         }
 
-        const headers = ['Date', 'Expense Name', 'Category', 'Spending', 'Bank', 'Type', 'Amount (PHP)'];
+        const headers = ['Date', 'Time', 'Expense Name', 'Category', 'Spending', 'Bank', 'Type', 'Amount (PHP)'];
         const rows = this.filteredRows.map(row => [
             row.expenseDate || '',
+            row.transactionTimeDisplay === '-' ? '' : row.transactionTimeDisplay,
             row.name || '',
             row.category || '',
             row.spending || '',

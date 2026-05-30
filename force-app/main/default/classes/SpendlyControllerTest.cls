@@ -124,6 +124,36 @@ private class SpendlyControllerTest {
         System.assertEquals(1, result.size(), 'Should return only Groceries expense');
     }
 
+    @IsTest
+    static void testGetExpenses_OrdersSameDayByTime() {
+        Category__c groceries = [SELECT Id FROM Category__c WHERE Name = 'Groceries' LIMIT 1];
+        Date expenseDate = Date.today().addDays(1);
+
+        insert new List<Expense__c>{
+            new Expense__c(
+                Name = 'Morning Expense',
+                Category__c = groceries.Id,
+                Expense_Date__c = expenseDate,
+                Transaction_Time__c = Time.newInstance(9, 0, 0, 0),
+                Amount__c = 100
+            ),
+            new Expense__c(
+                Name = 'Evening Expense',
+                Category__c = groceries.Id,
+                Expense_Date__c = expenseDate,
+                Transaction_Time__c = Time.newInstance(18, 30, 0, 0),
+                Amount__c = 200
+            )
+        };
+
+        Test.startTest();
+        List<Expense__c> result = SpendlyController.getExpensesByFilters('All', groceries.Id, expenseDate, expenseDate);
+        Test.stopTest();
+
+        System.assertEquals('Evening Expense', result[0].Name, 'Later same-day expense should sort first');
+        System.assertEquals(Time.newInstance(18, 30, 0, 0), result[0].Transaction_Time__c);
+    }
+
     // deleteExpense() - Success
     @IsTest
     static void testDeleteExpense_Success() {

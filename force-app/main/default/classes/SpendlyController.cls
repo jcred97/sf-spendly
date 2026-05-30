@@ -99,7 +99,7 @@ public with sharing class SpendlyController {
         Date endDate
     ) {
         String query =
-            'SELECT Id, Name, Expense_Date__c, Description__c, ' +
+            'SELECT Id, Name, Expense_Date__c, Transaction_Time__c, Description__c, ' +
             'Category__c, Category__r.Name, ' +
             'Category__r.Spending__c, Category__r.Spending__r.Name, ' +
             'Bank__c, Transaction_Type__c, Amount__c ' +
@@ -118,7 +118,7 @@ public with sharing class SpendlyController {
             query += 'AND Expense_Date__c <= :endDate ';
         }
 
-        query += 'ORDER BY Expense_Date__c DESC';
+        query += 'ORDER BY Expense_Date__c DESC, Transaction_Time__c DESC NULLS LAST, CreatedDate DESC';
         return Database.query(query);
     }
 

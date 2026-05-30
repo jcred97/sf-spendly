@@ -50,6 +50,7 @@ private class SpendlyRecurringExpenseServiceTest {
                 Description__c,
                 Expense_Date__c,
                 Recurring_Expense__c,
+                Transaction_Time__c,
                 Transaction_Type__c
             FROM Expense__c
             WHERE Recurring_Expense__c = :recurringExpense.Id
@@ -63,6 +64,7 @@ private class SpendlyRecurringExpenseServiceTest {
         System.assertEquals('Gym', generatedExpenses[0].Name);
         System.assertEquals(1500, generatedExpenses[0].Amount__c);
         System.assertEquals('BPI', generatedExpenses[0].Bank__c);
+        System.assertNotEquals(null, generatedExpenses[0].Transaction_Time__c);
         System.assertEquals('Debit Card', generatedExpenses[0].Transaction_Type__c);
 
         Recurring_Expense__c updatedRecurringExpense = [

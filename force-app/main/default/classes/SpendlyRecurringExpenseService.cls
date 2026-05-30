@@ -93,6 +93,7 @@ public with sharing class SpendlyRecurringExpenseService {
 
         List<Expense__c> expensesToInsert = new List<Expense__c>();
         List<Recurring_Expense__c> recurringExpensesToUpdate = new List<Recurring_Expense__c>();
+        Time generatedTransactionTime = getCurrentUserTime();
 
         for (Recurring_Expense__c recurringExpense : dueRecurringExpenses) {
             Boolean generatedForTemplate = false;
@@ -104,7 +105,7 @@ public with sharing class SpendlyRecurringExpenseService {
                     break;
                 }
 
-                expensesToInsert.add(buildExpense(recurringExpense, dueDate));
+                expensesToInsert.add(buildExpense(recurringExpense, dueDate, generatedTransactionTime));
                 dueDate = SpendlyRecurringExpenseCalculator.getNextRunDate(
                     dueDate,
                     recurringExpense.Frequency__c,
@@ -137,7 +138,11 @@ public with sharing class SpendlyRecurringExpenseService {
         return result;
     }
 
-    private static Expense__c buildExpense(Recurring_Expense__c recurringExpense, Date dueDate) {
+    private static Expense__c buildExpense(
+        Recurring_Expense__c recurringExpense,
+        Date dueDate,
+        Time generatedTransactionTime
+    ) {
         return new Expense__c(
             Name = recurringExpense.Name,
             Amount__c = recurringExpense.Amount__c,
@@ -146,7 +151,20 @@ public with sharing class SpendlyRecurringExpenseService {
             Description__c = recurringExpense.Description__c,
             Expense_Date__c = dueDate,
             Recurring_Expense__c = recurringExpense.Id,
+            Transaction_Time__c = generatedTransactionTime,
             Transaction_Type__c = recurringExpense.Transaction_Type__c
+        );
+    }
+
+    private static Time getCurrentUserTime() {
+        Datetime currentDateTime = System.now();
+        String timeZoneId = UserInfo.getTimeZone().getID();
+
+        return Time.newInstance(
+            Integer.valueOf(currentDateTime.format('H', timeZoneId)),
+            Integer.valueOf(currentDateTime.format('m', timeZoneId)),
+            Integer.valueOf(currentDateTime.format('s', timeZoneId)),
+            0
         );
     }
 

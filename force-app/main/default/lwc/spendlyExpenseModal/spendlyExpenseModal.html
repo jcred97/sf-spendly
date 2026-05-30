@@ -15,6 +15,8 @@
                     <lightning-record-edit-form
                         object-api-name="Expense__c"
                         record-id={recordId}
+                        onload={handleLoad}
+                        onsubmit={handleSubmit}
                         onsuccess={handleSuccess}
                         onerror={handleError}>
 
@@ -22,6 +24,15 @@
                         <lightning-input-field field-name="Amount__c" value={fieldValue.Amount__c}></lightning-input-field>
                         <lightning-input-field field-name="Category__c" value={fieldValue.Category__c}></lightning-input-field>
                         <lightning-input-field class="date-format-hide" field-name="Expense_Date__c" value={fieldValue.Expense_Date__c}></lightning-input-field>
+                        <div class="transaction-time-field">
+                            <lightning-input
+                                type="time"
+                                label="Transaction Time"
+                                variant="label-stacked"
+                                value={transactionTimeValue}
+                                onchange={handleTransactionTimeChange}>
+                            </lightning-input>
+                        </div>
                         <lightning-input-field field-name="Transaction_Type__c" value={fieldValue.Transaction_Type__c}></lightning-input-field>
                         <lightning-input-field field-name="Bank__c" value={fieldValue.Bank__c}></lightning-input-field>
 

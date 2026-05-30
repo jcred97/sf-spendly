@@ -6,6 +6,16 @@
     display: none;
 }
 
+.transaction-time-field {
+    display: block;
+    margin-bottom: var(--lwc-spacingXSmall, 0.5rem);
+}
+
+.transaction-time-field lightning-input {
+    display: block;
+    width: 100%;
+}
+
 @keyframes modalFadeIn {
     from {
         opacity: 0;

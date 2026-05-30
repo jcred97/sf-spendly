@@ -4,15 +4,44 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class SpendlyExpenseModal extends LightningElement {
 
     @api isOpen = false;
-    @api recordId = null;
-    @api duplicateData = null;
 
     @track isClosing = false;
     @track isRendered = false;
 
+    _recordId = null;
+    _duplicateData = null;
     _handleKeyDown;
     _previouslyFocusedElement;
     _saveAndNew = false;
+    transactionTimeValue = '';
+
+    @api
+    get recordId() {
+        return this._recordId;
+    }
+
+    set recordId(value) {
+        this._recordId = value;
+        if (!value) {
+            this.transactionTimeValue = this.normalizeTimeForInput(
+                this._duplicateData?.Transaction_Time__c
+            );
+        }
+    }
+
+    @api
+    get duplicateData() {
+        return this._duplicateData;
+    }
+
+    set duplicateData(value) {
+        this._duplicateData = value;
+        if (!this._recordId) {
+            this.transactionTimeValue = this.normalizeTimeForInput(
+                value?.Transaction_Time__c
+            );
+        }
+    }
 
     renderedCallback() {
         if (this.isOpen && !this.isRendered) {
@@ -109,6 +138,30 @@ export default class SpendlyExpenseModal extends LightningElement {
         this._saveAndNew = false;
     }
 
+    handleLoad(event) {
+        if (!this.isEditMode) {
+            return;
+        }
+
+        const record = event.detail.records?.[this.recordId];
+        this.transactionTimeValue = this.normalizeTimeForInput(
+            record?.fields?.Transaction_Time__c?.value
+        );
+    }
+
+    handleSubmit(event) {
+        event.preventDefault();
+
+        const fields = { ...event.detail.fields };
+        fields.Transaction_Time__c = this.normalizeTimeForSubmit(this.transactionTimeValue);
+
+        this.template.querySelector('lightning-record-edit-form').submit(fields);
+    }
+
+    handleTransactionTimeChange(event) {
+        this.transactionTimeValue = event.detail.value;
+    }
+
     handleSuccess() {
         this.dispatchEvent(new CustomEvent('success'));
 
@@ -118,6 +171,7 @@ export default class SpendlyExpenseModal extends LightningElement {
                     field.value = null;
                 }
             });
+            this.transactionTimeValue = '';
             this._saveAndNew = false;
         } else {
             this.handleClose();
@@ -137,6 +191,30 @@ export default class SpendlyExpenseModal extends LightningElement {
 
     get fieldValue() {
         return this.duplicateData || {};
+    }
+
+    normalizeTimeForInput(value) {
+        if (!value) {
+            return '';
+        }
+
+        if (typeof value === 'number') {
+            const totalMinutes = Math.floor(value / 60000);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        }
+
+        return String(value).slice(0, 5);
+    }
+
+    normalizeTimeForSubmit(value) {
+        if (!value) {
+            return null;
+        }
+
+        const [hour, minute] = value.split(':');
+        return `${hour}:${minute}:00.000Z`;
     }
 
     get isEditMode() {
