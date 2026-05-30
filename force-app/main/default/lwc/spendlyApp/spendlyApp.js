@@ -152,6 +152,7 @@ function buildBarChartData(entries, prefix) {
 export default class SpendlyApp extends LightningElement {
     _latestLoadRequestId = 0;
 
+    activeView = 'dashboard';
     startDate;
     endDate;
     spendingId = 'All';
@@ -186,6 +187,38 @@ export default class SpendlyApp extends LightningElement {
         transactionType: true,
         amount: true
     };
+
+    get isDashboardView() {
+        return this.activeView === 'dashboard';
+    }
+
+    get isExpensesView() {
+        return this.activeView === 'expenses';
+    }
+
+    get isRecurringView() {
+        return this.activeView === 'recurring';
+    }
+
+    get isSettingsView() {
+        return this.activeView === 'settings';
+    }
+
+    get dashboardNavClass() {
+        return this.getNavClass('dashboard');
+    }
+
+    get expensesNavClass() {
+        return this.getNavClass('expenses');
+    }
+
+    get recurringNavClass() {
+        return this.getNavClass('recurring');
+    }
+
+    get settingsNavClass() {
+        return this.getNavClass('settings');
+    }
 
     renderedCallback() {
         loadStyle(this, removeDateFormatStyle);
@@ -451,6 +484,14 @@ export default class SpendlyApp extends LightningElement {
         } else {
             this.dateError = '';
         }
+    }
+
+    handleViewChange(event) {
+        this.activeView = event.currentTarget.dataset.view;
+    }
+
+    getNavClass(viewName) {
+        return `workspace-nav-item ${this.activeView === viewName ? 'is-active' : ''}`;
     }
 
     handleToggleColumnPicker() {
