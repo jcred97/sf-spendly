@@ -1,245 +1,287 @@
 <template>
     <div class="spendly-page">
-        <nav class="workspace-nav" aria-label="Spendly workspace">
-            <button class={dashboardNavClass} data-view="dashboard" onclick={handleViewChange}>
-                <lightning-icon icon-name="utility:chart" size="x-small"></lightning-icon>
-                <span>Dashboard</span>
-            </button>
-            <button class={expensesNavClass} data-view="expenses" onclick={handleViewChange}>
-                <lightning-icon icon-name="utility:table" size="x-small"></lightning-icon>
-                <span>Expenses</span>
-            </button>
-            <button class={recurringNavClass} data-view="recurring" onclick={handleViewChange}>
-                <lightning-icon icon-name="utility:sync" size="x-small"></lightning-icon>
-                <span>Recurring</span>
-            </button>
-            <button class={settingsNavClass} data-view="settings" onclick={handleViewChange}>
-                <lightning-icon icon-name="utility:settings" size="x-small"></lightning-icon>
-                <span>Settings</span>
-            </button>
-        </nav>
-
-        <template lwc:if={isDashboardView}>
-            <section class="workspace-view">
-                <div class="view-header">
-                    <h2>Dashboard</h2>
-                    <lightning-button
-                        variant="brand"
-                        label="Add Expense"
-                        icon-name="utility:add"
-                        onclick={openModal}>
-                    </lightning-button>
-                </div>
-
-                <c-spendly-summary-cards
-                    formatted-total={formattedTotal}
-                    expense-count={expenseCount}
-                    average-expense={averageExpense}
-                    top-category-name={topCategory.name}
-                    top-category-amount={topCategory.amount}
-                    top-bank-name={topBank.name}
-                    top-bank-count={topBank.count}>
-                </c-spendly-summary-cards>
-
-                <div class="charts-row">
-                    <c-spendly-bar-chart
-                        title="By Category"
-                        chart-data={categoryChartData}>
-                    </c-spendly-bar-chart>
-
-                    <c-spendly-trend-chart
-                        title="Monthly Trend"
-                        trend-data={monthlyTrendData}>
-                    </c-spendly-trend-chart>
-
-                    <c-spendly-bar-chart
-                        title="By Bank"
-                        chart-data={bankChartData}>
-                    </c-spendly-bar-chart>
-                </div>
-            </section>
-        </template>
-
-        <template lwc:elseif={isExpensesView}>
-            <section class="workspace-view">
-                <div class="view-header">
-                    <h2>Expenses</h2>
-                    <div class="view-actions">
-                        <lightning-button
-                            variant="brand"
-                            label="Add Expense"
-                            icon-name="utility:add"
-                            onclick={openModal}>
-                        </lightning-button>
-                        <div class="column-picker-wrapper">
-                            <lightning-button
-                                variant="neutral"
-                                label="Columns"
-                                icon-name="utility:table"
-                                onclick={handleToggleColumnPicker}>
-                            </lightning-button>
-                            <template lwc:if={isColumnPickerOpen}>
-                                <div class="column-picker">
-                                    <p class="column-picker-title">Show / Hide Columns</p>
-                                    <template for:each={columnPickerOptions} for:item="col">
-                                        <label key={col.key} class="column-picker-item">
-                                            <input
-                                                type="checkbox"
-                                                data-key={col.key}
-                                                checked={col.checked}
-                                                onchange={handleColumnToggle} />
-                                            {col.label}
-                                        </label>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                        <lightning-button
-                            variant="neutral"
-                            label="Export CSV"
-                            icon-name="utility:download"
-                            onclick={handleExportCsv}
-                            disabled={hasNoRows}>
-                        </lightning-button>
-                        <lightning-button
-                            variant="neutral"
-                            label="Print / PDF"
-                            icon-name="utility:print"
-                            onclick={handlePrint}
-                            disabled={hasNoRows}>
-                        </lightning-button>
+        <div class={workspaceShellClass}>
+            <aside class="workspace-sidebar" aria-label="Spendly workspace">
+                <div class="sidebar-brand">
+                    <span class="brand-mark">
+                        <lightning-icon icon-name="utility:money" size="x-small"></lightning-icon>
+                    </span>
+                    <div class="brand-copy">
+                        <span class="brand-name">Spendly</span>
+                        <span class="brand-caption">Expense workspace</span>
                     </div>
+                    <button
+                        class="sidebar-toggle"
+                        type="button"
+                        title={sidebarToggleTitle}
+                        aria-label={sidebarToggleTitle}
+                        aria-expanded={sidebarAriaExpanded}
+                        onclick={handleSidebarToggle}>
+                        <lightning-icon icon-name={sidebarToggleIcon} size="xx-small"></lightning-icon>
+                    </button>
                 </div>
 
-                <div class="filters-panel">
-                    <div class="slds-grid slds-gutters_small slds-wrap slds-grid_vertical-align-end">
-                        <div class="slds-col filter-col">
-                            <lightning-input
-                                class="date-format-hide"
-                                type="date"
-                                label="Start Date"
-                                value={startDate}
-                                onchange={handleChange}
-                                data-field="startDate">
-                            </lightning-input>
-                        </div>
-                        <div class="slds-col filter-col">
-                            <lightning-input
-                                class="date-format-hide"
-                                type="date"
-                                label="End Date"
-                                value={endDate}
-                                onchange={handleChange}
-                                data-field="endDate">
-                            </lightning-input>
-                        </div>
-                        <div class="slds-col filter-col">
-                            <lightning-combobox
-                                label="Expense Group"
-                                value={expenseGroupId}
-                                options={expenseGroupOptions}
-                                onchange={handleChange}
-                                data-field="expenseGroupId">
-                            </lightning-combobox>
-                        </div>
-                        <div class="slds-col filter-col">
-                            <lightning-combobox
-                                label="Category"
-                                value={categoryId}
-                                options={categoryOptions}
-                                onchange={handleChange}
-                                data-field="categoryId">
-                            </lightning-combobox>
-                        </div>
-                        <div class="slds-col search-col">
-                            <lightning-input
-                                type="search"
-                                label="Search"
-                                placeholder="Search by name, category, expense group, bank..."
-                                value={searchTerm}
-                                onchange={handleSearch}>
-                            </lightning-input>
-                        </div>
-                        <div class="slds-col slds-no-flex reset-col">
-                            <lightning-button
-                                variant="neutral"
-                                label="Reset"
-                                icon-name="utility:refresh"
-                                onclick={handleReset}>
-                            </lightning-button>
-                        </div>
-                    </div>
-                    <template lwc:if={dateError}>
-                        <div class="slds-text-color_error slds-m-top_x-small">{dateError}</div>
+                <nav class="workspace-nav" aria-label="Spendly views">
+                    <template for:each={workspaceNavItems} for:item="item">
+                        <button
+                            key={item.key}
+                            class={item.className}
+                            data-view={item.key}
+                            aria-current={item.ariaCurrent}
+                            title={item.label}
+                            onclick={handleViewChange}>
+                            <lightning-icon icon-name={item.iconName} size="x-small"></lightning-icon>
+                            <span>{item.label}</span>
+                        </button>
                     </template>
-                </div>
+                </nav>
+            </aside>
 
-                <div class="table-row">
-                    <div class="table-panel">
-                        <template lwc:if={hasNoRows}>
-                            <div class="empty-state">
-                                <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
-                                <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
+            <main class="workspace-main">
+                <template lwc:if={isDashboardView}>
+                    <section class="workspace-view">
+                        <div class="view-header">
+                            <div>
+                                <h2>{viewTitle}</h2>
+                                <p>{viewSubtitle}</p>
                             </div>
-                        </template>
-                        <template lwc:else>
-                            <template lwc:if={hasSelectedRows}>
-                                <div class="selection-bar">
-                                    <span class="selection-count">{selectedCount} row(s) selected</span>
-                                    <lightning-button
-                                        variant="destructive-text"
-                                        label="Delete Selected"
-                                        icon-name="utility:delete"
-                                        onclick={handleBulkDelete}>
-                                    </lightning-button>
+                            <lightning-button
+                                variant="brand"
+                                label="Add Expense"
+                                icon-name="utility:add"
+                                onclick={openModal}>
+                            </lightning-button>
+                        </div>
+
+                        <c-spendly-summary-cards
+                            formatted-total={formattedTotal}
+                            expense-count={expenseCount}
+                            average-expense={averageExpense}
+                            top-category-name={topCategory.name}
+                            top-category-amount={topCategory.amount}
+                            top-bank-name={topBank.name}
+                            top-bank-count={topBank.count}>
+                        </c-spendly-summary-cards>
+
+                        <div class="charts-row">
+                            <c-spendly-bar-chart
+                                title="By Category"
+                                chart-data={categoryChartData}>
+                            </c-spendly-bar-chart>
+
+                            <c-spendly-trend-chart
+                                title="Monthly Trend"
+                                trend-data={monthlyTrendData}>
+                            </c-spendly-trend-chart>
+
+                            <c-spendly-bar-chart
+                                title="By Bank"
+                                chart-data={bankChartData}>
+                            </c-spendly-bar-chart>
+                        </div>
+                    </section>
+                </template>
+
+                <template lwc:elseif={isTransactionsView}>
+                    <section class="workspace-view">
+                        <div class="view-header">
+                            <div>
+                                <h2>{viewTitle}</h2>
+                                <p>{viewSubtitle}</p>
+                            </div>
+                            <lightning-button
+                                variant="brand"
+                                label="Add Expense"
+                                icon-name="utility:add"
+                                onclick={openModal}>
+                            </lightning-button>
+                        </div>
+
+                        <div class="transactions-layout">
+                            <aside class="transaction-filters" aria-label="Transaction filters">
+                                <div class="panel-title-row">
+                                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                                    <h3>Filter</h3>
                                 </div>
-                            </template>
-                            <div class="table-wrap">
-                                <lightning-datatable
-                                    key-field="id"
-                                    data={rowsToDisplay}
-                                    columns={columns}
-                                    selected-rows={selectedRows}
-                                    sorted-by={sortedBy}
-                                    sorted-direction={sortedDirection}
-                                    onsort={handleSort}
-                                    onrowaction={handleRowAction}
-                                    onrowselection={handleRowSelection}
-                                    enable-infinite-loading
-                                    onloadmore={handleLoadMore}
-                                    is-loading={isLoading}>
-                                </lightning-datatable>
-                            </div>
-                            <div class="table-footer">
-                                <strong>Total: {formattedTotal}</strong>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </section>
-        </template>
 
-        <template lwc:elseif={isRecurringView}>
-            <section class="workspace-view">
-                <div class="view-header">
-                    <h2>Recurring</h2>
-                </div>
-                <div class="placeholder-panel">
-                    <lightning-icon icon-name="utility:sync" size="medium"></lightning-icon>
-                </div>
-            </section>
-        </template>
+                                <lightning-input
+                                    type="search"
+                                    label="Search"
+                                    placeholder="Name, category, group, bank..."
+                                    value={searchTerm}
+                                    onchange={handleSearch}>
+                                </lightning-input>
 
-        <template lwc:elseif={isSettingsView}>
-            <section class="workspace-view">
-                <div class="view-header">
-                    <h2>Settings</h2>
-                </div>
-                <div class="placeholder-panel">
-                    <lightning-icon icon-name="utility:settings" size="medium"></lightning-icon>
-                </div>
-            </section>
-        </template>
+                                <div class="filter-stack">
+                                    <lightning-input
+                                        class="date-format-hide"
+                                        type="date"
+                                        label="Start Date"
+                                        value={startDate}
+                                        onchange={handleChange}
+                                        data-field="startDate">
+                                    </lightning-input>
+                                    <lightning-input
+                                        class="date-format-hide"
+                                        type="date"
+                                        label="End Date"
+                                        value={endDate}
+                                        onchange={handleChange}
+                                        data-field="endDate">
+                                    </lightning-input>
+                                    <lightning-combobox
+                                        label="Expense Group"
+                                        value={expenseGroupId}
+                                        options={expenseGroupOptions}
+                                        onchange={handleChange}
+                                        data-field="expenseGroupId">
+                                    </lightning-combobox>
+                                    <lightning-combobox
+                                        label="Category"
+                                        value={categoryId}
+                                        options={categoryOptions}
+                                        onchange={handleChange}
+                                        data-field="categoryId">
+                                    </lightning-combobox>
+                                </div>
+
+                                <template lwc:if={dateError}>
+                                    <div class="slds-text-color_error slds-m-top_x-small">{dateError}</div>
+                                </template>
+
+                                <lightning-button
+                                    class="filter-reset"
+                                    variant="neutral"
+                                    label="Reset Filters"
+                                    icon-name="utility:refresh"
+                                    onclick={handleReset}>
+                                </lightning-button>
+                            </aside>
+
+                            <div class="transactions-panel">
+                                <div class="transactions-panel-header">
+                                    <div>
+                                        <p class="eyebrow">{transactionPeriodLabel}</p>
+                                        <h3>{transactionCountLabel}</h3>
+                                    </div>
+                                    <div class="transactions-total">
+                                        <span>Total</span>
+                                        <strong>{formattedTotal}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="transactions-toolbar">
+                                    <div class="table-status">{visibleRowsSummary}</div>
+                                    <div class="view-actions">
+                                        <div class="column-picker-wrapper">
+                                            <lightning-button
+                                                variant="neutral"
+                                                label="Columns"
+                                                icon-name="utility:table"
+                                                onclick={handleToggleColumnPicker}>
+                                            </lightning-button>
+                                            <template lwc:if={isColumnPickerOpen}>
+                                                <div class="column-picker">
+                                                    <p class="column-picker-title">Show / Hide Columns</p>
+                                                    <template for:each={columnPickerOptions} for:item="col">
+                                                        <label key={col.key} class="column-picker-item">
+                                                            <input
+                                                                type="checkbox"
+                                                                data-key={col.key}
+                                                                checked={col.checked}
+                                                                onchange={handleColumnToggle} />
+                                                            {col.label}
+                                                        </label>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <lightning-button
+                                            variant="neutral"
+                                            label="Export CSV"
+                                            icon-name="utility:download"
+                                            onclick={handleExportCsv}
+                                            disabled={hasNoRows}>
+                                        </lightning-button>
+                                        <lightning-button
+                                            variant="neutral"
+                                            label="Print / PDF"
+                                            icon-name="utility:print"
+                                            onclick={handlePrint}
+                                            disabled={hasNoRows}>
+                                        </lightning-button>
+                                    </div>
+                                </div>
+
+                                <template lwc:if={hasNoRows}>
+                                    <div class="empty-state">
+                                        <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
+                                        <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <template lwc:if={hasSelectedRows}>
+                                        <div class="selection-bar">
+                                            <span class="selection-count">{selectedCount} row(s) selected</span>
+                                            <lightning-button
+                                                variant="destructive-text"
+                                                label="Delete Selected"
+                                                icon-name="utility:delete"
+                                                onclick={handleBulkDelete}>
+                                            </lightning-button>
+                                        </div>
+                                    </template>
+                                    <div class="table-wrap transactions-table-wrap">
+                                        <lightning-datatable
+                                            key-field="id"
+                                            data={rowsToDisplay}
+                                            columns={columns}
+                                            selected-rows={selectedRows}
+                                            sorted-by={sortedBy}
+                                            sorted-direction={sortedDirection}
+                                            onsort={handleSort}
+                                            onrowaction={handleRowAction}
+                                            onrowselection={handleRowSelection}
+                                            enable-infinite-loading
+                                            onloadmore={handleLoadMore}
+                                            is-loading={isLoading}>
+                                        </lightning-datatable>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
+                </template>
+
+                <template lwc:elseif={isRecurringView}>
+                    <section class="workspace-view">
+                        <div class="view-header">
+                            <div>
+                                <h2>{viewTitle}</h2>
+                                <p>{viewSubtitle}</p>
+                            </div>
+                        </div>
+                        <div class="placeholder-panel">
+                            <lightning-icon icon-name="utility:sync" size="medium"></lightning-icon>
+                        </div>
+                    </section>
+                </template>
+
+                <template lwc:elseif={isSettingsView}>
+                    <section class="workspace-view">
+                        <div class="view-header">
+                            <div>
+                                <h2>{viewTitle}</h2>
+                                <p>{viewSubtitle}</p>
+                            </div>
+                        </div>
+                        <div class="placeholder-panel">
+                            <lightning-icon icon-name="utility:settings" size="medium"></lightning-icon>
+                        </div>
+                    </section>
+                </template>
+            </main>
+        </div>
     </div>
 
     <!-- Print-only content -->

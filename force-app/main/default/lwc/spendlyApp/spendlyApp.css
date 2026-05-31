@@ -4,30 +4,112 @@
     background: #f3f2f2;
 }
 
+.workspace-shell {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+.workspace-shell.is-sidebar-collapsed {
+    grid-template-columns: 4.75rem minmax(0, 1fr);
+}
+
+.workspace-sidebar {
+    background: #ffffff;
+    border-right: 1px solid #dddbda;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sidebar-brand {
+    align-items: center;
+    border-bottom: 1px solid #dddbda;
+    display: grid;
+    gap: 0.625rem;
+    grid-template-columns: 2rem minmax(0, 1fr) 1.75rem;
+    min-height: 4.25rem;
+    padding: 0.875rem 0.75rem;
+}
+
+.brand-mark {
+    align-items: center;
+    background: #2e844a;
+    border-radius: 0.375rem;
+    display: inline-flex;
+    height: 2rem;
+    justify-content: center;
+    width: 2rem;
+}
+
+.brand-mark lightning-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+}
+
+.brand-copy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.brand-name {
+    color: #181818;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.brand-caption {
+    color: #706e6b;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    margin-top: 0.125rem;
+}
+
+.sidebar-toggle {
+    align-items: center;
+    appearance: none;
+    background: #f3f2f2;
+    border: 1px solid #dddbda;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    height: 1.75rem;
+    justify-content: center;
+    padding: 0;
+    width: 1.75rem;
+}
+
+.sidebar-toggle:hover {
+    background: #eaf4ff;
+    border-color: #0176d3;
+}
+
 .workspace-nav {
     display: flex;
-    align-items: center;
+    flex: 1;
+    flex-direction: column;
     gap: 0.25rem;
-    background: white;
-    border-bottom: 1px solid #dddbda;
-    padding: 0 1.5rem;
-    overflow-x: auto;
+    padding: 0.75rem;
 }
 
 .workspace-nav-item {
+    align-items: center;
     appearance: none;
     background: transparent;
     border: 0;
-    border-bottom: 3px solid transparent;
+    border-left: 3px solid transparent;
+    border-radius: 0.375rem;
     color: #3e3e3c;
     cursor: pointer;
     display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
+    gap: 0.625rem;
     font-weight: 600;
-    min-height: 2.75rem;
-    padding: 0 0.875rem;
+    min-height: 2.5rem;
+    padding: 0 0.75rem;
+    text-align: left;
     white-space: nowrap;
+    width: 100%;
 }
 
 .workspace-nav-item:hover {
@@ -36,8 +118,47 @@
 }
 
 .workspace-nav-item.is-active {
-    border-bottom-color: #0176d3;
+    background: #eaf4ff;
+    border-left-color: #0176d3;
     color: #032d60;
+}
+
+.workspace-nav-item lightning-icon {
+    flex: 0 0 auto;
+}
+
+.workspace-main {
+    min-width: 0;
+}
+
+.is-sidebar-collapsed .brand-copy,
+.is-sidebar-collapsed .workspace-nav-item span {
+    display: none;
+}
+
+.is-sidebar-collapsed .sidebar-brand {
+    gap: 0.5rem;
+    grid-template-columns: 2rem;
+    justify-content: center;
+}
+
+.is-sidebar-collapsed .sidebar-toggle {
+    justify-self: center;
+}
+
+.is-sidebar-collapsed .workspace-nav {
+    align-items: center;
+}
+
+.is-sidebar-collapsed .workspace-nav-item {
+    border-left-color: transparent;
+    justify-content: center;
+    padding: 0;
+    width: 2.5rem;
+}
+
+.is-sidebar-collapsed .workspace-nav-item.is-active {
+    border-left-color: transparent;
 }
 
 .workspace-view {
@@ -59,11 +180,18 @@
     margin: 0;
 }
 
+.view-header p {
+    color: #706e6b;
+    font-size: 0.8125rem;
+    margin: 0.125rem 0 0;
+}
+
 .view-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 /* Column Picker */
@@ -110,31 +238,6 @@
     background: #f3f2f2;
 }
 
-/* Filters */
-.filters-panel {
-    background: white;
-    padding: 0.875rem 1.5rem;
-    border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.filter-col {
-    min-width: 160px;
-    max-width: 210px;
-}
-
-.search-col {
-    min-width: 220px;
-    flex: 1;
-}
-
-.reset-col {
-    display: flex;
-    align-items: flex-end;
-    padding-bottom: 2px;
-}
-
 /* Charts Row */
 .charts-row {
     display: grid;
@@ -145,6 +248,125 @@
 /* Table Row */
 .table-row {
     padding: 0;
+}
+
+/* Transactions */
+.transactions-layout {
+    align-items: start;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+}
+
+.transaction-filters,
+.transactions-panel {
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.transaction-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    position: sticky;
+    top: 1rem;
+}
+
+.panel-title-row {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.panel-title-row h3 {
+    color: #181818;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.filter-stack {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.filter-reset {
+    align-self: flex-start;
+}
+
+.transactions-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.transactions-panel-header {
+    align-items: center;
+    border-bottom: 1px solid #dddbda;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+}
+
+.transactions-panel-header h3 {
+    color: #181818;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0.125rem 0 0;
+}
+
+.eyebrow {
+    color: #706e6b;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.transactions-total {
+    text-align: right;
+}
+
+.transactions-total span {
+    color: #706e6b;
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.transactions-total strong {
+    color: #2e844a;
+    display: block;
+    font-size: 1.125rem;
+    margin-top: 0.125rem;
+}
+
+.transactions-toolbar {
+    align-items: center;
+    background: #fafaf9;
+    border-bottom: 1px solid #dddbda;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+}
+
+.table-status {
+    color: #706e6b;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.transactions-table-wrap {
+    height: 560px;
 }
 
 /* Selection Bar */
@@ -175,6 +397,10 @@
 
 .table-wrap {
     height: 500px;
+}
+
+.table-wrap.transactions-table-wrap {
+    height: 560px;
 }
 
 .table-footer {
@@ -208,13 +434,91 @@
 }
 
 @media (max-width: 900px) {
+    .workspace-shell,
+    .workspace-shell.is-sidebar-collapsed {
+        display: block;
+        min-height: 100vh;
+    }
+
+    .workspace-sidebar {
+        border-bottom: 1px solid #dddbda;
+        border-right: 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .sidebar-brand,
+    .is-sidebar-collapsed .sidebar-brand {
+        grid-template-columns: 2rem minmax(0, 1fr);
+        min-height: 3.5rem;
+    }
+
+    .is-sidebar-collapsed .brand-copy {
+        display: flex;
+    }
+
+    .sidebar-toggle {
+        display: none;
+    }
+
+    .workspace-nav,
+    .is-sidebar-collapsed .workspace-nav {
+        align-items: center;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0 0.75rem 0.75rem;
+    }
+
+    .workspace-nav-item,
+    .is-sidebar-collapsed .workspace-nav-item {
+        border-bottom: 3px solid transparent;
+        border-left: 0;
+        justify-content: flex-start;
+        min-width: max-content;
+        padding: 0 0.75rem;
+        width: auto;
+    }
+
+    .workspace-nav-item.is-active,
+    .is-sidebar-collapsed .workspace-nav-item.is-active {
+        border-bottom-color: #0176d3;
+        border-left: 0;
+    }
+
+    .is-sidebar-collapsed .workspace-nav-item span {
+        display: inline;
+    }
+
     .view-header {
         align-items: flex-start;
         flex-direction: column;
     }
 
-    .workspace-nav {
-        padding: 0 0.75rem;
+    .transactions-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .transaction-filters {
+        position: static;
+    }
+
+    .transactions-panel-header,
+    .transactions-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .transactions-total {
+        text-align: left;
+    }
+
+    .table-wrap.transactions-table-wrap {
+        height: 480px;
+    }
+
+    .view-actions {
+        justify-content: flex-start;
     }
 
     .workspace-view {

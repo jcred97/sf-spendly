@@ -15,6 +15,36 @@ const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const PAGE_SIZE = 20;
 const LOAD_MORE_SIZE = 10;
+const VIEW_CONFIG = [
+    {
+        key: 'dashboard',
+        label: 'Dashboard',
+        title: 'Dashboard',
+        subtitle: 'Overview of current filtered spending',
+        iconName: 'utility:chart'
+    },
+    {
+        key: 'transactions',
+        label: 'Transactions',
+        title: 'Transactions',
+        subtitle: 'Review, filter, export, and maintain expenses',
+        iconName: 'utility:table'
+    },
+    {
+        key: 'recurring',
+        label: 'Recurring',
+        title: 'Recurring',
+        subtitle: 'Monitor recurring expense templates',
+        iconName: 'utility:sync'
+    },
+    {
+        key: 'settings',
+        label: 'Settings',
+        title: 'Settings',
+        subtitle: 'Automation and workspace preferences',
+        iconName: 'utility:settings'
+    }
+];
 
 const PHP_CURRENCY = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
 const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
@@ -153,6 +183,7 @@ export default class SpendlyApp extends LightningElement {
     _latestLoadRequestId = 0;
 
     activeView = 'dashboard';
+    isSidebarCollapsed = false;
     startDate;
     endDate;
     expenseGroupId = 'All';
@@ -192,8 +223,8 @@ export default class SpendlyApp extends LightningElement {
         return this.activeView === 'dashboard';
     }
 
-    get isExpensesView() {
-        return this.activeView === 'expenses';
+    get isTransactionsView() {
+        return this.activeView === 'transactions';
     }
 
     get isRecurringView() {
@@ -204,20 +235,40 @@ export default class SpendlyApp extends LightningElement {
         return this.activeView === 'settings';
     }
 
-    get dashboardNavClass() {
-        return this.getNavClass('dashboard');
+    get workspaceNavItems() {
+        return VIEW_CONFIG.map(view => ({
+            ...view,
+            className: this.getNavClass(view.key),
+            ariaCurrent: this.activeView === view.key ? 'page' : null
+        }));
     }
 
-    get expensesNavClass() {
-        return this.getNavClass('expenses');
+    get activeViewConfig() {
+        return VIEW_CONFIG.find(view => view.key === this.activeView) || VIEW_CONFIG[0];
     }
 
-    get recurringNavClass() {
-        return this.getNavClass('recurring');
+    get viewTitle() {
+        return this.activeViewConfig.title;
     }
 
-    get settingsNavClass() {
-        return this.getNavClass('settings');
+    get viewSubtitle() {
+        return this.activeViewConfig.subtitle;
+    }
+
+    get workspaceShellClass() {
+        return `workspace-shell ${this.isSidebarCollapsed ? 'is-sidebar-collapsed' : ''}`;
+    }
+
+    get sidebarToggleTitle() {
+        return this.isSidebarCollapsed ? 'Expand navigation' : 'Collapse navigation';
+    }
+
+    get sidebarToggleIcon() {
+        return this.isSidebarCollapsed ? 'utility:chevronright' : 'utility:chevronleft';
+    }
+
+    get sidebarAriaExpanded() {
+        return String(!this.isSidebarCollapsed);
     }
 
     renderedCallback() {
@@ -368,6 +419,16 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.length;
     }
 
+    get transactionCountLabel() {
+        const count = this.expenseCount;
+        return `${count} transaction${count === 1 ? '' : 's'}`;
+    }
+
+    get visibleRowsSummary() {
+        const visibleCount = Math.min(this.visibleCount, this.filteredRows.length);
+        return `Showing ${visibleCount} of ${this.filteredRows.length}`;
+    }
+
     get averageExpense() {
         if (this.filteredRows.length === 0) {
             return 'PHP 0.00';
@@ -434,6 +495,17 @@ export default class SpendlyApp extends LightningElement {
         return `${this.startDate || ''} - ${this.endDate || ''}`;
     }
 
+    get transactionPeriodLabel() {
+        const start = formatDate(this.startDate);
+        const end = formatDate(this.endDate);
+
+        if (start === '-' && end === '-') {
+            return 'All dates';
+        }
+
+        return `${start} - ${end}`;
+    }
+
     get printRows() {
         return this.filteredRows.map(row => ({
             ...row,
@@ -488,6 +560,10 @@ export default class SpendlyApp extends LightningElement {
 
     handleViewChange(event) {
         this.activeView = event.currentTarget.dataset.view;
+    }
+
+    handleSidebarToggle() {
+        this.isSidebarCollapsed = !this.isSidebarCollapsed;
     }
 
     getNavClass(viewName) {
