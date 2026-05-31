@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <label>Spendly All Access</label>
+    <label>Spendly Admin</label>
     <hasActivationRequired>false</hasActivationRequired>
 
     <!-- Object Permissions -->
@@ -60,7 +60,6 @@
         <field>Category__c.Display_Name__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
     <fieldPermissions>
         <editable>false</editable>
         <field>Category__c.Total_Amount__c</field>
@@ -78,7 +77,6 @@
         <field>Expense__c.Bank__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
     <fieldPermissions>
         <editable>true</editable>
         <field>Expense__c.Description__c</field>
@@ -90,6 +88,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Expense__c.Recurring_Expense__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Expense__c.Transaction_Time__c</field>
         <readable>true</readable>
@@ -97,11 +100,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Expense__c.Transaction_Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Expense__c.Recurring_Expense__c</field>
         <readable>true</readable>
     </fieldPermissions>
 
@@ -161,6 +159,10 @@
 
     <!-- Tab Visibility -->
     <tabSettings>
+        <tab>Spendly</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
         <tab>Expense__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
@@ -174,10 +176,6 @@
     </tabSettings>
     <tabSettings>
         <tab>Expense_Group__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>Spendly</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
@@ -206,5 +204,4 @@
         <apexClass>SpendlySettingsService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-
 </PermissionSet>

@@ -203,7 +203,7 @@ At the moment, the repo includes Jest configuration and scripts, but no checked-
 
 - App: `Spendly`
 - API version: `65.0`
-- Permission set: `Spendly_All_Access`
+- Permission sets: `Spendly_User`, `Spendly_Admin`, `Spendly_All_Access`
 - Static resource: `RemoveDateFormatStyle.css`
 - Includes flexipages, tabs, layouts, objects, permission sets, and app metadata
 
