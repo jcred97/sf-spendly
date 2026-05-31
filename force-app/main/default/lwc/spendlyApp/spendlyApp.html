@@ -8,7 +8,7 @@
                     </span>
                     <div class="brand-copy">
                         <span class="brand-name">Spendly</span>
-                        <span class="brand-caption">Expense workspace</span>
+                        <span class="brand-caption">{selectedExpenseGroupName}</span>
                     </div>
                     <button
                         class="sidebar-toggle"
@@ -19,6 +19,17 @@
                         onclick={handleSidebarToggle}>
                         <lightning-icon icon-name={sidebarToggleIcon} size="xx-small"></lightning-icon>
                     </button>
+                </div>
+
+                <div class="workspace-context">
+                    <lightning-combobox
+                        label="Expense Group"
+                        value={expenseGroupId}
+                        options={expenseGroupOptions}
+                        variant="label-hidden"
+                        onchange={handleWorkspaceGroupChange}>
+                    </lightning-combobox>
+                    <span class="context-caption">Current group</span>
                 </div>
 
                 <nav class="workspace-nav" aria-label="Spendly views">
@@ -129,13 +140,6 @@
                                         onchange={handleChange}
                                         data-field="endDate">
                                     </lightning-input>
-                                    <lightning-combobox
-                                        label="Expense Group"
-                                        value={expenseGroupId}
-                                        options={expenseGroupOptions}
-                                        onchange={handleChange}
-                                        data-field="expenseGroupId">
-                                    </lightning-combobox>
                                     <lightning-combobox
                                         label="Category"
                                         value={categoryId}

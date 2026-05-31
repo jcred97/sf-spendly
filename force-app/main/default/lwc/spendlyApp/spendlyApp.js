@@ -186,12 +186,14 @@ export default class SpendlyApp extends LightningElement {
     isSidebarCollapsed = false;
     startDate;
     endDate;
-    expenseGroupId = 'All';
+    expenseGroupId = '';
     categoryId = 'All';
     searchTerm = '';
 
-    expenseGroupOptions = [{ label: 'All', value: 'All' }];
-    categoryOptions = [{ label: 'All', value: 'All' }];
+    expenseGroups = [];
+    expenseGroupOptions = [];
+    categoryOptions = [{ label: 'All Categories', value: 'All' }];
+    isExpenseGroupsLoaded = false;
 
     allRows = [];
     selectedRows = [];
@@ -233,6 +235,14 @@ export default class SpendlyApp extends LightningElement {
 
     get isSettingsView() {
         return this.activeView === 'settings';
+    }
+
+    get selectedExpenseGroupName() {
+        return this.expenseGroups.find(expenseGroup => expenseGroup.Id === this.expenseGroupId)?.Name || '';
+    }
+
+    get categoryExpenseGroupId() {
+        return this.expenseGroupId || undefined;
     }
 
     get workspaceNavItems() {
@@ -281,27 +291,36 @@ export default class SpendlyApp extends LightningElement {
 
         this.startDate = formatDateISO(firstDay);
         this.endDate = formatDateISO(today);
-
-        this.loadExpenses();
     }
 
     @wire(getAllExpenseGroups)
     wiredExpenseGroups({ error, data }) {
         if (data) {
-            this.expenseGroupOptions = [
-                { label: 'All', value: 'All' },
-                ...data.map(expenseGroup => ({ label: expenseGroup.Name, value: expenseGroup.Id }))
-            ];
+            this.isExpenseGroupsLoaded = true;
+            this.expenseGroups = data;
+            this.expenseGroupOptions = data.map(expenseGroup => ({
+                label: expenseGroup.Name,
+                value: expenseGroup.Id
+            }));
+
+            if (this.expenseGroupId && !data.some(expenseGroup => expenseGroup.Id === this.expenseGroupId)) {
+                this.clearWorkspaceContext();
+            }
+
+            if (!this.expenseGroupId && data.length > 0) {
+                this.setExpenseGroupContext(data[0].Id);
+            }
         } else if (error) {
+            this.isExpenseGroupsLoaded = true;
             this.showToast('Error', 'Failed to load expense groups.', 'error');
         }
     }
 
-    @wire(getCategoriesByExpenseGroup, { expenseGroupId: '$expenseGroupId' })
+    @wire(getCategoriesByExpenseGroup, { expenseGroupId: '$categoryExpenseGroupId' })
     wiredCategories({ error, data }) {
         if (data) {
             this.categoryOptions = [
-                { label: 'All', value: 'All' },
+                { label: 'All Categories', value: 'All' },
                 ...data.map(category => ({ label: category.Name, value: category.Id }))
             ];
         } else if (error) {
@@ -310,6 +329,11 @@ export default class SpendlyApp extends LightningElement {
     }
 
     async loadExpenses() {
+        if (!this.expenseGroupId) {
+            this.clearExpenseData();
+            return;
+        }
+
         const requestId = ++this._latestLoadRequestId;
         this.isLoading = true;
         this.selectedRows = [];
@@ -544,7 +568,6 @@ export default class SpendlyApp extends LightningElement {
 
         this.startDate = formatDateISO(firstDay);
         this.endDate = formatDateISO(today);
-        this.expenseGroupId = 'All';
         this.categoryId = 'All';
         this.searchTerm = '';
         this.loadExpenses();
@@ -560,6 +583,40 @@ export default class SpendlyApp extends LightningElement {
 
     handleViewChange(event) {
         this.activeView = event.currentTarget.dataset.view;
+    }
+
+    handleWorkspaceGroupChange(event) {
+        this.setExpenseGroupContext(event.detail.value);
+    }
+
+    setExpenseGroupContext(expenseGroupId) {
+        if (!expenseGroupId || expenseGroupId === this.expenseGroupId) {
+            return;
+        }
+
+        this.expenseGroupId = expenseGroupId;
+        this.categoryId = 'All';
+        this.searchTerm = '';
+        this.activeView = 'dashboard';
+        this.loadExpenses();
+    }
+
+    clearWorkspaceContext() {
+        this.expenseGroupId = '';
+        this.categoryId = 'All';
+        this.categoryOptions = [{ label: 'All Categories', value: 'All' }];
+        this.searchTerm = '';
+        this.activeView = 'dashboard';
+        this.clearExpenseData();
+    }
+
+    clearExpenseData() {
+        this._latestLoadRequestId += 1;
+        this.allRows = [];
+        this.selectedRows = [];
+        this.monthlyTrendRaw = [];
+        this.visibleCount = PAGE_SIZE;
+        this.isLoading = false;
     }
 
     handleSidebarToggle() {
