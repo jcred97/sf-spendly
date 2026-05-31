@@ -10,6 +10,9 @@ import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpenses
 import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
 import getMonthlyTrend from '@salesforce/apex/SpendlyController.getMonthlyTrend';
+import getRecurringExpenseOverview from '@salesforce/apex/SpendlyController.getRecurringExpenseOverview';
+import deactivateRecurringExpense from '@salesforce/apex/SpendlyController.deactivateRecurringExpense';
+import runDueExpensesBatch from '@salesforce/apex/SpendlyRecurringExpenseService.runDueExpensesBatch';
 
 const CHART_COLORS = ['#0070D2', '#04844B', '#FFB75D', '#E4A201', '#9E5BB5', '#E16032'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -161,10 +164,18 @@ export default class SpendlyApp extends LightningElement {
     allRows = [];
     selectedRows = [];
     monthlyTrendRaw = [];
+    recurringRows = [];
+    recurringOverview = {
+        activeCount: 0,
+        dueTodayCount: 0,
+        monthlyTotal: 0
+    };
 
     visibleCount = PAGE_SIZE;
 
     isLoading = false;
+    isRecurringLoading = false;
+    isRunningRecurring = false;
     isModalOpen = false;
     editRecordId = null;
     duplicateData = null;
@@ -344,6 +355,46 @@ export default class SpendlyApp extends LightningElement {
             if (requestId === this._latestLoadRequestId) {
                 this.isLoading = false;
             }
+        }
+    }
+
+    async loadRecurringExpenses() {
+        if (!this.expenseGroupId) {
+            this.clearRecurringData();
+            return;
+        }
+
+        this.isRecurringLoading = true;
+
+        try {
+            const overview = await getRecurringExpenseOverview({
+                expenseGroupId: this.expenseGroupId
+            });
+            this.recurringOverview = {
+                activeCount: overview?.activeCount || 0,
+                dueTodayCount: overview?.dueTodayCount || 0,
+                monthlyTotal: overview?.monthlyTotal || 0
+            };
+            this.recurringRows = (overview?.rows || []).map(row => ({
+                ...row,
+                recordLink: `/${row.id}`,
+                categoryDisplay: row.categoryName || 'Uncategorized',
+                expenseGroupDisplay: row.expenseGroupName || 'No group',
+                bankDisplay: row.bank || 'No bank',
+                transactionTypeDisplay: row.transactionType || 'No type',
+                amountFormatted: formatPHP(row.amount || 0),
+                monthlyAmountFormatted: formatPHP(row.monthlyAmount || 0),
+                startDateFormatted: formatDate(row.startDate),
+                nextRunDateFormatted: formatDate(row.nextRunDate),
+                endDateFormatted: formatDate(row.endDate),
+                statusLabel: row.active ? 'Active' : 'Inactive',
+                deactivateDisabled: !row.active,
+                rowClass: `recurring-row ${row.dueToday ? 'is-due' : ''}`
+            }));
+        } catch (error) {
+            this.showToast('Error', this.getErrorMessage(error, 'Failed to load recurring expenses.'), 'error');
+        } finally {
+            this.isRecurringLoading = false;
         }
     }
 
@@ -580,6 +631,58 @@ export default class SpendlyApp extends LightningElement {
         return this.recentDashboardRows.length > 0;
     }
 
+    get hasRecurringRows() {
+        return this.recurringRows.length > 0;
+    }
+
+    get recurringCountLabel() {
+        const count = this.recurringRows.length;
+        return `${count} recurring expense${count === 1 ? '' : 's'}`;
+    }
+
+    get activeRecurringCount() {
+        return this.recurringOverview.activeCount || 0;
+    }
+
+    get dueRecurringCount() {
+        return this.recurringOverview.dueTodayCount || 0;
+    }
+
+    get recurringMonthlyTotal() {
+        return formatPHP(this.recurringOverview.monthlyTotal || 0);
+    }
+
+    get recurringSummaryCards() {
+        return [
+            {
+                key: 'active',
+                label: 'Active templates',
+                value: this.activeRecurringCount,
+                detail: `${this.recurringRows.length} total templates`
+            },
+            {
+                key: 'due',
+                label: 'Due today',
+                value: this.dueRecurringCount,
+                detail: 'Ready for the next batch run'
+            },
+            {
+                key: 'monthly',
+                label: 'Monthly estimate',
+                value: this.recurringMonthlyTotal,
+                detail: 'Normalized active recurring total'
+            }
+        ];
+    }
+
+    get runRecurringLabel() {
+        return this.isRunningRecurring ? 'Running...' : 'Run Recurring';
+    }
+
+    get isRunRecurringDisabled() {
+        return this.isRunningRecurring || this.isRecurringLoading;
+    }
+
     get monthlyTrendData() {
         const end = parseDateString(this.endDate) || new Date();
         const last6Months = Array.from({ length: 6 }, (_, index) => {
@@ -704,6 +807,10 @@ export default class SpendlyApp extends LightningElement {
 
     handleViewChange(event) {
         this.activeView = event.currentTarget.dataset.view;
+
+        if (this.isRecurringView) {
+            this.loadRecurringExpenses();
+        }
     }
 
     handleWorkspaceGroupChange(event) {
@@ -720,6 +827,7 @@ export default class SpendlyApp extends LightningElement {
         this.searchTerm = '';
         this.activeView = 'dashboard';
         this.loadExpenses();
+        this.loadRecurringExpenses();
     }
 
     clearWorkspaceContext() {
@@ -729,6 +837,7 @@ export default class SpendlyApp extends LightningElement {
         this.searchTerm = '';
         this.activeView = 'dashboard';
         this.clearExpenseData();
+        this.clearRecurringData();
     }
 
     clearExpenseData() {
@@ -738,6 +847,16 @@ export default class SpendlyApp extends LightningElement {
         this.monthlyTrendRaw = [];
         this.visibleCount = PAGE_SIZE;
         this.isLoading = false;
+    }
+
+    clearRecurringData() {
+        this.recurringRows = [];
+        this.recurringOverview = {
+            activeCount: 0,
+            dueTodayCount: 0,
+            monthlyTotal: 0
+        };
+        this.isRecurringLoading = false;
     }
 
     handleSidebarToggle() {
@@ -777,6 +896,62 @@ export default class SpendlyApp extends LightningElement {
         const { action, id } = event.currentTarget.dataset;
         const row = this.allRows.find(item => item.id === id);
         await this.performRowAction(action, row);
+    }
+
+    async handleRecurringAction(event) {
+        const { action, id } = event.currentTarget.dataset;
+
+        if (action === 'edit') {
+            window.open(`/${id}`, '_blank', 'noopener');
+            return;
+        }
+
+        if (action === 'deactivate') {
+            await this.confirmAndDeactivateRecurring(id);
+        }
+    }
+
+    async handleRunRecurringExpenses() {
+        this.isRunningRecurring = true;
+        try {
+            await runDueExpensesBatch();
+            this.showToast('Recurring run started', 'Due recurring expenses are being generated.', 'success');
+            await Promise.all([
+                this.loadRecurringExpenses(),
+                this.loadExpenses()
+            ]);
+        } catch (error) {
+            this.showToast(
+                'Error',
+                this.getErrorMessage(error, 'Failed to start recurring expense generation.'),
+                'error'
+            );
+        } finally {
+            this.isRunningRecurring = false;
+        }
+    }
+
+    async confirmAndDeactivateRecurring(recordId) {
+        const confirmed = await LightningConfirm.open({
+            message: 'Deactivate this recurring expense template?',
+            variant: 'header',
+            label: 'Deactivate Recurring Expense'
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await deactivateRecurringExpense({ recurringExpenseId: recordId });
+            this.showToast('Deactivated', 'Recurring expense deactivated.', 'success');
+            await this.loadRecurringExpenses();
+        } catch (error) {
+            this.showToast(
+                'Error',
+                this.getErrorMessage(error, 'Failed to deactivate recurring expense.'),
+                'error'
+            );
+        }
     }
 
     async performRowAction(actionName, row) {
@@ -928,5 +1103,9 @@ export default class SpendlyApp extends LightningElement {
 
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
+
+    getErrorMessage(error, fallback) {
+        return error?.body?.message || fallback;
     }
 }

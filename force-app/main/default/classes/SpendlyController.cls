@@ -7,6 +7,38 @@ public with sharing class SpendlyController {
         @AuraEnabled public Decimal total;
     }
 
+    public class RecurringExpenseRow {
+        @AuraEnabled public Id id;
+        @AuraEnabled public String name;
+        @AuraEnabled public Id categoryId;
+        @AuraEnabled public String categoryName;
+        @AuraEnabled public String expenseGroupName;
+        @AuraEnabled public Decimal amount;
+        @AuraEnabled public Decimal monthlyAmount;
+        @AuraEnabled public String bank;
+        @AuraEnabled public String transactionType;
+        @AuraEnabled public String frequency;
+        @AuraEnabled public Date startDate;
+        @AuraEnabled public Date nextRunDate;
+        @AuraEnabled public Date endDate;
+        @AuraEnabled public Boolean active;
+        @AuraEnabled public Boolean dueToday;
+    }
+
+    public class RecurringExpenseOverview {
+        @AuraEnabled public List<RecurringExpenseRow> rows;
+        @AuraEnabled public Integer activeCount;
+        @AuraEnabled public Integer dueTodayCount;
+        @AuraEnabled public Decimal monthlyTotal;
+
+        public RecurringExpenseOverview() {
+            this.rows = new List<RecurringExpenseRow>();
+            this.activeCount = 0;
+            this.dueTodayCount = 0;
+            this.monthlyTotal = 0;
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<MonthlyTotal> getMonthlyTrend(
         String expenseGroupId,
@@ -122,6 +154,82 @@ public with sharing class SpendlyController {
         return Database.query(query);
     }
 
+    @AuraEnabled(cacheable=true)
+    public static RecurringExpenseOverview getRecurringExpenseOverview(String expenseGroupId) {
+        RecurringExpenseOverview overview = new RecurringExpenseOverview();
+        Date today = Date.today();
+
+        String query =
+            'SELECT Id, Name, Active__c, Amount__c, Bank__c, Category__c, Category__r.Name, ' +
+            'Category__r.Expense_Group__r.Name, End_Date__c, Frequency__c, Next_Run_Date__c, ' +
+            'Start_Date__c, Transaction_Type__c ' +
+            'FROM Recurring_Expense__c WHERE Id != null ';
+
+        if (String.isNotBlank(expenseGroupId) && expenseGroupId != 'All') {
+            query += 'AND Category__r.Expense_Group__c = :expenseGroupId ';
+        }
+
+        query += 'ORDER BY Active__c DESC, Next_Run_Date__c ASC NULLS LAST, Name ASC LIMIT 500';
+
+        for (Recurring_Expense__c recurringExpense : Database.query(query)) {
+            RecurringExpenseRow row = new RecurringExpenseRow();
+            row.id = recurringExpense.Id;
+            row.name = recurringExpense.Name;
+            row.categoryId = recurringExpense.Category__c;
+            row.categoryName = recurringExpense.Category__r?.Name;
+            row.expenseGroupName = recurringExpense.Category__r?.Expense_Group__r?.Name;
+            row.amount = recurringExpense.Amount__c;
+            row.monthlyAmount = getMonthlyRecurringAmount(recurringExpense.Amount__c, recurringExpense.Frequency__c);
+            row.bank = recurringExpense.Bank__c;
+            row.transactionType = recurringExpense.Transaction_Type__c;
+            row.frequency = recurringExpense.Frequency__c;
+            row.startDate = recurringExpense.Start_Date__c;
+            row.nextRunDate = recurringExpense.Next_Run_Date__c;
+            row.endDate = recurringExpense.End_Date__c;
+            row.active = recurringExpense.Active__c;
+            row.dueToday = recurringExpense.Active__c == true &&
+                recurringExpense.Next_Run_Date__c != null &&
+                recurringExpense.Next_Run_Date__c <= today;
+
+            overview.rows.add(row);
+
+            if (row.active == true) {
+                overview.activeCount++;
+                overview.monthlyTotal += row.monthlyAmount == null ? 0 : row.monthlyAmount;
+            }
+            if (row.dueToday == true) {
+                overview.dueTodayCount++;
+            }
+        }
+
+        return overview;
+    }
+
+    @AuraEnabled
+    public static void deactivateRecurringExpense(Id recurringExpenseId) {
+        if (recurringExpenseId == null) {
+            throw handledException('Recurring Expense Id is required.');
+        }
+
+        try {
+            List<Recurring_Expense__c> recurringExpenses = [
+                SELECT Id, Active__c
+                FROM Recurring_Expense__c
+                WHERE Id = :recurringExpenseId
+                LIMIT 1
+            ];
+
+            if (recurringExpenses.isEmpty()) {
+                throw handledException('Recurring Expense not found or already deleted.');
+            }
+
+            recurringExpenses[0].Active__c = false;
+            update recurringExpenses[0];
+        } catch (DmlException e) {
+            throw handledException('Failed to deactivate recurring expense: ' + e.getMessage());
+        }
+    }
+
     @AuraEnabled
     public static void deleteExpenses(List<Id> expenseIds) {
         if (expenseIds == null || expenseIds.isEmpty()) {
@@ -161,5 +269,20 @@ public with sharing class SpendlyController {
         AuraHandledException exceptionToThrow = new AuraHandledException(message);
         exceptionToThrow.setMessage(message);
         return exceptionToThrow;
+    }
+
+    private static Decimal getMonthlyRecurringAmount(Decimal amount, String frequency) {
+        Decimal safeAmount = amount == null ? 0 : amount;
+
+        if (frequency == 'Daily') {
+            return safeAmount * 30;
+        }
+        if (frequency == 'Weekly') {
+            return (safeAmount * 52) / 12;
+        }
+        if (frequency == 'Yearly') {
+            return safeAmount / 12;
+        }
+        return safeAmount;
     }
 }

@@ -612,6 +612,233 @@
     min-height: 18rem;
 }
 
+.recurring-summary-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.recurring-summary-card {
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    min-width: 0;
+    padding: 1rem 1.25rem;
+}
+
+.recurring-summary-card span {
+    color: #5c5c5c;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.recurring-summary-card strong {
+    color: #181818;
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-top: 0.35rem;
+}
+
+.recurring-summary-card small {
+    color: #706e6b;
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.recurring-panel {
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.recurring-panel-header {
+    align-items: center;
+    border-bottom: 1px solid #dddbda;
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+}
+
+.recurring-panel-header h3 {
+    color: #181818;
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0.125rem 0 0;
+}
+
+.recurring-panel-header > span {
+    color: #706e6b;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.recurring-loading,
+.recurring-empty {
+    align-items: center;
+    color: #706e6b;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    min-height: 14rem;
+    padding: 2rem;
+}
+
+.recurring-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.recurring-row {
+    align-items: center;
+    border-bottom: 1px solid #f3f2f2;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(12rem, 1.2fr) minmax(18rem, 1.4fr) minmax(8rem, 10rem) auto;
+    min-height: 5rem;
+    padding: 1rem 1.25rem;
+}
+
+.recurring-row:last-child {
+    border-bottom: 0;
+}
+
+.recurring-row:hover {
+    background: #fafaf9;
+}
+
+.recurring-row.is-due {
+    box-shadow: inset 0.25rem 0 0 #0176d3;
+}
+
+.recurring-main {
+    min-width: 0;
+}
+
+.recurring-title-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.recurring-title-row a {
+    color: #181818;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.recurring-title-row a:hover {
+    color: #0176d3;
+    text-decoration: underline;
+}
+
+.recurring-status,
+.recurring-due {
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0.25rem 0.45rem;
+}
+
+.recurring-status {
+    background: #f3f2f2;
+    color: #444444;
+}
+
+.recurring-due {
+    background: #eaf4ff;
+    color: #0176d3;
+}
+
+.recurring-meta {
+    color: #706e6b;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+    margin: 0.35rem 0 0;
+}
+
+.recurring-meta span:not(:last-child)::after {
+    color: #c9c9c9;
+    content: "/";
+    margin-left: 0.35rem;
+}
+
+.recurring-schedule {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.recurring-schedule span {
+    color: #706e6b;
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.recurring-schedule strong {
+    color: #181818;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 800;
+    margin-top: 0.2rem;
+}
+
+.recurring-dates {
+    color: #706e6b;
+    font-size: 0.75rem;
+    text-align: right;
+}
+
+.recurring-actions {
+    display: flex;
+    gap: 0.25rem;
+    justify-content: flex-end;
+}
+
+.recurring-actions button {
+    align-items: center;
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    height: 2rem;
+    justify-content: center;
+    padding: 0;
+    width: 2rem;
+}
+
+.recurring-actions button:hover:not(:disabled) {
+    background: #f3f2f2;
+    border-color: #dddbda;
+}
+
+.recurring-actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
 .transaction-list {
     background: #ffffff;
     display: flex;
@@ -896,6 +1123,30 @@
 
     .charts-row {
         grid-template-columns: 1fr;
+    }
+
+    .recurring-summary-grid,
+    .recurring-schedule {
+        grid-template-columns: 1fr;
+    }
+
+    .recurring-panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .recurring-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+    }
+
+    .recurring-dates {
+        text-align: left;
+    }
+
+    .recurring-actions {
+        justify-content: flex-start;
     }
 
     .dashboard-transaction-row {

@@ -26,6 +26,36 @@ private class SpendlyControllerTest {
         );
         insert new List<Category__c>{ c1, c2, c3 };
 
+        insert new List<Recurring_Expense__c>{
+            new Recurring_Expense__c(
+                Name = 'Monthly Groceries',
+                Active__c = true,
+                Amount__c = 100,
+                Category__c = c1.Id,
+                Frequency__c = 'Monthly',
+                Next_Run_Date__c = Date.today(),
+                Start_Date__c = Date.today().addMonths(-1)
+            ),
+            new Recurring_Expense__c(
+                Name = 'Yearly Dining',
+                Active__c = true,
+                Amount__c = 1200,
+                Category__c = c2.Id,
+                Frequency__c = 'Yearly',
+                Next_Run_Date__c = Date.today().addMonths(1),
+                Start_Date__c = Date.today()
+            ),
+            new Recurring_Expense__c(
+                Name = 'Inactive Taxi',
+                Active__c = false,
+                Amount__c = 50,
+                Category__c = c3.Id,
+                Frequency__c = 'Weekly',
+                Next_Run_Date__c = Date.today(),
+                Start_Date__c = Date.today().addDays(-7)
+            )
+        };
+
         // Expenses
         List<Expense__c> expenses = new List<Expense__c>{
             new Expense__c(
@@ -237,6 +267,62 @@ private class SpendlyControllerTest {
 
         System.assertEquals(1, result.size(), 'Should return one monthly bucket for the filtered category');
         System.assertEquals(100, result[0].total, 'Trend total should match the filtered expense amount');
+    }
+
+    @IsTest
+    static void testGetRecurringExpenseOverview_All() {
+        Test.startTest();
+        SpendlyController.RecurringExpenseOverview result = SpendlyController.getRecurringExpenseOverview('All');
+        Test.stopTest();
+
+        System.assertEquals(3, result.rows.size(), 'Should return all recurring expense templates');
+        System.assertEquals(2, result.activeCount, 'Should count active templates only');
+        System.assertEquals(1, result.dueTodayCount, 'Should count active templates due today');
+        System.assertEquals(200, result.monthlyTotal, 'Monthly estimate should normalize monthly and yearly templates');
+    }
+
+    @IsTest
+    static void testGetRecurringExpenseOverview_ByExpenseGroup() {
+        Expense_Group__c food = [SELECT Id FROM Expense_Group__c WHERE Name = 'Food' LIMIT 1];
+
+        Test.startTest();
+        SpendlyController.RecurringExpenseOverview result = SpendlyController.getRecurringExpenseOverview(food.Id);
+        Test.stopTest();
+
+        System.assertEquals(2, result.rows.size(), 'Food group should return only related recurring templates');
+        System.assertEquals(2, result.activeCount, 'Food group active count should match related templates');
+    }
+
+    @IsTest
+    static void testDeactivateRecurringExpense() {
+        Recurring_Expense__c recurringExpense = [
+            SELECT Id, Active__c
+            FROM Recurring_Expense__c
+            WHERE Name = 'Monthly Groceries'
+            LIMIT 1
+        ];
+
+        Test.startTest();
+        SpendlyController.deactivateRecurringExpense(recurringExpense.Id);
+        Test.stopTest();
+
+        recurringExpense = [SELECT Active__c FROM Recurring_Expense__c WHERE Id = :recurringExpense.Id];
+        System.assertEquals(false, recurringExpense.Active__c, 'Recurring template should be inactive');
+    }
+
+    @IsTest
+    static void testDeactivateRecurringExpense_NullId() {
+        Boolean exceptionThrown = false;
+
+        try {
+            Test.startTest();
+            SpendlyController.deactivateRecurringExpense(null);
+            Test.stopTest();
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+
+        System.assertEquals(true, exceptionThrown, 'Null recurring expense Id should throw an exception');
     }
 
     @IsTest

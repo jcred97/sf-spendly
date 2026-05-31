@@ -423,10 +423,116 @@
                                 <h2>{viewTitle}</h2>
                                 <p>{viewSubtitle}</p>
                             </div>
+                            <div class="view-header-actions">
+                                <lightning-button
+                                    variant="brand"
+                                    label={runRecurringLabel}
+                                    icon-name="utility:play"
+                                    onclick={handleRunRecurringExpenses}
+                                    disabled={isRunRecurringDisabled}>
+                                </lightning-button>
+                            </div>
                         </div>
-                        <div class="placeholder-panel">
-                            <lightning-icon icon-name="utility:sync" size="medium"></lightning-icon>
+
+                        <div class="recurring-summary-grid">
+                            <template for:each={recurringSummaryCards} for:item="card">
+                                <section key={card.key} class="recurring-summary-card">
+                                    <span>{card.label}</span>
+                                    <strong>{card.value}</strong>
+                                    <small>{card.detail}</small>
+                                </section>
+                            </template>
                         </div>
+
+                        <section class="recurring-panel">
+                            <div class="recurring-panel-header">
+                                <div>
+                                    <p class="eyebrow">Templates</p>
+                                    <h3>{selectedExpenseGroupName}</h3>
+                                </div>
+                                <span>{recurringCountLabel}</span>
+                            </div>
+
+                            <template lwc:if={isRecurringLoading}>
+                                <div class="recurring-loading">
+                                    <lightning-spinner alternative-text="Loading recurring expenses" size="small"></lightning-spinner>
+                                </div>
+                            </template>
+
+                            <template lwc:elseif={hasRecurringRows}>
+                                <div class="recurring-list">
+                                    <template for:each={recurringRows} for:item="row">
+                                        <article key={row.id} class={row.rowClass}>
+                                            <div class="recurring-main">
+                                                <div class="recurring-title-row">
+                                                    <a href={row.recordLink} target="_blank" rel="noopener noreferrer">{row.name}</a>
+                                                    <span class="recurring-status">{row.statusLabel}</span>
+                                                    <template lwc:if={row.dueToday}>
+                                                        <span class="recurring-due">Due</span>
+                                                    </template>
+                                                </div>
+                                                <p class="recurring-meta">
+                                                    <span>{row.categoryDisplay}</span>
+                                                    <span>{row.expenseGroupDisplay}</span>
+                                                    <span>{row.bankDisplay}</span>
+                                                    <span>{row.transactionTypeDisplay}</span>
+                                                </p>
+                                            </div>
+
+                                            <div class="recurring-schedule">
+                                                <div>
+                                                    <span>Frequency</span>
+                                                    <strong>{row.frequency}</strong>
+                                                </div>
+                                                <div>
+                                                    <span>Next run</span>
+                                                    <strong>{row.nextRunDateFormatted}</strong>
+                                                </div>
+                                                <div>
+                                                    <span>Amount</span>
+                                                    <strong>{row.amountFormatted}</strong>
+                                                </div>
+                                                <div>
+                                                    <span>Monthly est.</span>
+                                                    <strong>{row.monthlyAmountFormatted}</strong>
+                                                </div>
+                                            </div>
+
+                                            <div class="recurring-dates">
+                                                <span>{row.startDateFormatted} - {row.endDateFormatted}</span>
+                                            </div>
+
+                                            <div class="recurring-actions">
+                                                <button
+                                                    type="button"
+                                                    title="Edit"
+                                                    data-id={row.id}
+                                                    data-action="edit"
+                                                    onclick={handleRecurringAction}>
+                                                    <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    title="Deactivate"
+                                                    data-id={row.id}
+                                                    data-action="deactivate"
+                                                    onclick={handleRecurringAction}
+                                                    disabled={row.deactivateDisabled}>
+                                                    <lightning-icon icon-name="utility:block_visitor" size="xx-small"></lightning-icon>
+                                                </button>
+                                            </div>
+                                        </article>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template lwc:else>
+                                <div class="recurring-empty">
+                                    <lightning-icon icon-name="utility:sync" size="small"></lightning-icon>
+                                    <span>No recurring expenses for this group</span>
+                                </div>
+                            </template>
+                        </section>
                     </section>
                 </template>
 
