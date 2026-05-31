@@ -7,23 +7,22 @@ private class SpendlyControllerTest {
     @testSetup
     static void setupData() {
 
-        // Spendings
-        Spending__c s1 = new Spending__c(Name = 'Food');
-        Spending__c s2 = new Spending__c(Name = 'Transport');
-        insert new List<Spending__c>{ s1, s2 };
+        Expense_Group__c eg1 = new Expense_Group__c(Name = 'Food');
+        Expense_Group__c eg2 = new Expense_Group__c(Name = 'Transport');
+        insert new List<Expense_Group__c>{ eg1, eg2 };
 
         // Categories
         Category__c c1 = new Category__c(
             Name = 'Groceries',
-            Spending__c = s1.Id
+            Expense_Group__c = eg1.Id
         );
         Category__c c2 = new Category__c(
             Name = 'Dining',
-            Spending__c = s1.Id
+            Expense_Group__c = eg1.Id
         );
         Category__c c3 = new Category__c(
             Name = 'Taxi',
-            Spending__c = s2.Id
+            Expense_Group__c = eg2.Id
         );
         insert new List<Category__c>{ c1, c2, c3 };
 
@@ -51,34 +50,21 @@ private class SpendlyControllerTest {
         insert expenses;
     }
 
-    // getAllSpendings()
     @IsTest
-    static void testGetAllSpendings() {
+    static void testGetAllExpenseGroups() {
         Test.startTest();
-        List<Spending__c> result = SpendlyController.getAllSpendings();
+        List<Expense_Group__c> result = SpendlyController.getAllExpenseGroups();
         Test.stopTest();
 
-        System.assertEquals(2, result.size(), 'Should return all spendings');
+        System.assertEquals(2, result.size(), 'Should return all expense groups');
     }
 
-    // getCategoriesBySpending() - All
     @IsTest
-    static void testGetCategories_All() {
-        Test.startTest();
-        List<Category__c> result = SpendlyController.getCategoriesBySpending('All');
-        Test.stopTest();
-
-        System.assertEquals(3, result.size(), 'Should return all categories');
-    }
-
-    // getCategoriesBySpending() - Filtered
-    @IsTest
-    static void testGetCategories_BySpending() {
-
-        Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
+    static void testGetCategories_ByExpenseGroup() {
+        Expense_Group__c food = [SELECT Id FROM Expense_Group__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
-        List<Category__c> result = SpendlyController.getCategoriesBySpending(food.Id);
+        List<Category__c> result = SpendlyController.getCategoriesByExpenseGroup(food.Id);
         Test.stopTest();
 
         System.assertEquals(2, result.size(), 'Food should have 2 categories');
@@ -95,17 +81,17 @@ private class SpendlyControllerTest {
         System.assertEquals(3, result.size(), 'Should return all expenses');
     }
 
-    // getExpensesByFilters() - Spending Filter
+    // getExpensesByFilters() - Expense Group Filter
     @IsTest
-    static void testGetExpenses_BySpending() {
+    static void testGetExpenses_ByExpenseGroup() {
 
-        Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
+        Expense_Group__c food = [SELECT Id FROM Expense_Group__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
         List<Expense__c> result = SpendlyController.getExpensesByFilters(food.Id, 'All', null, null);
         Test.stopTest();
 
-        System.assertEquals(2, result.size(), 'Food spending should return 2 expenses');
+        System.assertEquals(2, result.size(), 'Food expense group should return 2 expenses');
     }
 
     // getExpensesByFilters() - Category + Date Filter
@@ -214,7 +200,7 @@ private class SpendlyControllerTest {
         System.assertEquals(true, exceptionThrown, 'Exception should be thrown for empty list');
     }
 
-    // getMonthlyTrend() - All spendings
+    // getMonthlyTrend() - All expense groups
     @IsTest
     static void testGetMonthlyTrend_All() {
         Test.startTest();
@@ -224,16 +210,16 @@ private class SpendlyControllerTest {
         System.assert(result.size() > 0, 'Should return monthly trend data');
     }
 
-    // getMonthlyTrend() - Specific spending
+    // getMonthlyTrend() - Specific expense group
     @IsTest
-    static void testGetMonthlyTrend_BySpending() {
-        Spending__c food = [SELECT Id FROM Spending__c WHERE Name = 'Food' LIMIT 1];
+    static void testGetMonthlyTrend_ByExpenseGroup() {
+        Expense_Group__c food = [SELECT Id FROM Expense_Group__c WHERE Name = 'Food' LIMIT 1];
 
         Test.startTest();
         List<SpendlyController.MonthlyTotal> result = SpendlyController.getMonthlyTrend(food.Id, 'All', null, null);
         Test.stopTest();
 
-        System.assert(result != null, 'Should return trend data for spending');
+        System.assert(result != null, 'Should return trend data for expense group');
     }
 
     @IsTest

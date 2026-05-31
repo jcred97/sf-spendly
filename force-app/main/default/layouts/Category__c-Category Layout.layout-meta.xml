@@ -11,8 +11,8 @@
                 <field>Name</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>Spending__c</field>
+                <behavior>Edit</behavior>
+                <field>Expense_Group__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>

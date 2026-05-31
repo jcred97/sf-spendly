@@ -2,7 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Display_Name__c</fullName>
     <externalId>false</externalId>
-    <formula>Spending__r.Name &amp; &quot; - &quot; &amp; Name</formula>
+    <formula>Expense_Group__r.Name &amp; &quot; - &quot; &amp; Name</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <label>Display Name</label>
     <required>false</required>

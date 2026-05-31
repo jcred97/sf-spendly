@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Spending__c</fullName>
+    <fullName>Expense_Group__c</fullName>
     <externalId>false</externalId>
-    <label>Spending</label>
-    <referenceTo>Spending__c</referenceTo>
+    <label>Expense Group</label>
+    <referenceTo>Expense_Group__c</referenceTo>
     <relationshipLabel>Categories</relationshipLabel>
     <relationshipName>Categories</relationshipName>
-    <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
     <type>MasterDetail</type>

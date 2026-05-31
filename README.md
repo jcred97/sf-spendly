@@ -2,15 +2,15 @@
 
 Spendly is a Salesforce Lightning Web Components (LWC) expense tracking app for managing personal spending in a simple hierarchy:
 
-`Spending__c -> Category__c -> Expense__c`
+`Expense_Group__c -> Category__c -> Expense__c`
 
 The app combines a dashboard-style UI with filters, summary cards, charts, a datatable, and a modal form for creating and editing expenses.
 
 ## Features
 
-- Manage expenses under spendings and categories
-- Filter by spending, category, start date, and end date
-- Search across expense name, category, spending, bank, and transaction type
+- Manage expenses under expense groups and categories
+- Filter by expense group, category, start date, and end date
+- Search across expense name, category, expense group, bank, and transaction type
 - View dashboard summaries for total spent, average expense, top category, and top bank
 - See chart breakdowns by category and bank
 - View a monthly trend chart
@@ -25,12 +25,12 @@ The app combines a dashboard-style UI with filters, summary cards, charts, a dat
 
 ## Data Model
 
-### Spending__c
-- Top-level spending bucket
+### Expense_Group__c
+- Top-level expense bucket
 
 ### Category__c
-- Lookup to `Spending__c`
-- Groups related expenses under a spending
+- Master-detail to `Expense_Group__c`
+- Groups related expenses under an expense group
 
 ### Expense__c
 - Lookup to `Category__c`
@@ -65,8 +65,8 @@ Users can narrow the dataset with filters, review high-level metrics, and then a
 
 The controller is responsible for:
 
-- Loading all spendings
-- Loading categories by spending
+- Loading all expense groups
+- Loading categories by expense group
 - Loading filtered expenses
 - Loading monthly trend aggregates
 - Deleting one expense
@@ -74,8 +74,8 @@ The controller is responsible for:
 
 Notable backend behavior:
 
-- Expense queries support spending, category, and date filters
-- Monthly trend data also respects the active spending, category, and date filters
+- Expense queries support expense group, category, and date filters
+- Monthly trend data also respects the active expense group, category, and date filters
 - Single-delete returns a handled message when a record is already missing
 
 ### LWC Components
@@ -98,7 +98,7 @@ Notable backend behavior:
 ## Current UI Behavior
 
 - Default date range is the current month
-- Changing `spendingId` resets `categoryId` to `All`
+- Changing `expenseGroupId` resets `categoryId` to `All`
 - Invalid date ranges are blocked with an inline error
 - Search is client-side on the currently loaded filtered rows
 - Infinite loading shows 20 rows initially and loads 10 more at a time
@@ -176,7 +176,7 @@ sf project deploy start --manifest destructive/package.xml --post-destructive-ch
 
 The Apex tests cover:
 
-- Spending retrieval
+- Expense group retrieval
 - Category retrieval
 - Expense filtering
 - Monthly trend aggregation

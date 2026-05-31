@@ -2,12 +2,12 @@
 private class RecurringExpenseTriggerTest {
     @testSetup
     static void setupData() {
-        Spending__c spending = new Spending__c(Name = 'Health');
-        insert spending;
+        Expense_Group__c expenseGroup = new Expense_Group__c(Name = 'Health');
+        insert expenseGroup;
 
         Category__c category = new Category__c(
             Name = 'Fitness',
-            Spending__c = spending.Id
+            Expense_Group__c = expenseGroup.Id
         );
         insert category;
     }

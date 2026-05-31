@@ -32,16 +32,16 @@
     <types>
         <members>Category__c</members>
         <members>Expense__c</members>
+        <members>Expense_Group__c</members>
         <members>Recurring_Expense__c</members>
-        <members>Spending__c</members>
         <members>Spendly_Settings__c</members>
         <name>CustomObject</name>
     </types>
     <types>
         <members>Category__c</members>
         <members>Expense__c</members>
+        <members>Expense_Group__c</members>
         <members>Recurring_Expense__c</members>
-        <members>Spending__c</members>
         <members>Spendly</members>
         <members>Spendly_Settings</members>
         <name>CustomTab</name>
@@ -60,9 +60,9 @@
     <types>
         <members>Category__c-Category Layout</members>
         <members>Expense__c-Expense Layout</members>
+        <members>Expense_Group__c-Expense Group Layout</members>
         <members>Recurring_Expense__c-Recurring Expense Layout</members>
         <members>Spendly_Settings__c-Spendly Settings Layout</members>
-        <members>Spending__c-Spending Layout</members>
         <name>Layout</name>
     </types>
     <types>

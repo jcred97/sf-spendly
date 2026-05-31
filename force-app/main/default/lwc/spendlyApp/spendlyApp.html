@@ -135,11 +135,11 @@
                         </div>
                         <div class="slds-col filter-col">
                             <lightning-combobox
-                                label="Spending"
-                                value={spendingId}
-                                options={spendingOptions}
+                                label="Expense Group"
+                                value={expenseGroupId}
+                                options={expenseGroupOptions}
                                 onchange={handleChange}
-                                data-field="spendingId">
+                                data-field="expenseGroupId">
                             </lightning-combobox>
                         </div>
                         <div class="slds-col filter-col">
@@ -155,7 +155,7 @@
                             <lightning-input
                                 type="search"
                                 label="Search"
-                                placeholder="Search by name, category, bank..."
+                                placeholder="Search by name, category, expense group, bank..."
                                 value={searchTerm}
                                 onchange={handleSearch}>
                             </lightning-input>
@@ -262,7 +262,7 @@
                     <th>Time</th>
                     <th>Expense Name</th>
                     <th>Category</th>
-                    <th>Spending</th>
+                    <th>Expense Group</th>
                     <th>Bank</th>
                     <th>Type</th>
                     <th class="print-amount-col">Amount (PHP)</th>
@@ -275,7 +275,7 @@
                         <td>{row.transactionTimeFormatted}</td>
                         <td>{row.name}</td>
                         <td>{row.category}</td>
-                        <td>{row.spending}</td>
+                        <td>{row.expenseGroup}</td>
                         <td>{row.bank}</td>
                         <td>{row.transactionType}</td>
                         <td class="print-amount-col">{row.amountFormatted}</td>

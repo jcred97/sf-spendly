@@ -10,7 +10,7 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>Spending__c</object>
+        <object>Expense_Group__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
@@ -173,7 +173,7 @@
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
-        <tab>Spending__c</tab>
+        <tab>Expense_Group__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>

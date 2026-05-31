@@ -9,7 +9,7 @@ public with sharing class SpendlyController {
 
     @AuraEnabled(cacheable=true)
     public static List<MonthlyTotal> getMonthlyTrend(
-        String spendingId,
+        String expenseGroupId,
         String categoryId,
         Date startDate,
         Date endDate
@@ -34,8 +34,8 @@ public with sharing class SpendlyController {
             query += 'AND Expense_Date__c <= :effectiveEndDate ';
         }
 
-        if (String.isNotBlank(spendingId) && spendingId != 'All') {
-            query += 'AND Category__r.Spending__c = :spendingId ';
+        if (String.isNotBlank(expenseGroupId) && expenseGroupId != 'All') {
+            query += 'AND Category__r.Expense_Group__c = :expenseGroupId ';
         }
         if (String.isNotBlank(categoryId) && categoryId != 'All') {
             query += 'AND Category__c = :categoryId ';
@@ -65,35 +65,35 @@ public with sharing class SpendlyController {
 
 
     @AuraEnabled(cacheable=true)
-    public static List<Spending__c> getAllSpendings() {
+    public static List<Expense_Group__c> getAllExpenseGroups() {
         return [
             SELECT Id, Name
-            FROM Spending__c
+            FROM Expense_Group__c
             ORDER BY Name
         ];
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Category__c> getCategoriesBySpending(String spendingId) {
-        if (String.isBlank(spendingId) || spendingId == 'All') {
+    public static List<Category__c> getCategoriesByExpenseGroup(String expenseGroupId) {
+        if (String.isBlank(expenseGroupId) || expenseGroupId == 'All') {
             return [
-                SELECT Id, Name, Spending__c, Spending__r.Name
+                SELECT Id, Name, Expense_Group__c, Expense_Group__r.Name
                 FROM Category__c
                 ORDER BY Name
             ];
         }
 
         return [
-            SELECT Id, Name, Spending__c, Spending__r.Name
+            SELECT Id, Name, Expense_Group__c, Expense_Group__r.Name
             FROM Category__c
-            WHERE Spending__c = :spendingId
+            WHERE Expense_Group__c = :expenseGroupId
             ORDER BY Name
         ];
     }
 
     @AuraEnabled
     public static List<Expense__c> getExpensesByFilters(
-        String spendingId,
+        String expenseGroupId,
         String categoryId,
         Date startDate,
         Date endDate
@@ -101,12 +101,12 @@ public with sharing class SpendlyController {
         String query =
             'SELECT Id, Name, Expense_Date__c, Transaction_Time__c, Description__c, ' +
             'Category__c, Category__r.Name, ' +
-            'Category__r.Spending__c, Category__r.Spending__r.Name, ' +
+            'Category__r.Expense_Group__c, Category__r.Expense_Group__r.Name, ' +
             'Bank__c, Transaction_Type__c, Amount__c ' +
             'FROM Expense__c WHERE Id != null ';
 
-        if (String.isNotBlank(spendingId) && spendingId != 'All') {
-            query += 'AND Category__r.Spending__c = :spendingId ';
+        if (String.isNotBlank(expenseGroupId) && expenseGroupId != 'All') {
+            query += 'AND Category__r.Expense_Group__c = :expenseGroupId ';
         }
         if (String.isNotBlank(categoryId) && categoryId != 'All') {
             query += 'AND Category__c = :categoryId ';

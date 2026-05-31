@@ -18,7 +18,7 @@
     <tabs>Expense__c</tabs>
     <tabs>Recurring_Expense__c</tabs>
     <tabs>Category__c</tabs>
-    <tabs>Spending__c</tabs>
+    <tabs>Expense_Group__c</tabs>
     <tabs>standard-report</tabs>
     <tabs>standard-Dashboard</tabs>
     <tabs>Spendly_Settings</tabs>

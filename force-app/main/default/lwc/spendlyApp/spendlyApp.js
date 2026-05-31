@@ -4,8 +4,8 @@ import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import removeDateFormatStyle from '@salesforce/resourceUrl/RemoveDateFormatStyle';
 
-import getAllSpendings from '@salesforce/apex/SpendlyController.getAllSpendings';
-import getCategoriesBySpending from '@salesforce/apex/SpendlyController.getCategoriesBySpending';
+import getAllExpenseGroups from '@salesforce/apex/SpendlyController.getAllExpenseGroups';
+import getCategoriesByExpenseGroup from '@salesforce/apex/SpendlyController.getCategoriesByExpenseGroup';
 import getExpensesByFilters from '@salesforce/apex/SpendlyController.getExpensesByFilters';
 import deleteExpense from '@salesforce/apex/SpendlyController.deleteExpense';
 import deleteExpenses from '@salesforce/apex/SpendlyController.deleteExpenses';
@@ -41,7 +41,7 @@ const ALL_COLUMNS = [
         typeAttributes: { label: { fieldName: 'name' }, target: '_blank' }
     },
     { label: 'Category', fieldName: 'category', sortable: true },
-    { label: 'Spending', fieldName: 'spending', sortable: true },
+    { label: 'Expense Group', fieldName: 'expenseGroup', sortable: true },
     { label: 'Bank', fieldName: 'bank', sortable: true },
     { label: 'Type', fieldName: 'transactionType', sortable: true },
     {
@@ -68,7 +68,7 @@ const COLUMN_OPTIONS = [
     { key: 'transactionTimeDisplay', label: 'Time' },
     { key: 'recordLink', label: 'Expense Name' },
     { key: 'category', label: 'Category' },
-    { key: 'spending', label: 'Spending' },
+    { key: 'expenseGroup', label: 'Expense Group' },
     { key: 'bank', label: 'Bank' },
     { key: 'transactionType', label: 'Type' },
     { key: 'amount', label: 'Amount' }
@@ -155,11 +155,11 @@ export default class SpendlyApp extends LightningElement {
     activeView = 'dashboard';
     startDate;
     endDate;
-    spendingId = 'All';
+    expenseGroupId = 'All';
     categoryId = 'All';
     searchTerm = '';
 
-    spendingOptions = [{ label: 'All', value: 'All' }];
+    expenseGroupOptions = [{ label: 'All', value: 'All' }];
     categoryOptions = [{ label: 'All', value: 'All' }];
 
     allRows = [];
@@ -182,7 +182,7 @@ export default class SpendlyApp extends LightningElement {
         transactionTimeDisplay: true,
         recordLink: true,
         category: true,
-        spending: true,
+        expenseGroup: true,
         bank: true,
         transactionType: true,
         amount: true
@@ -234,19 +234,19 @@ export default class SpendlyApp extends LightningElement {
         this.loadExpenses();
     }
 
-    @wire(getAllSpendings)
-    wiredSpendings({ error, data }) {
+    @wire(getAllExpenseGroups)
+    wiredExpenseGroups({ error, data }) {
         if (data) {
-            this.spendingOptions = [
+            this.expenseGroupOptions = [
                 { label: 'All', value: 'All' },
-                ...data.map(spending => ({ label: spending.Name, value: spending.Id }))
+                ...data.map(expenseGroup => ({ label: expenseGroup.Name, value: expenseGroup.Id }))
             ];
         } else if (error) {
-            this.showToast('Error', 'Failed to load spendings.', 'error');
+            this.showToast('Error', 'Failed to load expense groups.', 'error');
         }
     }
 
-    @wire(getCategoriesBySpending, { spendingId: '$spendingId' })
+    @wire(getCategoriesByExpenseGroup, { expenseGroupId: '$expenseGroupId' })
     wiredCategories({ error, data }) {
         if (data) {
             this.categoryOptions = [
@@ -266,13 +266,13 @@ export default class SpendlyApp extends LightningElement {
         try {
             const [data, trendData] = await Promise.all([
                 getExpensesByFilters({
-                    spendingId: this.spendingId,
+                    expenseGroupId: this.expenseGroupId,
                     categoryId: this.categoryId,
                     startDate: this.startDate,
                     endDate: this.endDate
                 }),
                 getMonthlyTrend({
-                    spendingId: this.spendingId,
+                    expenseGroupId: this.expenseGroupId,
                     categoryId: this.categoryId,
                     startDate: this.startDate,
                     endDate: this.endDate
@@ -293,7 +293,7 @@ export default class SpendlyApp extends LightningElement {
                 recordLink: `/${row.Id}`,
                 category: row.Category__r?.Name,
                 categoryId: row.Category__c,
-                spending: row.Category__r?.Spending__r?.Name,
+                expenseGroup: row.Category__r?.Expense_Group__r?.Name,
                 bank: row.Bank__c,
                 transactionType: row.Transaction_Type__c,
                 amount: row.Amount__c
@@ -320,7 +320,7 @@ export default class SpendlyApp extends LightningElement {
         return this.allRows.filter(row =>
             (row.name || '').toLowerCase().includes(term) ||
             (row.category || '').toLowerCase().includes(term) ||
-            (row.spending || '').toLowerCase().includes(term) ||
+            (row.expenseGroup || '').toLowerCase().includes(term) ||
             (row.bank || '').toLowerCase().includes(term) ||
             (row.transactionType || '').toLowerCase().includes(term)
         );
@@ -447,7 +447,7 @@ export default class SpendlyApp extends LightningElement {
         const field = event.target.dataset.field;
         this[field] = event.detail.value;
 
-        if (field === 'spendingId') {
+        if (field === 'expenseGroupId') {
             this.categoryId = 'All';
         }
 
@@ -472,7 +472,7 @@ export default class SpendlyApp extends LightningElement {
 
         this.startDate = formatDateISO(firstDay);
         this.endDate = formatDateISO(today);
-        this.spendingId = 'All';
+        this.expenseGroupId = 'All';
         this.categoryId = 'All';
         this.searchTerm = '';
         this.loadExpenses();
@@ -659,13 +659,13 @@ export default class SpendlyApp extends LightningElement {
             return;
         }
 
-        const headers = ['Date', 'Time', 'Expense Name', 'Category', 'Spending', 'Bank', 'Type', 'Amount (PHP)'];
+        const headers = ['Date', 'Time', 'Expense Name', 'Category', 'Expense Group', 'Bank', 'Type', 'Amount (PHP)'];
         const rows = this.filteredRows.map(row => [
             row.expenseDate || '',
             row.transactionTimeDisplay === '-' ? '' : row.transactionTimeDisplay,
             row.name || '',
             row.category || '',
-            row.spending || '',
+            row.expenseGroup || '',
             row.bank || '',
             row.transactionType || '',
             row.amount != null ? row.amount : ''
