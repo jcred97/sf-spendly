@@ -54,56 +54,6 @@ const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
     timeZone: 'UTC'
 });
 
-const ALL_COLUMNS = [
-    {
-        label: 'Date',
-        fieldName: 'expenseDate',
-        type: 'date',
-        sortable: true,
-        typeAttributes: { year: 'numeric', month: 'short', day: '2-digit', timeZone: 'UTC' }
-    },
-    { label: 'Time', fieldName: 'transactionTimeDisplay', sortable: true },
-    {
-        label: 'Expense Name',
-        fieldName: 'recordLink',
-        type: 'url',
-        sortable: true,
-        typeAttributes: { label: { fieldName: 'name' }, target: '_blank' }
-    },
-    { label: 'Category', fieldName: 'category', sortable: true },
-    { label: 'Expense Group', fieldName: 'expenseGroup', sortable: true },
-    { label: 'Bank', fieldName: 'bank', sortable: true },
-    { label: 'Type', fieldName: 'transactionType', sortable: true },
-    {
-        label: 'Amount',
-        fieldName: 'amount',
-        type: 'currency',
-        typeAttributes: { currencyCode: 'PHP' },
-        sortable: true
-    },
-    {
-        type: 'action',
-        typeAttributes: {
-            rowActions: [
-                { label: 'Edit', name: 'edit' },
-                { label: 'Duplicate', name: 'duplicate' },
-                { label: 'Delete', name: 'delete' }
-            ]
-        }
-    }
-];
-
-const COLUMN_OPTIONS = [
-    { key: 'expenseDate', label: 'Date' },
-    { key: 'transactionTimeDisplay', label: 'Time' },
-    { key: 'recordLink', label: 'Expense Name' },
-    { key: 'category', label: 'Category' },
-    { key: 'expenseGroup', label: 'Expense Group' },
-    { key: 'bank', label: 'Bank' },
-    { key: 'transactionType', label: 'Type' },
-    { key: 'amount', label: 'Amount' }
-];
-
 function formatPHP(value) {
     return PHP_CURRENCY.format(value);
 }
@@ -199,27 +149,13 @@ export default class SpendlyApp extends LightningElement {
     selectedRows = [];
     monthlyTrendRaw = [];
 
-    sortedBy = 'expenseDate';
-    sortedDirection = 'desc';
     visibleCount = PAGE_SIZE;
 
     isLoading = false;
     isModalOpen = false;
     editRecordId = null;
     duplicateData = null;
-    isColumnPickerOpen = false;
     dateError = '';
-
-    columnVisibility = {
-        expenseDate: true,
-        transactionTimeDisplay: true,
-        recordLink: true,
-        category: true,
-        expenseGroup: true,
-        bank: true,
-        transactionType: true,
-        amount: true
-    };
 
     get isDashboardView() {
         return this.activeView === 'dashboard';
@@ -362,16 +298,21 @@ export default class SpendlyApp extends LightningElement {
             this.allRows = data.map(row => ({
                 id: row.Id,
                 expenseDate: row.Expense_Date__c,
+                expenseDateFormatted: formatDate(row.Expense_Date__c),
                 transactionTime: row.Transaction_Time__c,
                 transactionTimeDisplay: formatTime(row.Transaction_Time__c),
                 name: row.Name,
                 recordLink: `/${row.Id}`,
                 category: row.Category__r?.Name,
                 categoryId: row.Category__c,
+                categoryDisplay: row.Category__r?.Name || 'Uncategorized',
                 expenseGroup: row.Category__r?.Expense_Group__r?.Name,
                 bank: row.Bank__c,
+                bankDisplay: row.Bank__c || 'No bank',
                 transactionType: row.Transaction_Type__c,
-                amount: row.Amount__c
+                transactionTypeDisplay: row.Transaction_Type__c || 'No type',
+                amount: row.Amount__c,
+                amountFormatted: formatPHP(row.Amount__c || 0)
             }));
             this.visibleCount = PAGE_SIZE;
         } catch (error) {
@@ -405,26 +346,49 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.slice(0, this.visibleCount);
     }
 
-    get columns() {
-        return ALL_COLUMNS.filter(column =>
-            column.type === 'action' || this.columnVisibility[column.fieldName] !== false
-        );
-    }
-
-    get columnPickerOptions() {
-        return COLUMN_OPTIONS.map(column => ({
-            key: column.key,
-            label: column.label,
-            checked: this.columnVisibility[column.key]
-        }));
-    }
-
     get modalCategoryOptions() {
         return this.categoryOptions.filter(option => option.value !== 'All');
     }
 
+    get transactionGroups() {
+        const groups = [];
+        const groupMap = new Map();
+        const selectedIds = new Set(this.selectedRows);
+
+        this.rowsToDisplay.forEach(row => {
+            const key = row.expenseDate || 'no-date';
+            if (!groupMap.has(key)) {
+                const group = {
+                    key,
+                    label: row.expenseDateFormatted,
+                    rows: [],
+                    total: 0
+                };
+                groupMap.set(key, group);
+                groups.push(group);
+            }
+
+            const group = groupMap.get(key);
+            group.rows.push({
+                ...row,
+                isSelected: selectedIds.has(row.id)
+            });
+            group.total += row.amount || 0;
+        });
+
+        return groups.map(group => ({
+            ...group,
+            countLabel: `${group.rows.length} transaction${group.rows.length === 1 ? '' : 's'}`,
+            totalFormatted: formatPHP(group.total)
+        }));
+    }
+
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
+    }
+
+    get hasMoreRows() {
+        return this.visibleCount < this.filteredRows.length;
     }
 
     get hasSelectedRows() {
@@ -631,38 +595,6 @@ export default class SpendlyApp extends LightningElement {
         return `workspace-nav-item ${this.activeView === viewName ? 'is-active' : ''}`;
     }
 
-    handleToggleColumnPicker() {
-        this.isColumnPickerOpen = !this.isColumnPickerOpen;
-    }
-
-    handleColumnToggle(event) {
-        const key = event.target.dataset.key;
-        this.columnVisibility = { ...this.columnVisibility, [key]: event.target.checked };
-    }
-
-    handleRowSelection(event) {
-        this.selectedRows = event.detail.selectedRows.map(row => row.id);
-    }
-
-    handleSort(event) {
-        const { fieldName, sortDirection } = event.detail;
-        this.sortedBy = fieldName;
-        this.sortedDirection = sortDirection;
-
-        const isAsc = sortDirection === 'asc';
-        const sortField = fieldName === 'transactionTimeDisplay' ? 'transactionTime' : fieldName;
-        this.allRows = [...this.allRows].sort((a, b) => {
-            const left = a[sortField] || '';
-            const right = b[sortField] || '';
-
-            if (left === right) {
-                return 0;
-            }
-
-            return left > right ? (isAsc ? 1 : -1) : (isAsc ? -1 : 1);
-        });
-    }
-
     async handleLoadMore() {
         if (this.visibleCount >= this.filteredRows.length) {
             return;
@@ -675,9 +607,30 @@ export default class SpendlyApp extends LightningElement {
         this.isLoading = false;
     }
 
-    async handleRowAction(event) {
-        const actionName = event.detail.action.name;
-        const row = event.detail.row;
+    handleTransactionSelect(event) {
+        const { id } = event.target.dataset;
+        const selectedRows = new Set(this.selectedRows);
+
+        if (event.target.checked) {
+            selectedRows.add(id);
+        } else {
+            selectedRows.delete(id);
+        }
+
+        this.selectedRows = [...selectedRows];
+    }
+
+    async handleTransactionAction(event) {
+        const { action, id } = event.currentTarget.dataset;
+        const row = this.allRows.find(item => item.id === id);
+        await this.performRowAction(action, row);
+    }
+
+    async performRowAction(actionName, row) {
+        if (!row) {
+            return;
+        }
+
         const recordId = row.id;
 
         if (!recordId) {
