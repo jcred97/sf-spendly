@@ -288,6 +288,13 @@ export default class SpendlyApp extends LightningElement {
         this.selectedRows = [];
 
         try {
+            const trendEndDate = parseDateString(this.endDate) || new Date();
+            const trendStartDate = new Date(
+                trendEndDate.getFullYear(),
+                trendEndDate.getMonth() - 5,
+                1
+            );
+
             const [data, trendData] = await Promise.all([
                 getExpensesByFilters({
                     expenseGroupId: this.expenseGroupId,
@@ -298,7 +305,7 @@ export default class SpendlyApp extends LightningElement {
                 getMonthlyTrend({
                     expenseGroupId: this.expenseGroupId,
                     categoryId: this.categoryId,
-                    startDate: this.startDate,
+                    startDate: formatDateISO(trendStartDate),
                     endDate: this.endDate
                 })
             ]);
@@ -473,6 +480,106 @@ export default class SpendlyApp extends LightningElement {
         return buildBarChartData(entries, 'bank');
     }
 
+    get dashboardTitle() {
+        return `${this.selectedMonthLabel} spending`;
+    }
+
+    get dashboardSubtitle() {
+        return `${this.selectedExpenseGroupName || 'No group selected'} / ${this.transactionPeriodLabel}`;
+    }
+
+    get largestExpense() {
+        if (this.filteredRows.length === 0) {
+            return { name: '-', amount: 'PHP 0.00', meta: 'No expenses yet' };
+        }
+
+        const row = [...this.filteredRows].sort((a, b) => (b.amount || 0) - (a.amount || 0))[0];
+        return {
+            name: row.name || 'Untitled expense',
+            amount: formatPHP(row.amount || 0),
+            meta: `${row.categoryDisplay} / ${row.expenseDateFormatted}`
+        };
+    }
+
+    get topDay() {
+        if (this.filteredRows.length === 0) {
+            return { label: '-', amount: 'PHP 0.00', countLabel: 'No activity' };
+        }
+
+        const dayMap = new Map();
+        this.filteredRows.forEach(row => {
+            const key = row.expenseDate || 'no-date';
+            const item = dayMap.get(key) || {
+                label: row.expenseDateFormatted,
+                total: 0,
+                count: 0
+            };
+            item.total += row.amount || 0;
+            item.count += 1;
+            dayMap.set(key, item);
+        });
+
+        const top = [...dayMap.values()].sort((a, b) => b.total - a.total)[0];
+        return {
+            label: top.label,
+            amount: formatPHP(top.total),
+            countLabel: `${top.count} transaction${top.count === 1 ? '' : 's'}`
+        };
+    }
+
+    get dailyAverage() {
+        if (this.filteredRows.length === 0) {
+            return 'PHP 0.00';
+        }
+
+        const activeDays = new Set(this.filteredRows.map(row => row.expenseDate || 'no-date')).size || 1;
+        return formatPHP(this.totalAmount / activeDays);
+    }
+
+    get dashboardInsights() {
+        return [
+            {
+                key: 'largest',
+                iconName: 'utility:arrowup',
+                label: 'Largest expense',
+                value: this.largestExpense.amount,
+                detail: this.largestExpense.name
+            },
+            {
+                key: 'top-day',
+                iconName: 'utility:event',
+                label: 'Highest day',
+                value: this.topDay.amount,
+                detail: `${this.topDay.label} / ${this.topDay.countLabel}`
+            },
+            {
+                key: 'daily-average',
+                iconName: 'utility:metrics',
+                label: 'Active-day average',
+                value: this.dailyAverage,
+                detail: 'Based on days with expenses'
+            },
+            {
+                key: 'top-category',
+                iconName: 'utility:topic',
+                label: 'Top category',
+                value: this.topCategory.name,
+                detail: this.topCategory.amount
+            }
+        ];
+    }
+
+    get recentDashboardRows() {
+        return this.filteredRows.slice(0, 5).map(row => ({
+            ...row,
+            metaLine: `${row.categoryDisplay} / ${row.bankDisplay}`
+        }));
+    }
+
+    get hasRecentDashboardRows() {
+        return this.recentDashboardRows.length > 0;
+    }
+
     get monthlyTrendData() {
         const end = parseDateString(this.endDate) || new Date();
         const last6Months = Array.from({ length: 6 }, (_, index) => {
@@ -491,7 +598,9 @@ export default class SpendlyApp extends LightningElement {
         return last6Months.map((month, index) => ({
             key: `trend-${month.year}-${month.monthNum}`,
             label: MONTH_NAMES[month.monthNum - 1],
-            barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${Math.max(3, Math.round((totals[index] / max) * 110))}px`,
+            formattedTotal: formatPHP(totals[index]),
+            barClass: `vbar-item ${month.year === end.getFullYear() && month.monthNum === end.getMonth() + 1 ? 'is-selected' : ''}`,
+            barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${totals[index] > 0 ? Math.max(10, Math.round((totals[index] / max) * 110)) : 2}px`,
             hasValue: totals[index] > 0
         }));
     }

@@ -209,6 +209,246 @@
     justify-content: flex-end;
 }
 
+.view-header-actions {
+    align-items: center;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+/* Dashboard */
+.dashboard-hero {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.dashboard-hero h3 {
+    color: #181818;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0.125rem 0;
+}
+
+.dashboard-hero p {
+    color: #706e6b;
+    font-size: 0.8125rem;
+    margin: 0;
+}
+
+.dashboard-hero-actions {
+    align-items: center;
+    display: flex;
+    flex: 0 0 auto;
+}
+
+.dashboard-month-controls {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 999px;
+    display: inline-flex;
+    gap: 0.375rem;
+    padding: 0.1875rem;
+}
+
+.dashboard-month-controls span {
+    color: #181818;
+    display: inline-block;
+    font-size: 0.875rem;
+    font-weight: 800;
+    min-width: 7.75rem;
+    text-align: center;
+}
+
+.dashboard-hero-total {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.dashboard-hero-total span,
+.dashboard-hero-total small {
+    color: #706e6b;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dashboard-hero-total strong {
+    color: #2e844a;
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0.25rem 0;
+}
+
+.dashboard-detail-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
+    margin-top: 1rem;
+}
+
+.dashboard-panel {
+    background: #ffffff;
+    border: 1px solid #dddbda;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.dashboard-panel-header {
+    align-items: center;
+    border-bottom: 1px solid #dddbda;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+}
+
+.dashboard-panel-header h3 {
+    color: #181818;
+    font-size: 1rem;
+    font-weight: 800;
+    margin: 0.125rem 0 0;
+}
+
+.text-action {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: #0176d3;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    padding: 0.25rem 0;
+}
+
+.text-action:hover {
+    text-decoration: underline;
+}
+
+.dashboard-transaction-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-transaction-row {
+    align-items: center;
+    border-bottom: 1px solid #f3f2f2;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 4rem;
+    padding: 0.75rem 1.25rem;
+}
+
+.dashboard-transaction-row:last-child {
+    border-bottom: 0;
+}
+
+.dashboard-transaction-row:hover {
+    background: #fafaf9;
+}
+
+.dashboard-transaction-row a {
+    color: #181818;
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dashboard-transaction-row a:hover {
+    color: #0176d3;
+    text-decoration: underline;
+}
+
+.dashboard-transaction-row p,
+.dashboard-transaction-row span {
+    color: #706e6b;
+    font-size: 0.75rem;
+    margin: 0.25rem 0 0;
+}
+
+.dashboard-transaction-row strong {
+    color: #181818;
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.dashboard-transaction-row div:last-child {
+    text-align: right;
+}
+
+.dashboard-empty {
+    align-items: center;
+    color: #706e6b;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    min-height: 10rem;
+}
+
+.insight-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 1rem;
+}
+
+.insight-card {
+    background: #fafaf9;
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    display: grid;
+    gap: 0.25rem;
+    min-height: 7.25rem;
+    padding: 0.875rem;
+}
+
+.insight-card lightning-icon {
+    --slds-c-icon-color-foreground-default: #0176d3;
+}
+
+.insight-card span {
+    color: #706e6b;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.insight-card strong {
+    color: #181818;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.insight-card small {
+    color: #706e6b;
+    font-size: 0.75rem;
+    line-height: 1.25;
+}
+
 /* Charts Row */
 .charts-row {
     display: grid;
@@ -321,24 +561,8 @@
     border-bottom: 1px solid #dddbda;
     display: flex;
     gap: 1rem;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 0.75rem 1rem;
-}
-
-.month-navigator {
-    align-items: center;
-    display: inline-flex;
-    gap: 0.5rem;
-    min-width: 13rem;
-}
-
-.month-navigator-label {
-    color: #181818;
-    display: inline-block;
-    font-size: 0.9375rem;
-    font-weight: 800;
-    min-width: 8.5rem;
-    text-align: center;
 }
 
 .table-status {
@@ -621,6 +845,29 @@
         flex-direction: column;
     }
 
+    .view-header-actions,
+    .dashboard-hero,
+    .dashboard-hero-actions {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-hero-total {
+        text-align: left;
+    }
+
+    .dashboard-month-controls span {
+        min-width: 7.5rem;
+    }
+
+    .dashboard-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insight-grid {
+        grid-template-columns: 1fr;
+    }
+
     .transactions-layout {
         grid-template-columns: 1fr;
     }
@@ -649,6 +896,16 @@
 
     .charts-row {
         grid-template-columns: 1fr;
+    }
+
+    .dashboard-transaction-row {
+        align-items: start;
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-transaction-row strong,
+    .dashboard-transaction-row div:last-child {
+        text-align: left;
     }
 
     .transaction-row {

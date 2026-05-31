@@ -56,13 +56,47 @@
                                 <h2>{viewTitle}</h2>
                                 <p>{viewSubtitle}</p>
                             </div>
-                            <lightning-button
-                                variant="brand"
-                                label="Add Expense"
-                                icon-name="utility:add"
-                                onclick={openModal}>
-                            </lightning-button>
+                            <div class="view-header-actions">
+                                <div class="dashboard-month-controls" aria-label="Dashboard month">
+                                    <lightning-button-icon
+                                        icon-name="utility:chevronleft"
+                                        alternative-text="Previous month"
+                                        title="Previous month"
+                                        variant="border-filled"
+                                        onclick={handlePreviousMonth}>
+                                    </lightning-button-icon>
+                                    <span>{selectedMonthLabel}</span>
+                                    <lightning-button-icon
+                                        icon-name="utility:chevronright"
+                                        alternative-text="Next month"
+                                        title="Next month"
+                                        variant="border-filled"
+                                        onclick={handleNextMonth}>
+                                    </lightning-button-icon>
+                                </div>
+                                <lightning-button
+                                    variant="brand"
+                                    label="Add Expense"
+                                    icon-name="utility:add"
+                                    onclick={openModal}>
+                                </lightning-button>
+                            </div>
                         </div>
+
+                        <section class="dashboard-hero" aria-label="Monthly spending summary">
+                            <div>
+                                <p class="eyebrow">Current view</p>
+                                <h3>{dashboardTitle}</h3>
+                                <p>{dashboardSubtitle}</p>
+                            </div>
+                            <div class="dashboard-hero-actions">
+                                <div class="dashboard-hero-total">
+                                    <span>Total spent</span>
+                                    <strong>{formattedTotal}</strong>
+                                    <small>{transactionCountLabel}</small>
+                                </div>
+                            </div>
+                        </section>
 
                         <c-spendly-summary-cards
                             formatted-total={formattedTotal}
@@ -90,6 +124,65 @@
                                 chart-data={bankChartData}>
                             </c-spendly-bar-chart>
                         </div>
+
+                        <div class="dashboard-detail-grid">
+                            <section class="dashboard-panel">
+                                <div class="dashboard-panel-header">
+                                    <div>
+                                        <h3>Latest transactions</h3>
+                                    </div>
+                                    <button
+                                        class="text-action"
+                                        type="button"
+                                        data-view="transactions"
+                                        onclick={handleViewChange}>
+                                        View all
+                                    </button>
+                                </div>
+
+                                <template lwc:if={hasRecentDashboardRows}>
+                                    <div class="dashboard-transaction-list">
+                                        <template for:each={recentDashboardRows} for:item="row">
+                                            <article key={row.id} class="dashboard-transaction-row">
+                                                <div>
+                                                    <a href={row.recordLink} target="_blank" rel="noopener noreferrer">{row.name}</a>
+                                                    <p>{row.metaLine}</p>
+                                                </div>
+                                                <div>
+                                                    <strong>{row.amountFormatted}</strong>
+                                                    <span>{row.transactionTimeDisplay} / {row.expenseDateFormatted}</span>
+                                                </div>
+                                            </article>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    <div class="dashboard-empty">
+                                        <lightning-icon icon-name="utility:table" size="small"></lightning-icon>
+                                        <span>No transactions in this period</span>
+                                    </div>
+                                </template>
+                            </section>
+
+                            <section class="dashboard-panel">
+                                <div class="dashboard-panel-header">
+                                    <div>
+                                        <h3>Spending insights</h3>
+                                    </div>
+                                </div>
+
+                                <div class="insight-grid">
+                                    <template for:each={dashboardInsights} for:item="insight">
+                                        <div key={insight.key} class="insight-card">
+                                            <lightning-icon icon-name={insight.iconName} size="x-small"></lightning-icon>
+                                            <span>{insight.label}</span>
+                                            <strong>{insight.value}</strong>
+                                            <small>{insight.detail}</small>
+                                        </div>
+                                    </template>
+                                </div>
+                            </section>
+                        </div>
                     </section>
                 </template>
 
@@ -100,12 +193,31 @@
                                 <h2>{viewTitle}</h2>
                                 <p>{viewSubtitle}</p>
                             </div>
-                            <lightning-button
-                                variant="brand"
-                                label="Add Expense"
-                                icon-name="utility:add"
-                                onclick={openModal}>
-                            </lightning-button>
+                            <div class="view-header-actions">
+                                <div class="dashboard-month-controls" aria-label="Transaction month">
+                                    <lightning-button-icon
+                                        icon-name="utility:chevronleft"
+                                        alternative-text="Previous month"
+                                        title="Previous month"
+                                        variant="border-filled"
+                                        onclick={handlePreviousMonth}>
+                                    </lightning-button-icon>
+                                    <span>{selectedMonthLabel}</span>
+                                    <lightning-button-icon
+                                        icon-name="utility:chevronright"
+                                        alternative-text="Next month"
+                                        title="Next month"
+                                        variant="border-filled"
+                                        onclick={handleNextMonth}>
+                                    </lightning-button-icon>
+                                </div>
+                                <lightning-button
+                                    variant="brand"
+                                    label="Add Expense"
+                                    icon-name="utility:add"
+                                    onclick={openModal}>
+                                </lightning-button>
+                            </div>
                         </div>
 
                         <div class="transactions-layout">
@@ -175,23 +287,6 @@
                                 </div>
 
                                 <div class="transactions-toolbar">
-                                    <div class="month-navigator" aria-label="Transaction month">
-                                        <lightning-button-icon
-                                            icon-name="utility:chevronleft"
-                                            alternative-text="Previous month"
-                                            title="Previous month"
-                                            variant="border-filled"
-                                            onclick={handlePreviousMonth}>
-                                        </lightning-button-icon>
-                                        <span class="month-navigator-label">{selectedMonthLabel}</span>
-                                        <lightning-button-icon
-                                            icon-name="utility:chevronright"
-                                            alternative-text="Next month"
-                                            title="Next month"
-                                            variant="border-filled"
-                                            onclick={handleNextMonth}>
-                                        </lightning-button-icon>
-                                    </div>
                                     <div class="view-actions">
                                         <span class="table-status">{visibleRowsSummary}</span>
                                         <lightning-button

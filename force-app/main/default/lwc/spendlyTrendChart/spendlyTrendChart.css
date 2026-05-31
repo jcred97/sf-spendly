@@ -23,23 +23,55 @@
 .vbar-bars {
     display: flex;
     align-items: flex-end;
-    height: 110px;
-    gap: 6px;
+    height: 140px;
+    gap: 0.5rem;
     border-bottom: 2px solid #f3f2f2;
-    margin-bottom: 6px;
+    margin-bottom: 0.5rem;
+    min-width: 0;
+}
+
+.vbar-item {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-width: 0;
 }
 
 .vbar-fill {
-    flex: 1;
+    width: 100%;
     height: var(--vbar-height, 3px);
     background-color: var(--vbar-color);
-    border-radius: 3px 3px 0 0;
+    border-radius: 4px 4px 0 0;
     transition: height 0.4s ease;
+}
+
+.vbar-item.is-selected .vbar-fill {
+    background-color: #2e844a;
+}
+
+.vbar-value {
+    color: #3e3e3c;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+    max-width: 100%;
+    min-height: 0.75rem;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.vbar-item.is-selected .vbar-value {
+    color: #2e844a;
 }
 
 .vbar-labels {
     display: flex;
-    gap: 6px;
+    gap: 0.5rem;
 }
 
 .vbar-label {
