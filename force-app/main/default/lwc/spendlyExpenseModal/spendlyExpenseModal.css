@@ -6,6 +6,11 @@
     display: none;
 }
 
+lightning-combobox {
+    display: block;
+    margin-bottom: var(--lwc-spacingXSmall, 0.5rem);
+}
+
 .transaction-time-field {
     display: block;
     margin-bottom: var(--lwc-spacingXSmall, 0.5rem);

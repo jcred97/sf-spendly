@@ -3,17 +3,35 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 export default class SpendlyExpenseModal extends LightningElement {
 
-    @api isOpen = false;
+    @api categoryOptions = [];
+    @api selectedExpenseGroupName = '';
 
     @track isClosing = false;
     @track isRendered = false;
 
+    _isOpen = false;
     _recordId = null;
     _duplicateData = null;
     _handleKeyDown;
     _previouslyFocusedElement;
     _saveAndNew = false;
+    categoryValue = '';
     transactionTimeValue = '';
+
+    @api
+    get isOpen() {
+        return this._isOpen;
+    }
+
+    set isOpen(value) {
+        const isOpening = value && !this._isOpen;
+        this._isOpen = value;
+
+        if (isOpening && !this._recordId && !this._duplicateData) {
+            this.categoryValue = '';
+            this.transactionTimeValue = '';
+        }
+    }
 
     @api
     get recordId() {
@@ -23,6 +41,7 @@ export default class SpendlyExpenseModal extends LightningElement {
     set recordId(value) {
         this._recordId = value;
         if (!value) {
+            this.categoryValue = this._duplicateData?.Category__c || '';
             this.transactionTimeValue = this.normalizeTimeForInput(
                 this._duplicateData?.Transaction_Time__c
             );
@@ -37,6 +56,7 @@ export default class SpendlyExpenseModal extends LightningElement {
     set duplicateData(value) {
         this._duplicateData = value;
         if (!this._recordId) {
+            this.categoryValue = value?.Category__c || '';
             this.transactionTimeValue = this.normalizeTimeForInput(
                 value?.Transaction_Time__c
             );
@@ -144,6 +164,7 @@ export default class SpendlyExpenseModal extends LightningElement {
         }
 
         const record = event.detail.records?.[this.recordId];
+        this.categoryValue = record?.fields?.Category__c?.value || '';
         this.transactionTimeValue = this.normalizeTimeForInput(
             record?.fields?.Transaction_Time__c?.value
         );
@@ -152,10 +173,20 @@ export default class SpendlyExpenseModal extends LightningElement {
     handleSubmit(event) {
         event.preventDefault();
 
+        const categoryInput = this.template.querySelector('[data-field="category"]');
+        if (categoryInput && !categoryInput.reportValidity()) {
+            return;
+        }
+
         const fields = { ...event.detail.fields };
+        fields.Category__c = this.categoryValue;
         fields.Transaction_Time__c = this.normalizeTimeForSubmit(this.transactionTimeValue);
 
         this.template.querySelector('lightning-record-edit-form').submit(fields);
+    }
+
+    handleCategoryChange(event) {
+        this.categoryValue = event.detail.value;
     }
 
     handleTransactionTimeChange(event) {
@@ -171,6 +202,7 @@ export default class SpendlyExpenseModal extends LightningElement {
                     field.value = null;
                 }
             });
+            this.categoryValue = '';
             this.transactionTimeValue = '';
             this._saveAndNew = false;
         } else {
@@ -191,6 +223,12 @@ export default class SpendlyExpenseModal extends LightningElement {
 
     get fieldValue() {
         return this.duplicateData || {};
+    }
+
+    get categoryPlaceholder() {
+        return this.selectedExpenseGroupName
+            ? `Select a ${this.selectedExpenseGroupName} category`
+            : 'Select a category';
     }
 
     normalizeTimeForInput(value) {

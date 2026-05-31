@@ -419,6 +419,10 @@ export default class SpendlyApp extends LightningElement {
         }));
     }
 
+    get modalCategoryOptions() {
+        return this.categoryOptions.filter(option => option.value !== 'All');
+    }
+
     get hasNoRows() {
         return this.filteredRows.length === 0 && !this.isLoading;
     }
