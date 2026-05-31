@@ -53,6 +53,10 @@ const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
     day: '2-digit',
     timeZone: 'UTC'
 });
+const MONTH_LABEL_FORMAT = new Intl.DateTimeFormat('en-PH', {
+    year: 'numeric',
+    month: 'long'
+});
 
 function formatPHP(value) {
     return PHP_CURRENCY.format(value);
@@ -93,6 +97,15 @@ function formatDateISO(date) {
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
+}
+
+function getMonthBounds(date) {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    return {
+        startDate: formatDateISO(firstDay),
+        endDate: formatDateISO(lastDay)
+    };
 }
 
 function parseDateString(value) {
@@ -223,10 +236,10 @@ export default class SpendlyApp extends LightningElement {
 
     connectedCallback() {
         const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthBounds = getMonthBounds(today);
 
-        this.startDate = formatDateISO(firstDay);
-        this.endDate = formatDateISO(today);
+        this.startDate = monthBounds.startDate;
+        this.endDate = monthBounds.endDate;
     }
 
     @wire(getAllExpenseGroups)
@@ -498,6 +511,11 @@ export default class SpendlyApp extends LightningElement {
         return `${start} - ${end}`;
     }
 
+    get selectedMonthLabel() {
+        const selectedDate = parseDateString(this.startDate) || new Date();
+        return MONTH_LABEL_FORMAT.format(selectedDate);
+    }
+
     get printRows() {
         return this.filteredRows.map(row => ({
             ...row,
@@ -532,12 +550,38 @@ export default class SpendlyApp extends LightningElement {
 
     handleReset() {
         const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthBounds = getMonthBounds(today);
 
-        this.startDate = formatDateISO(firstDay);
-        this.endDate = formatDateISO(today);
+        this.startDate = monthBounds.startDate;
+        this.endDate = monthBounds.endDate;
         this.categoryId = 'All';
         this.searchTerm = '';
+        this.dateError = '';
+        this.visibleCount = PAGE_SIZE;
+        this.loadExpenses();
+    }
+
+    handlePreviousMonth() {
+        this.setTransactionMonth(-1);
+    }
+
+    handleNextMonth() {
+        this.setTransactionMonth(1);
+    }
+
+    setTransactionMonth(monthOffset) {
+        const selectedDate = parseDateString(this.startDate) || new Date();
+        const targetMonth = new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth() + monthOffset,
+            1
+        );
+        const monthBounds = getMonthBounds(targetMonth);
+
+        this.startDate = monthBounds.startDate;
+        this.endDate = monthBounds.endDate;
+        this.dateError = '';
+        this.visibleCount = PAGE_SIZE;
         this.loadExpenses();
     }
 

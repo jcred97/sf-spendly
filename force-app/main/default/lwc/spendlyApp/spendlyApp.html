@@ -175,8 +175,25 @@
                                 </div>
 
                                 <div class="transactions-toolbar">
-                                    <div class="table-status">{visibleRowsSummary}</div>
+                                    <div class="month-navigator" aria-label="Transaction month">
+                                        <lightning-button-icon
+                                            icon-name="utility:chevronleft"
+                                            alternative-text="Previous month"
+                                            title="Previous month"
+                                            variant="border-filled"
+                                            onclick={handlePreviousMonth}>
+                                        </lightning-button-icon>
+                                        <span class="month-navigator-label">{selectedMonthLabel}</span>
+                                        <lightning-button-icon
+                                            icon-name="utility:chevronright"
+                                            alternative-text="Next month"
+                                            title="Next month"
+                                            variant="border-filled"
+                                            onclick={handleNextMonth}>
+                                        </lightning-button-icon>
+                                    </div>
                                     <div class="view-actions">
+                                        <span class="table-status">{visibleRowsSummary}</span>
                                         <lightning-button
                                             variant="neutral"
                                             label="Export CSV"
