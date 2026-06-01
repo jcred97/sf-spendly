@@ -39,7 +39,7 @@ public with sharing class SpendlyController {
         }
     }
 
-    @AuraEnabled(cacheable=true)
+    @AuraEnabled
     public static List<MonthlyTotal> getMonthlyTrend(
         String expenseGroupId,
         String categoryId,

@@ -50,6 +50,7 @@ const VIEW_CONFIG = [
 ];
 
 const PHP_CURRENCY = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+const MUTATION_REFRESH_DELAY_MS = 250;
 const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
     year: 'numeric',
     month: 'short',
@@ -1009,6 +1010,8 @@ export default class SpendlyApp extends LightningElement {
         try {
             await deleteExpense({ expenseId: recordId });
             this.showToast('Deleted', 'Expense deleted successfully!', 'success');
+            await this.waitForMutationCommit();
+            await this.loadExpenses();
         } catch (error) {
             this.allRows = [
                 ...this.allRows.slice(0, index),
@@ -1040,6 +1043,8 @@ export default class SpendlyApp extends LightningElement {
         try {
             await deleteExpenses({ expenseIds: idsToDelete });
             this.showToast('Deleted', `${count} expense(s) deleted successfully!`, 'success');
+            await this.waitForMutationCommit();
+            await this.loadExpenses();
         } catch (error) {
             const restored = [...this.allRows];
             removedRows.forEach((row, index) => {
@@ -1065,7 +1070,13 @@ export default class SpendlyApp extends LightningElement {
 
     async handleSuccess() {
         this.showToast('Success', 'Expense saved successfully!', 'success');
+        await this.waitForMutationCommit();
         await this.loadExpenses();
+    }
+
+    waitForMutationCommit() {
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        return new Promise(resolve => setTimeout(resolve, MUTATION_REFRESH_DELAY_MS));
     }
 
     handlePrint() {
