@@ -55,7 +55,7 @@
 .brand-name {
     color: #181818;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
 }
 
@@ -75,9 +75,8 @@
     color: #706e6b;
     display: block;
     font-size: 0.6875rem;
-    font-weight: 600;
+    font-weight: 400;
     margin-top: 0.25rem;
-    text-transform: uppercase;
 }
 
 .sidebar-toggle {
@@ -118,7 +117,7 @@
     cursor: pointer;
     display: inline-flex;
     gap: 0.625rem;
-    font-weight: 600;
+    font-weight: 400;
     min-height: 2.5rem;
     padding: 0 0.75rem;
     text-align: left;
@@ -191,7 +190,7 @@
 .view-header h2 {
     color: #181818;
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -221,8 +220,7 @@
     align-items: center;
     background: #ffffff;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 0.25rem;
     display: flex;
     justify-content: space-between;
     gap: 1rem;
@@ -232,8 +230,8 @@
 
 .dashboard-hero h3 {
     color: #181818;
-    font-size: 1.5rem;
-    font-weight: 800;
+    font-size: 1.375rem;
+    font-weight: 600;
     line-height: 1.2;
     margin: 0.125rem 0;
 }
@@ -264,7 +262,7 @@
     color: #181818;
     display: inline-block;
     font-size: 0.875rem;
-    font-weight: 800;
+    font-weight: 600;
     min-width: 7.75rem;
     text-align: center;
 }
@@ -279,14 +277,14 @@
     color: #706e6b;
     display: block;
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .dashboard-hero-total strong {
     color: #2e844a;
     display: block;
-    font-size: 1.75rem;
-    font-weight: 800;
+    font-size: 1.5rem;
+    font-weight: 600;
     line-height: 1.1;
     margin: 0.25rem 0;
 }
@@ -301,8 +299,7 @@
 .dashboard-panel {
     background: #ffffff;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 0.25rem;
     min-width: 0;
     overflow: hidden;
 }
@@ -319,7 +316,7 @@
 .dashboard-panel-header h3 {
     color: #181818;
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 600;
     margin: 0.125rem 0 0;
 }
 
@@ -330,7 +327,7 @@
     color: #0176d3;
     cursor: pointer;
     font-size: 0.8125rem;
-    font-weight: 700;
+    font-weight: 400;
     padding: 0.25rem 0;
 }
 
@@ -365,7 +362,7 @@
     color: #181818;
     display: block;
     font-size: 0.9375rem;
-    font-weight: 800;
+    font-weight: 600;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -388,7 +385,7 @@
     color: #181818;
     display: block;
     font-size: 0.9375rem;
-    font-weight: 800;
+    font-weight: 600;
     text-align: right;
 }
 
@@ -415,7 +412,7 @@
 .insight-card {
     background: #fafaf9;
     border: 1px solid #e5e5e5;
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
     display: grid;
     gap: 0.25rem;
     min-height: 7.25rem;
@@ -429,14 +426,13 @@
 .insight-card span {
     color: #706e6b;
     font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
+    font-weight: 400;
 }
 
 .insight-card strong {
     color: #181818;
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.2;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -468,8 +464,7 @@
 .transactions-panel {
     background: #ffffff;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border-radius: 0.25rem;
 }
 
 .transaction-filters {
@@ -490,7 +485,7 @@
 .panel-title-row h3 {
     color: #181818;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -522,17 +517,16 @@
 .transactions-panel-header h3 {
     color: #181818;
     font-size: 1.25rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0.125rem 0 0;
 }
 
 .eyebrow {
     color: #706e6b;
     font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-weight: 400;
+    letter-spacing: 0;
     margin: 0;
-    text-transform: uppercase;
 }
 
 .transactions-total {
@@ -543,9 +537,8 @@
     color: #706e6b;
     display: block;
     font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 400;
+    letter-spacing: 0;
 }
 
 .transactions-total strong {
@@ -605,7 +598,7 @@
     align-items: center;
     background: white;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
+    border-radius: 0.25rem;
     color: #706e6b;
     display: flex;
     justify-content: center;
@@ -621,8 +614,7 @@
 .recurring-summary-card {
     background: #ffffff;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 0.25rem;
     min-width: 0;
     padding: 1rem 1.25rem;
 }
@@ -631,16 +623,15 @@
     color: #5c5c5c;
     display: block;
     font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 400;
+    letter-spacing: 0;
 }
 
 .recurring-summary-card strong {
     color: #181818;
     display: block;
-    font-size: 1.5rem;
-    font-weight: 800;
+    font-size: 1.375rem;
+    font-weight: 600;
     line-height: 1.2;
     margin-top: 0.35rem;
 }
@@ -655,8 +646,7 @@
 .recurring-panel {
     background: #ffffff;
     border: 1px solid #dddbda;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 0.25rem;
     overflow: hidden;
 }
 
@@ -671,7 +661,7 @@
 .recurring-panel-header h3 {
     color: #181818;
     font-size: 1rem;
-    font-weight: 800;
+    font-weight: 600;
     margin: 0.125rem 0 0;
 }
 
@@ -733,7 +723,7 @@
 .recurring-title-row a {
     color: #181818;
     font-size: 0.9375rem;
-    font-weight: 800;
+    font-weight: 600;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -750,7 +740,7 @@
     border-radius: 999px;
     display: inline-flex;
     font-size: 0.6875rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
     padding: 0.25rem 0.45rem;
 }
@@ -790,16 +780,15 @@
     color: #706e6b;
     display: block;
     font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 400;
+    letter-spacing: 0;
 }
 
 .recurring-schedule strong {
     color: #181818;
     display: block;
     font-size: 0.875rem;
-    font-weight: 800;
+    font-weight: 600;
     margin-top: 0.2rem;
 }
 
@@ -865,7 +854,7 @@
 .transaction-day-label {
     color: #181818;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 600;
     margin: 0;
 }
 
@@ -917,7 +906,7 @@
     color: #181818;
     display: block;
     font-size: 0.9375rem;
-    font-weight: 700;
+    font-weight: 600;
     overflow: hidden;
     text-decoration: none;
     text-overflow: ellipsis;
@@ -960,13 +949,13 @@
 
 .transaction-when span:first-child {
     color: #3e3e3c;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .transaction-amount {
     color: #181818;
     font-size: 0.9375rem;
-    font-weight: 800;
+    font-weight: 600;
     text-align: right;
 }
 

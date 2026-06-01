@@ -4,19 +4,18 @@
 
 .chart-panel {
     background: white;
-    border-radius: 0.5rem;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
     padding: 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     height: 100%;
     box-sizing: border-box;
 }
 
 .panel-title {
     font-size: 0.6875rem;
-    font-weight: 600;
+    font-weight: 400;
     color: #706e6b;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0;
     margin-bottom: 1rem;
 }
 
@@ -54,7 +53,7 @@
 .vbar-value {
     color: #3e3e3c;
     font-size: 0.625rem;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 1.1;
     margin-bottom: 0.25rem;
     max-width: 100%;
