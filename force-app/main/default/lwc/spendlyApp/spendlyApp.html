@@ -129,7 +129,7 @@
                             <section class="dashboard-panel">
                                 <div class="dashboard-panel-header">
                                     <div>
-                                        <h3>Latest transactions</h3>
+                                        <h3>Latest expenses</h3>
                                     </div>
                                     <button
                                         class="text-action"
@@ -159,7 +159,7 @@
                                 <template lwc:else>
                                     <div class="dashboard-empty">
                                         <lightning-icon icon-name="utility:table" size="small"></lightning-icon>
-                                        <span>No transactions in this period</span>
+                                        <span>No expenses in this period</span>
                                     </div>
                                 </template>
                             </section>
@@ -221,7 +221,7 @@
                         </div>
 
                         <div class="transactions-layout">
-                            <aside class="transaction-filters" aria-label="Transaction filters">
+                            <aside class="transaction-filters" aria-label="Expense filters">
                                 <div class="panel-title-row">
                                     <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
                                     <h3>Filter</h3>
@@ -324,7 +324,7 @@
                                             </lightning-button>
                                         </div>
                                     </template>
-                                    <div class="transaction-list" aria-label="Transactions">
+                                    <div class="transaction-list" aria-label="Expenses">
                                         <template for:each={transactionGroups} for:item="group">
                                             <section key={group.key} class="transaction-day">
                                                 <div class="transaction-day-header">
@@ -338,7 +338,7 @@
                                                 <div class="transaction-day-rows">
                                                     <template for:each={group.rows} for:item="row">
                                                         <article key={row.id} class="transaction-row">
-                                                            <label class="transaction-select" title="Select transaction">
+                                                            <label class="transaction-select" title="Select expense">
                                                                 <input
                                                                     type="checkbox"
                                                                     data-id={row.id}
@@ -366,7 +366,7 @@
                                                                 {row.amountFormatted}
                                                             </div>
 
-                                                            <div class="transaction-actions" aria-label="Transaction actions">
+                                                            <div class="transaction-actions" aria-label="Expense actions">
                                                                 <button
                                                                     type="button"
                                                                     title="Edit"
@@ -561,7 +561,7 @@
         </div>
         <div class="print-summary">
             <span><strong>Total Spent:</strong> {formattedTotal}</span>
-            <span><strong>Transactions:</strong> {expenseCount}</span>
+            <span><strong>Expenses:</strong> {expenseCount}</span>
             <span><strong>Average:</strong> {averageExpense}</span>
             <span><strong>Top Category:</strong> {topCategory.name} ({topCategory.amount})</span>
             <span><strong>Top Bank:</strong> {topBank.name} ({topBank.count} txns)</span>

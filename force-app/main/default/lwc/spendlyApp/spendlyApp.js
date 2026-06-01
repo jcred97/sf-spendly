@@ -28,8 +28,8 @@ const VIEW_CONFIG = [
     },
     {
         key: 'transactions',
-        label: 'Transactions',
-        title: 'Transactions',
+        label: 'Expenses',
+        title: 'Expenses',
         subtitle: 'Review, filter, export, and maintain expenses',
         iconName: 'utility:table'
     },
@@ -449,7 +449,7 @@ export default class SpendlyApp extends LightningElement {
 
         return groups.map(group => ({
             ...group,
-            countLabel: `${group.rows.length} transaction${group.rows.length === 1 ? '' : 's'}`,
+            countLabel: `${group.rows.length} expense${group.rows.length === 1 ? '' : 's'}`,
             totalFormatted: formatPHP(group.total)
         }));
     }
@@ -484,7 +484,7 @@ export default class SpendlyApp extends LightningElement {
 
     get transactionCountLabel() {
         const count = this.expenseCount;
-        return `${count} transaction${count === 1 ? '' : 's'}`;
+        return `${count} expense${count === 1 ? '' : 's'}`;
     }
 
     get visibleRowsSummary() {
@@ -574,7 +574,7 @@ export default class SpendlyApp extends LightningElement {
         return {
             label: top.label,
             amount: formatPHP(top.total),
-            countLabel: `${top.count} transaction${top.count === 1 ? '' : 's'}`
+            countLabel: `${top.count} expense${top.count === 1 ? '' : 's'}`
         };
     }
 
