@@ -367,30 +367,36 @@
                                                             </div>
 
                                                             <div class="transaction-actions" aria-label="Expense actions">
-                                                                <button
-                                                                    type="button"
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:edit"
+                                                                    variant="bare"
+                                                                    size="small"
+                                                                    alternative-text="Edit"
                                                                     title="Edit"
                                                                     data-id={row.id}
                                                                     data-action="edit"
                                                                     onclick={handleTransactionAction}>
-                                                                    <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
-                                                                </button>
-                                                                <button
-                                                                    type="button"
+                                                                </lightning-button-icon>
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:copy_to_clipboard"
+                                                                    variant="bare"
+                                                                    size="small"
+                                                                    alternative-text="Duplicate"
                                                                     title="Duplicate"
                                                                     data-id={row.id}
                                                                     data-action="duplicate"
                                                                     onclick={handleTransactionAction}>
-                                                                    <lightning-icon icon-name="utility:copy_to_clipboard" size="xx-small"></lightning-icon>
-                                                                </button>
-                                                                <button
-                                                                    type="button"
+                                                                </lightning-button-icon>
+                                                                <lightning-button-icon
+                                                                    icon-name="utility:delete"
+                                                                    variant="bare"
+                                                                    size="small"
+                                                                    alternative-text="Delete"
                                                                     title="Delete"
                                                                     data-id={row.id}
                                                                     data-action="delete"
                                                                     onclick={handleTransactionAction}>
-                                                                    <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
-                                                                </button>
+                                                                </lightning-button-icon>
                                                             </div>
                                                         </article>
                                                     </template>
