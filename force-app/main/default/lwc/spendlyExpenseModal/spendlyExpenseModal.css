@@ -1,22 +1,8 @@
-.slds-modal__container {
-    border-radius: 0.75rem;
-}
-
 .date-format-hide .slds-form-element__help {
     display: none;
 }
 
-lightning-combobox {
-    display: block;
-    margin-bottom: var(--lwc-spacingXSmall, 0.5rem);
-}
-
 .transaction-time-field {
-    display: block;
-    margin-bottom: var(--lwc-spacingXSmall, 0.5rem);
-}
-
-.transaction-time-field lightning-input {
     display: block;
     width: 100%;
 }

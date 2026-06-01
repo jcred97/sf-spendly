@@ -1,58 +1,100 @@
 <template>
     <template lwc:if={isOpen}>
-        <section role="dialog" tabindex="-1" class={modalClass}>
+        <section
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-labelledby="expense-modal-heading"
+            class={modalClass}>
             <div class="slds-modal__container">
+                <button
+                    class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                    title="Close"
+                    onclick={handleClose}>
+                    <lightning-icon
+                        icon-name="utility:close"
+                        size="small"
+                        alternative-text="Close">
+                    </lightning-icon>
+                    <span class="slds-assistive-text">Close</span>
+                </button>
+
                 <header class="slds-modal__header">
-                    <h2 class="slds-text-heading_medium">{modalTitle}</h2>
-                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-                            title="Close"
-                            onclick={handleClose}>
-                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
-                    </button>
+                    <h2 id="expense-modal-heading" class="slds-modal__title slds-hyphenate">
+                        {modalTitle}
+                    </h2>
                 </header>
 
-                <div class="slds-modal__content slds-p-around_medium">
-                    <lightning-record-edit-form
-                        object-api-name="Expense__c"
-                        record-id={recordId}
-                        onload={handleLoad}
-                        onsubmit={handleSubmit}
-                        onsuccess={handleSuccess}
-                        onerror={handleError}>
+                <lightning-record-edit-form
+                    object-api-name="Expense__c"
+                    record-id={recordId}
+                    onload={handleLoad}
+                    onsubmit={handleSubmit}
+                    onsuccess={handleSuccess}
+                    onerror={handleError}>
 
-                        <lightning-input-field field-name="Name" value={fieldValue.Name}></lightning-input-field>
-                        <lightning-input-field field-name="Amount__c" value={fieldValue.Amount__c}></lightning-input-field>
-                        <lightning-combobox
-                            data-field="category"
-                            label="Category"
-                            value={categoryValue}
-                            options={categoryOptions}
-                            placeholder={categoryPlaceholder}
-                            required
-                            onchange={handleCategoryChange}>
-                        </lightning-combobox>
-                        <lightning-input-field class="date-format-hide" field-name="Expense_Date__c" value={fieldValue.Expense_Date__c}></lightning-input-field>
-                        <div class="transaction-time-field">
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <div class="slds-form slds-form_stacked">
+                            <lightning-input-field field-name="Name" value={fieldValue.Name}></lightning-input-field>
+                            <lightning-input-field
+                                field-name="Amount__c"
+                                value={fieldValue.Amount__c}>
+                            </lightning-input-field>
+                            <lightning-combobox
+                                class="slds-m-bottom_x-small"
+                                data-field="category"
+                                label="Category"
+                                value={categoryValue}
+                                options={categoryOptions}
+                                placeholder={categoryPlaceholder}
+                                required
+                                onchange={handleCategoryChange}>
+                            </lightning-combobox>
+                            <lightning-input-field
+                                class="date-format-hide"
+                                field-name="Expense_Date__c"
+                                value={fieldValue.Expense_Date__c}>
+                            </lightning-input-field>
                             <lightning-input
+                                class="transaction-time-field slds-m-bottom_x-small"
                                 type="time"
                                 label="Transaction Time"
-                                variant="label-stacked"
                                 value={transactionTimeValue}
                                 onchange={handleTransactionTimeChange}>
                             </lightning-input>
+                            <lightning-input-field
+                                field-name="Transaction_Type__c"
+                                value={fieldValue.Transaction_Type__c}>
+                            </lightning-input-field>
+                            <lightning-input-field field-name="Bank__c" value={fieldValue.Bank__c}>
+                            </lightning-input-field>
                         </div>
-                        <lightning-input-field field-name="Transaction_Type__c" value={fieldValue.Transaction_Type__c}></lightning-input-field>
-                        <lightning-input-field field-name="Bank__c" value={fieldValue.Bank__c}></lightning-input-field>
+                    </div>
 
-                        <div class="slds-m-top_medium slds-text-align_right">
-                            <lightning-button variant="neutral" label="Cancel" onclick={handleClose}></lightning-button>
-                            <template lwc:if={isAddMode}>
-                                <lightning-button class="slds-m-left_small" variant="neutral" type="submit" label="Save &amp; New" onclick={handleSaveAndNew}></lightning-button>
-                            </template>
-                            <lightning-button class="slds-m-left_small" variant="brand" type="submit" label="Save" onclick={handleSave}></lightning-button>
-                        </div>
-                    </lightning-record-edit-form>
-                </div>
+                    <footer class="slds-modal__footer">
+                        <lightning-button
+                            variant="neutral"
+                            label="Cancel"
+                            onclick={handleClose}>
+                        </lightning-button>
+                        <template lwc:if={isAddMode}>
+                            <lightning-button
+                                class="slds-m-left_x-small"
+                                variant="neutral"
+                                type="submit"
+                                label="Save &amp; New"
+                                onclick={handleSaveAndNew}>
+                            </lightning-button>
+                        </template>
+                        <lightning-button
+                            class="slds-m-left_x-small"
+                            variant="brand"
+                            type="submit"
+                            label="Save"
+                            onclick={handleSave}>
+                        </lightning-button>
+                    </footer>
+                </lightning-record-edit-form>
             </div>
         </section>
         <div class={backdropClass}></div>
