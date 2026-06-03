@@ -470,6 +470,14 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.length === 0 && !this.isLoading;
     }
 
+    get isDashboardLoading() {
+        return this.isDashboardView && this.isLoading;
+    }
+
+    get showDashboardEmptyState() {
+        return this.isDashboardView && this.filteredRows.length === 0 && !this.isLoading;
+    }
+
     get hasMoreRows() {
         return this.visibleCount < this.filteredRows.length;
     }

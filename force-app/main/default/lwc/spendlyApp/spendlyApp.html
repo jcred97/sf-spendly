@@ -98,91 +98,123 @@
                             </div>
                         </section>
 
-                        <c-spendly-summary-cards
-                            formatted-total={formattedTotal}
-                            expense-count={expenseCount}
-                            average-expense={averageExpense}
-                            top-category-name={topCategory.name}
-                            top-category-amount={topCategory.amount}
-                            top-bank-name={topBank.name}
-                            top-bank-count={topBank.count}>
-                        </c-spendly-summary-cards>
-
-                        <div class="charts-row">
-                            <c-spendly-bar-chart
-                                title="By Category"
-                                chart-data={categoryChartData}>
-                            </c-spendly-bar-chart>
-
-                            <c-spendly-trend-chart
-                                title="Monthly Trend"
-                                trend-data={monthlyTrendData}>
-                            </c-spendly-trend-chart>
-
-                            <c-spendly-bar-chart
-                                title="By Bank"
-                                chart-data={bankChartData}>
-                            </c-spendly-bar-chart>
-                        </div>
-
-                        <div class="dashboard-detail-grid">
-                            <section class="dashboard-panel">
-                                <div class="dashboard-panel-header">
-                                    <div>
-                                        <h3>Latest expenses</h3>
-                                    </div>
-                                    <button
-                                        class="text-action"
-                                        type="button"
-                                        data-view="transactions"
-                                        onclick={handleViewChange}>
-                                        View all
-                                    </button>
-                                </div>
-
-                                <template lwc:if={hasRecentDashboardRows}>
-                                    <div class="dashboard-transaction-list">
-                                        <template for:each={recentDashboardRows} for:item="row">
-                                            <article key={row.id} class="dashboard-transaction-row">
-                                                <div>
-                                                    <a href={row.recordLink} target="_blank" rel="noopener noreferrer">{row.name}</a>
-                                                    <p>{row.metaLine}</p>
-                                                </div>
-                                                <div>
-                                                    <strong>{row.amountFormatted}</strong>
-                                                    <span>{row.transactionTimeDisplay} / {row.expenseDateFormatted}</span>
-                                                </div>
-                                            </article>
-                                        </template>
-                                    </div>
-                                </template>
-                                <template lwc:else>
-                                    <div class="dashboard-empty">
-                                        <lightning-icon icon-name="utility:table" size="small"></lightning-icon>
-                                        <span>No expenses in this period</span>
-                                    </div>
-                                </template>
+                        <template lwc:if={isDashboardLoading}>
+                            <section class="dashboard-loading slds-box slds-theme_default" aria-busy="true">
+                                <lightning-spinner alternative-text="Loading dashboard" size="small"></lightning-spinner>
                             </section>
-
-                            <section class="dashboard-panel">
-                                <div class="dashboard-panel-header">
-                                    <div>
-                                        <h3>Spending insights</h3>
+                        </template>
+                        <template lwc:else>
+                            <template lwc:if={showDashboardEmptyState}>
+                                <section class="dashboard-empty-callout slds-box slds-theme_default">
+                                    <div class="slds-media">
+                                        <div class="slds-media__figure">
+                                            <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h3>No expenses in this period</h3>
+                                            <p>Add an expense or move to another month to see dashboard activity.</p>
+                                        </div>
                                     </div>
-                                </div>
+                                </section>
+                            </template>
 
-                                <div class="insight-grid">
-                                    <template for:each={dashboardInsights} for:item="insight">
-                                        <div key={insight.key} class="insight-card">
-                                            <lightning-icon icon-name={insight.iconName} size="x-small"></lightning-icon>
-                                            <span>{insight.label}</span>
-                                            <strong>{insight.value}</strong>
-                                            <small>{insight.detail}</small>
+                            <c-spendly-summary-cards
+                                formatted-total={formattedTotal}
+                                expense-count={expenseCount}
+                                average-expense={averageExpense}
+                                top-category-name={topCategory.name}
+                                top-category-amount={topCategory.amount}
+                                top-bank-name={topBank.name}
+                                top-bank-count={topBank.count}>
+                            </c-spendly-summary-cards>
+
+                            <div class="charts-row">
+                                <c-spendly-bar-chart
+                                    title="By Category"
+                                    chart-data={categoryChartData}
+                                    empty-message="No category spending in this period">
+                                </c-spendly-bar-chart>
+
+                                <c-spendly-trend-chart
+                                    title="Monthly Trend"
+                                    trend-data={monthlyTrendData}
+                                    empty-message="No trend data for the selected months">
+                                </c-spendly-trend-chart>
+
+                                <c-spendly-bar-chart
+                                    title="By Bank"
+                                    chart-data={bankChartData}
+                                    empty-message="No bank spending in this period">
+                                </c-spendly-bar-chart>
+                            </div>
+
+                            <div class="dashboard-detail-grid">
+                                <section class="dashboard-panel">
+                                    <div class="dashboard-panel-header">
+                                        <div>
+                                            <h3>Latest expenses</h3>
+                                        </div>
+                                        <button
+                                            class="text-action"
+                                            type="button"
+                                            data-view="transactions"
+                                            onclick={handleViewChange}>
+                                            View all
+                                        </button>
+                                    </div>
+
+                                    <template lwc:if={hasRecentDashboardRows}>
+                                        <div class="dashboard-transaction-list">
+                                            <template for:each={recentDashboardRows} for:item="row">
+                                                <article key={row.id} class="dashboard-transaction-row">
+                                                    <div>
+                                                        <a href={row.recordLink} target="_blank" rel="noopener noreferrer">{row.name}</a>
+                                                        <p>{row.metaLine}</p>
+                                                    </div>
+                                                    <div>
+                                                        <strong>{row.amountFormatted}</strong>
+                                                        <span>{row.transactionTimeDisplay} / {row.expenseDateFormatted}</span>
+                                                    </div>
+                                                </article>
+                                            </template>
                                         </div>
                                     </template>
-                                </div>
-                            </section>
-                        </div>
+                                    <template lwc:else>
+                                        <div class="dashboard-panel-empty">
+                                            <lightning-icon icon-name="utility:table" size="small"></lightning-icon>
+                                            <span>No latest expenses to show.</span>
+                                        </div>
+                                    </template>
+                                </section>
+
+                                <section class="dashboard-panel">
+                                    <div class="dashboard-panel-header">
+                                        <div>
+                                            <h3>Spending insights</h3>
+                                        </div>
+                                    </div>
+
+                                    <template lwc:if={showDashboardEmptyState}>
+                                        <div class="dashboard-panel-empty">
+                                            <lightning-icon icon-name="utility:metrics" size="small"></lightning-icon>
+                                            <span>Insights appear after expenses are added.</span>
+                                        </div>
+                                    </template>
+                                    <template lwc:else>
+                                        <div class="insight-grid">
+                                            <template for:each={dashboardInsights} for:item="insight">
+                                                <div key={insight.key} class="insight-card">
+                                                    <lightning-icon icon-name={insight.iconName} size="x-small"></lightning-icon>
+                                                    <span>{insight.label}</span>
+                                                    <strong>{insight.value}</strong>
+                                                    <small>{insight.detail}</small>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </section>
+                            </div>
+                        </template>
                     </section>
                 </template>
 

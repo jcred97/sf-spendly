@@ -15,7 +15,10 @@
             </div>
         </template>
         <template lwc:else>
-            <div class="no-data-msg">{emptyMessage}</div>
+            <div class="no-data-msg slds-box slds-theme_default">
+                <lightning-icon icon-name="utility:chart" size="small"></lightning-icon>
+                <span>{emptyMessage}</span>
+            </div>
         </template>
     </div>
 </template>

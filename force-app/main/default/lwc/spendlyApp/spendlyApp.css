@@ -393,7 +393,29 @@
     text-align: right;
 }
 
-.dashboard-empty {
+.dashboard-loading {
+    min-height: 12rem;
+    position: relative;
+}
+
+.dashboard-empty-callout {
+    margin-bottom: 1rem;
+}
+
+.dashboard-empty-callout h3 {
+    color: #181818;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin: 0 0 0.125rem;
+}
+
+.dashboard-empty-callout p {
+    color: #706e6b;
+    font-size: 0.8125rem;
+    margin: 0;
+}
+
+.dashboard-panel-empty {
     align-items: center;
     color: #706e6b;
     display: flex;

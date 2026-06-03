@@ -6,6 +6,6 @@ export default class SpendlyTrendChart extends LightningElement {
     @api emptyMessage = 'No trend data available';
 
     get hasData() {
-        return this.trendData.length > 0;
+        return this.trendData.some(item => item.hasValue);
     }
 }
