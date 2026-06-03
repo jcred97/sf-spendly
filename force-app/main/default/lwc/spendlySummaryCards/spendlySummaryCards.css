@@ -13,9 +13,9 @@
     background: white;
     border: 1px solid #dddbda;
     border-radius: 0.25rem;
-    padding: 1rem 1.25rem;
     min-width: 0;
     overflow: hidden;
+    padding: 1rem 1.25rem;
 }
 
 .stat-label {
@@ -39,9 +39,13 @@
 
 .stat-value_name {
     font-size: 1rem;
+    max-width: 100%;
 }
 
 .stat-sub {
     font-size: 0.75rem;
     color: #706e6b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

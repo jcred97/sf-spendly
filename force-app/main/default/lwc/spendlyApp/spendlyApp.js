@@ -50,6 +50,12 @@ const VIEW_CONFIG = [
 ];
 
 const PHP_CURRENCY = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+const PHP_COMPACT_CURRENCY = new Intl.NumberFormat('en-PH', {
+    style: 'currency',
+    currency: 'PHP',
+    notation: 'compact',
+    maximumFractionDigits: 1
+});
 const MUTATION_REFRESH_DELAY_MS = 250;
 const DATE_FORMAT = new Intl.DateTimeFormat('en-PH', {
     year: 'numeric',
@@ -64,6 +70,11 @@ const MONTH_LABEL_FORMAT = new Intl.DateTimeFormat('en-PH', {
 
 function formatPHP(value) {
     return PHP_CURRENCY.format(value);
+}
+
+function formatCompactPHP(value) {
+    const amount = value || 0;
+    return Math.abs(amount) < 1000 ? formatPHP(amount) : PHP_COMPACT_CURRENCY.format(amount);
 }
 
 function formatDate(isoDate) {
@@ -118,19 +129,19 @@ function parseDateString(value) {
     return new Date(year, month - 1, day);
 }
 
-function groupByAmount(rows, field) {
+function groupByAmount(rows, field, fallbackLabel = 'Unknown') {
     const map = {};
     rows.forEach(row => {
-        const key = row[field] || 'Unknown';
+        const key = row[field] || fallbackLabel;
         map[key] = (map[key] || 0) + (row.amount || 0);
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
 }
 
-function groupByCount(rows, field) {
+function groupByCount(rows, field, fallbackLabel = 'Unknown') {
     const map = {};
     rows.forEach(row => {
-        const key = row[field] || 'Unknown';
+        const key = row[field] || fallbackLabel;
         map[key] = (map[key] || 0) + 1;
     });
     return Object.entries(map).sort((a, b) => b[1] - a[1]);
@@ -504,7 +515,7 @@ export default class SpendlyApp extends LightningElement {
         if (this.filteredRows.length === 0) {
             return { name: '-', amount: 'PHP 0.00' };
         }
-        const [name, total] = groupByAmount(this.filteredRows, 'category')[0];
+        const [name, total] = groupByAmount(this.filteredRows, 'category', 'Uncategorized')[0];
         return { name, amount: formatPHP(total) };
     }
 
@@ -512,7 +523,7 @@ export default class SpendlyApp extends LightningElement {
         if (this.filteredRows.length === 0) {
             return { name: '-', count: 0 };
         }
-        const [name, count] = groupByCount(this.filteredRows, 'bank')[0];
+        const [name, count] = groupByCount(this.filteredRows, 'bank', 'No bank')[0];
         return { name, count };
     }
 
@@ -520,7 +531,7 @@ export default class SpendlyApp extends LightningElement {
         if (this.filteredRows.length === 0) {
             return [];
         }
-        const entries = groupByAmount(this.filteredRows, 'category').slice(0, 6);
+        const entries = groupByAmount(this.filteredRows, 'category', 'Uncategorized').slice(0, 6);
         return buildBarChartData(entries, 'cat');
     }
 
@@ -528,7 +539,7 @@ export default class SpendlyApp extends LightningElement {
         if (this.filteredRows.length === 0) {
             return [];
         }
-        const entries = groupByAmount(this.filteredRows, 'bank');
+        const entries = groupByAmount(this.filteredRows, 'bank', 'No bank');
         return buildBarChartData(entries, 'bank');
     }
 
@@ -703,6 +714,7 @@ export default class SpendlyApp extends LightningElement {
             key: `trend-${month.year}-${month.monthNum}`,
             label: MONTH_NAMES[month.monthNum - 1],
             formattedTotal: formatPHP(totals[index]),
+            compactTotal: formatCompactPHP(totals[index]),
             barClass: `vbar-item ${month.year === end.getFullYear() && month.monthNum === end.getMonth() + 1 ? 'is-selected' : ''}`,
             barStyle: `--vbar-color:${CHART_COLORS[0]};--vbar-height:${totals[index] > 0 ? Math.max(10, Math.round((totals[index] / max) * 110)) : 2}px`,
             hasValue: totals[index] > 0

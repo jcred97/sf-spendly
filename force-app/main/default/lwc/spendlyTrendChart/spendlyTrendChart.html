@@ -4,8 +4,8 @@
         <template lwc:if={hasData}>
             <div class="vbar-bars">
                 <template for:each={trendData} for:item="item">
-                    <div key={item.key} class={item.barClass} title={item.formattedTotal}>
-                        <div class="vbar-value">{item.formattedTotal}</div>
+                    <div key={item.key} class={item.barClass}>
+                        <div class="vbar-value">{item.compactTotal}</div>
                         <div class="vbar-fill" style={item.barStyle}></div>
                     </div>
                 </template>
