@@ -399,36 +399,29 @@
                                                             </div>
 
                                                             <div class="transaction-actions" aria-label="Expense actions">
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:edit"
-                                                                    variant="bare"
-                                                                    size="small"
-                                                                    alternative-text="Edit"
-                                                                    title="Edit"
+                                                                <lightning-button-menu
+                                                                    alternative-text="Expense actions"
+                                                                    icon-size="x-small"
+                                                                    menu-alignment="right"
+                                                                    variant="border-filled"
                                                                     data-id={row.id}
-                                                                    data-action="edit"
-                                                                    onclick={handleTransactionAction}>
-                                                                </lightning-button-icon>
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:copy_to_clipboard"
-                                                                    variant="bare"
-                                                                    size="small"
-                                                                    alternative-text="Duplicate"
-                                                                    title="Duplicate"
-                                                                    data-id={row.id}
-                                                                    data-action="duplicate"
-                                                                    onclick={handleTransactionAction}>
-                                                                </lightning-button-icon>
-                                                                <lightning-button-icon
-                                                                    icon-name="utility:delete"
-                                                                    variant="bare"
-                                                                    size="small"
-                                                                    alternative-text="Delete"
-                                                                    title="Delete"
-                                                                    data-id={row.id}
-                                                                    data-action="delete"
-                                                                    onclick={handleTransactionAction}>
-                                                                </lightning-button-icon>
+                                                                    onselect={handleTransactionAction}>
+                                                                    <lightning-menu-item
+                                                                        value="edit"
+                                                                        label="Edit"
+                                                                        icon-name="utility:edit">
+                                                                    </lightning-menu-item>
+                                                                    <lightning-menu-item
+                                                                        value="duplicate"
+                                                                        label="Duplicate"
+                                                                        icon-name="utility:copy_to_clipboard">
+                                                                    </lightning-menu-item>
+                                                                    <lightning-menu-item
+                                                                        value="delete"
+                                                                        label="Delete"
+                                                                        icon-name="utility:delete">
+                                                                    </lightning-menu-item>
+                                                                </lightning-button-menu>
                                                             </div>
                                                         </article>
                                                     </template>

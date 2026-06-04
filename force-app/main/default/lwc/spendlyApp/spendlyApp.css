@@ -984,12 +984,11 @@
 
 .transaction-actions {
     display: flex;
-    gap: 0.375rem;
     justify-content: flex-end;
 }
 
-.transaction-actions lightning-button-icon {
-    --slds-c-icon-color-foreground-default: #706e6b;
+.transaction-actions lightning-button-menu {
+    --slds-c-button-color-border: #c9c9c9;
 }
 
 .transaction-load-more {

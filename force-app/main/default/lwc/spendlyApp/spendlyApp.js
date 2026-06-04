@@ -914,7 +914,8 @@ export default class SpendlyApp extends LightningElement {
     }
 
     async handleTransactionAction(event) {
-        const { action, id } = event.currentTarget.dataset;
+        const action = event.detail.value;
+        const { id } = event.currentTarget.dataset;
         const row = this.allRows.find(item => item.id === id);
         await this.performRowAction(action, row);
     }
