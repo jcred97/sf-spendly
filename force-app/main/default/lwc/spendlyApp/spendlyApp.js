@@ -470,6 +470,26 @@ export default class SpendlyApp extends LightningElement {
         return this.filteredRows.length === 0 && !this.isLoading;
     }
 
+    get hasActiveExpenseFilters() {
+        return Boolean(this.searchTerm) || this.categoryId !== 'All';
+    }
+
+    get expenseEmptyIcon() {
+        return this.hasActiveExpenseFilters ? 'utility:filterList' : 'utility:table';
+    }
+
+    get expenseEmptyTitle() {
+        return this.hasActiveExpenseFilters ? 'No expenses match your filters' : 'No expenses in this period';
+    }
+
+    get expenseEmptyMessage() {
+        if (this.hasActiveExpenseFilters) {
+            return 'Adjust or reset the filters to widen your expense results.';
+        }
+
+        return 'Add an expense for this group and month to start tracking spending.';
+    }
+
     get isDashboardLoading() {
         return this.isDashboardView && this.isLoading;
     }

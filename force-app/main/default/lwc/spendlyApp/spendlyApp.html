@@ -340,8 +340,27 @@
 
                                 <template lwc:if={hasNoRows}>
                                     <div class="empty-state">
-                                        <lightning-icon icon-name="utility:sentiment_neutral" size="large" class="slds-m-bottom_small"></lightning-icon>
-                                        <p class="slds-text-heading_small slds-m-top_small">No expenses found</p>
+                                        <lightning-icon icon-name={expenseEmptyIcon} size="medium"></lightning-icon>
+                                        <h3>{expenseEmptyTitle}</h3>
+                                        <p>{expenseEmptyMessage}</p>
+                                        <div class="empty-state-actions">
+                                            <template lwc:if={hasActiveExpenseFilters}>
+                                                <lightning-button
+                                                    variant="neutral"
+                                                    label="Reset Filters"
+                                                    icon-name="utility:refresh"
+                                                    onclick={handleReset}>
+                                                </lightning-button>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-button
+                                                    variant="brand"
+                                                    label="Add Expense"
+                                                    icon-name="utility:add"
+                                                    onclick={openModal}>
+                                                </lightning-button>
+                                            </template>
+                                        </div>
                                     </div>
                                 </template>
                                 <template lwc:else>
