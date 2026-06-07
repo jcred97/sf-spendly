@@ -1,6 +1,6 @@
 <template>
-    <div class="chart-panel">
-        <div class="panel-title">{title}</div>
+    <div class="chart-panel slds-box slds-theme_default">
+        <h3 class="panel-title">{title}</h3>
         <template lwc:if={hasData}>
             <div class="vbar-bars">
                 <template for:each={trendData} for:item="item">

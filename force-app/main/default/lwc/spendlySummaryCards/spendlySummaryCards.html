@@ -1,21 +1,21 @@
 <template>
     <div class="summary-row">
-        <div class="stat-card">
+        <div class="stat-card slds-box slds-theme_default">
             <div class="stat-label">Total Spent</div>
-            <div class="stat-value">{formattedTotal}</div>
+            <div class="stat-value stat-value_amount" title={formattedTotal}>{formattedTotal}</div>
             <div class="stat-sub">{expenseCount} expenses</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card slds-box slds-theme_default">
             <div class="stat-label">Average</div>
-            <div class="stat-value">{averageExpense}</div>
+            <div class="stat-value stat-value_amount" title={averageExpense}>{averageExpense}</div>
             <div class="stat-sub">per expense</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card slds-box slds-theme_default">
             <div class="stat-label">Top Category</div>
             <div class="stat-value stat-value_name" title={topCategoryName}>{topCategoryName}</div>
             <div class="stat-sub">{topCategoryAmount}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card slds-box slds-theme_default">
             <div class="stat-label">Top Bank</div>
             <div class="stat-value stat-value_name" title={topBankName}>{topBankName}</div>
             <div class="stat-sub">{topBankCount} expenses</div>

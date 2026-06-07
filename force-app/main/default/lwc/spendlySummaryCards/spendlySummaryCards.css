@@ -4,14 +4,12 @@
 
 .summary-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     padding: 1rem 0;
 }
 
 .stat-card {
-    background: white;
-    border: 1px solid #dddbda;
     border-radius: 0.25rem;
     min-width: 0;
     overflow: hidden;
@@ -37,6 +35,10 @@
     text-overflow: ellipsis;
 }
 
+.stat-value_amount {
+    color: #2e844a;
+}
+
 .stat-value_name {
     font-size: 1rem;
     max-width: 100%;
@@ -48,4 +50,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .summary-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .summary-row {
+        grid-template-columns: 1fr;
+    }
 }

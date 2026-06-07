@@ -218,8 +218,6 @@
 /* Dashboard */
 .dashboard-hero {
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #dddbda;
     border-radius: 0.25rem;
     display: flex;
     justify-content: space-between;
@@ -230,7 +228,7 @@
 
 .dashboard-hero h3 {
     color: #181818;
-    font-size: 1.375rem;
+    font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.2;
     margin: 0.125rem 0;
@@ -269,6 +267,7 @@
 
 .dashboard-hero-total {
     flex: 0 0 auto;
+    min-width: 12rem;
     text-align: right;
 }
 
@@ -283,10 +282,13 @@
 .dashboard-hero-total strong {
     color: #2e844a;
     display: block;
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     font-weight: 600;
     line-height: 1.1;
     margin: 0.25rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .dashboard-detail-grid {
@@ -297,8 +299,6 @@
 }
 
 .dashboard-panel {
-    background: #ffffff;
-    border: 1px solid #dddbda;
     border-radius: 0.25rem;
     min-width: 0;
     overflow: hidden;
@@ -318,21 +318,6 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0.125rem 0 0;
-}
-
-.text-action {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    color: #0176d3;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    padding: 0.25rem 0;
-}
-
-.text-action:hover {
-    text-decoration: underline;
 }
 
 .dashboard-transaction-list {
@@ -390,6 +375,7 @@
 }
 
 .dashboard-transaction-row div:last-child {
+    min-width: 8rem;
     text-align: right;
 }
 
@@ -428,6 +414,8 @@
     gap: 0.5rem;
     justify-content: center;
     min-height: 10rem;
+    padding: 1rem;
+    text-align: center;
 }
 
 .insight-grid {
@@ -444,6 +432,7 @@
     display: grid;
     gap: 0.25rem;
     min-height: 7.25rem;
+    min-width: 0;
     padding: 0.875rem;
 }
 
@@ -471,6 +460,9 @@
     color: #706e6b;
     font-size: 0.75rem;
     line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Charts Row */
@@ -1124,7 +1116,9 @@
     }
 
     .dashboard-hero-total {
+        min-width: 0;
         text-align: left;
+        width: 100%;
     }
 
     .dashboard-month-controls span {

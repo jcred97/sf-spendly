@@ -3,8 +3,6 @@
 }
 
 .chart-panel {
-    background: white;
-    border: 1px solid #dddbda;
     border-radius: 0.25rem;
     padding: 1.25rem;
     height: 100%;
@@ -17,6 +15,13 @@
     color: #706e6b;
     letter-spacing: 0;
     margin-bottom: 1rem;
+    margin-top: 0;
+}
+
+.chart-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
 }
 
 .bar-row {
@@ -24,7 +29,6 @@
     display: grid;
     gap: 0.5rem;
     grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr) minmax(4.75rem, max-content);
-    margin-bottom: 0.875rem;
     min-width: 0;
 }
 
@@ -67,5 +71,17 @@
     font-size: 0.875rem;
     gap: 0.5rem;
     justify-content: center;
+    min-height: 9rem;
     padding: 2rem 0;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .bar-row {
+        grid-template-columns: minmax(0, 1fr) minmax(4.75rem, max-content);
+    }
+
+    .bar-track {
+        grid-column: 1 / -1;
+    }
 }
