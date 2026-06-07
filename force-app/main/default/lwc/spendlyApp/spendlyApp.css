@@ -1,13 +1,13 @@
 /* Page */
 .spendly-page {
-    min-height: 100vh;
     background: #f3f2f2;
+    min-height: calc(100vh - 9.5rem);
 }
 
 .workspace-shell {
     display: grid;
     grid-template-columns: 15rem minmax(0, 1fr);
-    min-height: 100vh;
+    min-height: calc(100vh - 9.5rem);
 }
 
 .workspace-shell.is-sidebar-collapsed {
@@ -393,9 +393,15 @@
     text-align: right;
 }
 
-.dashboard-loading {
+.dashboard-loading,
+.transactions-loading {
     min-height: 12rem;
     position: relative;
+}
+
+.transactions-loading {
+    flex: 1;
+    min-height: 14rem;
 }
 
 .dashboard-empty-callout {
@@ -523,6 +529,8 @@
 .transactions-panel {
     display: flex;
     flex-direction: column;
+    height: min(38rem, calc(100vh - 15rem));
+    min-height: 28rem;
     min-width: 0;
     overflow: hidden;
 }
@@ -571,19 +579,39 @@
     margin-top: 0.125rem;
 }
 
-.transactions-toolbar {
-    align-items: center;
-    border-bottom: 1px solid #dddbda;
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    padding: 0.75rem 1rem;
-}
-
 .table-status {
     color: #706e6b;
     font-size: 0.8125rem;
     font-weight: 400;
+}
+
+.transaction-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.transaction-body > .empty-state {
+    flex: 1;
+    justify-content: center;
+}
+
+.transaction-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+.transaction-table-footer {
+    align-items: center;
+    background: #ffffff;
+    border-top: 1px solid #dddbda;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    min-height: 3rem;
+    padding: 0.5rem 1rem;
 }
 
 /* Selection Bar */
@@ -1026,7 +1054,7 @@
     .workspace-shell,
     .workspace-shell.is-sidebar-collapsed {
         display: block;
-        min-height: 100vh;
+        min-height: calc(100vh - 9.5rem);
     }
 
     .workspace-sidebar {
@@ -1119,8 +1147,12 @@
         position: static;
     }
 
-    .transactions-panel-header,
-    .transactions-toolbar {
+    .transactions-panel {
+        height: auto;
+        min-height: 0;
+    }
+
+    .transactions-panel-header {
         align-items: flex-start;
         flex-direction: column;
     }
@@ -1131,6 +1163,11 @@
 
     .view-actions {
         justify-content: flex-start;
+    }
+
+    .transaction-table-footer {
+        align-items: flex-start;
+        flex-direction: column;
     }
 
     .workspace-view {

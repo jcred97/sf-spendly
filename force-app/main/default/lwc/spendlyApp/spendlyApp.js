@@ -186,6 +186,7 @@ export default class SpendlyApp extends LightningElement {
     visibleCount = PAGE_SIZE;
 
     isLoading = false;
+    isLoadingMore = false;
     isRecurringLoading = false;
     isRunningRecurring = false;
     isModalOpen = false;
@@ -494,12 +495,20 @@ export default class SpendlyApp extends LightningElement {
         return this.isDashboardView && this.isLoading;
     }
 
+    get isExpensesLoading() {
+        return this.isTransactionsView && this.isLoading;
+    }
+
     get showDashboardEmptyState() {
         return this.isDashboardView && this.filteredRows.length === 0 && !this.isLoading;
     }
 
     get hasMoreRows() {
         return this.visibleCount < this.filteredRows.length;
+    }
+
+    get loadMoreLabel() {
+        return this.isLoadingMore ? 'Loading...' : 'Load More';
     }
 
     get hasSelectedRows() {
@@ -888,6 +897,7 @@ export default class SpendlyApp extends LightningElement {
         this.monthlyTrendRaw = [];
         this.visibleCount = PAGE_SIZE;
         this.isLoading = false;
+        this.isLoadingMore = false;
     }
 
     clearRecurringData() {
@@ -913,11 +923,14 @@ export default class SpendlyApp extends LightningElement {
             return;
         }
 
-        this.isLoading = true;
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
-        await new Promise(resolve => setTimeout(resolve, 500));
-        this.visibleCount += LOAD_MORE_SIZE;
-        this.isLoading = false;
+        this.isLoadingMore = true;
+        try {
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            await new Promise(resolve => setTimeout(resolve, 500));
+            this.visibleCount += LOAD_MORE_SIZE;
+        } finally {
+            this.isLoadingMore = false;
+        }
     }
 
     handleTransactionSelect(event) {

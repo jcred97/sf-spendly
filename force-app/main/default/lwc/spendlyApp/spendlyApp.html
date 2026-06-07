@@ -244,6 +244,20 @@
                                     </lightning-button-icon>
                                 </div>
                                 <lightning-button
+                                    variant="neutral"
+                                    label="Export CSV"
+                                    icon-name="utility:download"
+                                    onclick={handleExportCsv}
+                                    disabled={hasNoRows}>
+                                </lightning-button>
+                                <lightning-button
+                                    variant="neutral"
+                                    label="Print / PDF"
+                                    icon-name="utility:print"
+                                    onclick={handlePrint}
+                                    disabled={hasNoRows}>
+                                </lightning-button>
+                                <lightning-button
                                     variant="brand"
                                     label="Add Expense"
                                     icon-name="utility:add"
@@ -318,149 +332,141 @@
                                     </div>
                                 </div>
 
-                                <div class="transactions-toolbar">
-                                    <div class="view-actions">
-                                        <span class="table-status">{visibleRowsSummary}</span>
-                                        <lightning-button
-                                            variant="neutral"
-                                            label="Export CSV"
-                                            icon-name="utility:download"
-                                            onclick={handleExportCsv}
-                                            disabled={hasNoRows}>
-                                        </lightning-button>
-                                        <lightning-button
-                                            variant="neutral"
-                                            label="Print / PDF"
-                                            icon-name="utility:print"
-                                            onclick={handlePrint}
-                                            disabled={hasNoRows}>
-                                        </lightning-button>
-                                    </div>
-                                </div>
-
-                                <template lwc:if={hasNoRows}>
-                                    <div class="empty-state">
-                                        <lightning-icon icon-name={expenseEmptyIcon} size="medium"></lightning-icon>
-                                        <h3>{expenseEmptyTitle}</h3>
-                                        <p>{expenseEmptyMessage}</p>
-                                        <div class="empty-state-actions">
-                                            <template lwc:if={hasActiveExpenseFilters}>
-                                                <lightning-button
-                                                    variant="neutral"
-                                                    label="Reset Filters"
-                                                    icon-name="utility:refresh"
-                                                    onclick={handleReset}>
-                                                </lightning-button>
-                                            </template>
-                                            <template lwc:else>
-                                                <lightning-button
-                                                    variant="brand"
-                                                    label="Add Expense"
-                                                    icon-name="utility:add"
-                                                    onclick={openModal}>
-                                                </lightning-button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template lwc:else>
-                                    <template lwc:if={hasSelectedRows}>
-                                        <div class="selection-bar">
-                                            <span class="selection-count">{selectedCount} row(s) selected</span>
-                                            <lightning-button
-                                                variant="destructive-text"
-                                                label="Delete Selected"
-                                                icon-name="utility:delete"
-                                                onclick={handleBulkDelete}>
-                                            </lightning-button>
-                                        </div>
+                                <div class="transaction-body">
+                                    <template lwc:if={isExpensesLoading}>
+                                        <section class="transactions-loading slds-box slds-theme_default" aria-busy="true">
+                                            <lightning-spinner alternative-text="Loading expenses" size="small"></lightning-spinner>
+                                        </section>
                                     </template>
-                                    <div class="transaction-list" aria-label="Expenses">
-                                        <template for:each={transactionGroups} for:item="group">
-                                            <section key={group.key} class="transaction-day">
-                                                <div class="transaction-day-header">
-                                                    <div>
-                                                        <p class="transaction-day-label">{group.label}</p>
-                                                        <p class="transaction-day-count">{group.countLabel}</p>
-                                                    </div>
-                                                    <strong>{group.totalFormatted}</strong>
-                                                </div>
-
-                                                <div class="transaction-day-rows">
-                                                    <template for:each={group.rows} for:item="row">
-                                                        <article key={row.id} class="transaction-row">
-                                                            <label class="transaction-select" title="Select expense">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    data-id={row.id}
-                                                                    checked={row.isSelected}
-                                                                    onchange={handleTransactionSelect} />
-                                                            </label>
-
-                                                            <div class="transaction-main">
-                                                                <a class="transaction-name" href={row.recordLink} target="_blank" rel="noopener noreferrer">
-                                                                    {row.name}
-                                                                </a>
-                                                                <div class="transaction-meta">
-                                                                    <span>{row.categoryDisplay}</span>
-                                                                    <span>{row.bankDisplay}</span>
-                                                                    <span>{row.transactionTypeDisplay}</span>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="transaction-when">
-                                                                <span>{row.transactionTimeDisplay}</span>
-                                                                <span>{row.expenseDateFormatted}</span>
-                                                            </div>
-
-                                                            <div class="transaction-amount">
-                                                                {row.amountFormatted}
-                                                            </div>
-
-                                                            <div class="transaction-actions" aria-label="Expense actions">
-                                                                <lightning-button-menu
-                                                                    alternative-text="Expense actions"
-                                                                    icon-size="x-small"
-                                                                    menu-alignment="right"
-                                                                    variant="border-filled"
-                                                                    data-id={row.id}
-                                                                    onselect={handleTransactionAction}>
-                                                                    <lightning-menu-item
-                                                                        value="edit"
-                                                                        label="Edit"
-                                                                        icon-name="utility:edit">
-                                                                    </lightning-menu-item>
-                                                                    <lightning-menu-item
-                                                                        value="duplicate"
-                                                                        label="Duplicate"
-                                                                        icon-name="utility:copy_to_clipboard">
-                                                                    </lightning-menu-item>
-                                                                    <lightning-menu-item
-                                                                        value="delete"
-                                                                        label="Delete"
-                                                                        icon-name="utility:delete">
-                                                                    </lightning-menu-item>
-                                                                </lightning-button-menu>
-                                                            </div>
-                                                        </article>
+                                    <template lwc:else>
+                                        <template lwc:if={hasNoRows}>
+                                            <div class="empty-state">
+                                                <lightning-icon icon-name={expenseEmptyIcon} size="medium"></lightning-icon>
+                                                <h3>{expenseEmptyTitle}</h3>
+                                                <p>{expenseEmptyMessage}</p>
+                                                <div class="empty-state-actions">
+                                                    <template lwc:if={hasActiveExpenseFilters}>
+                                                        <lightning-button
+                                                            variant="neutral"
+                                                            label="Reset Filters"
+                                                            icon-name="utility:refresh"
+                                                            onclick={handleReset}>
+                                                        </lightning-button>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <lightning-button
+                                                            variant="brand"
+                                                            label="Add Expense"
+                                                            icon-name="utility:add"
+                                                            onclick={openModal}>
+                                                        </lightning-button>
                                                     </template>
                                                 </div>
-                                            </section>
-                                        </template>
-
-                                        <template lwc:if={hasMoreRows}>
-                                            <div class="transaction-load-more">
-                                                <lightning-button
-                                                    variant="neutral"
-                                                    label="Load More"
-                                                    icon-name="utility:chevrondown"
-                                                    onclick={handleLoadMore}
-                                                    disabled={isLoading}>
-                                                </lightning-button>
                                             </div>
                                         </template>
-                                    </div>
-                                </template>
+                                        <template lwc:else>
+                                            <template lwc:if={hasSelectedRows}>
+                                                <div class="selection-bar">
+                                                    <span class="selection-count">{selectedCount} row(s) selected</span>
+                                                    <lightning-button
+                                                        variant="destructive-text"
+                                                        label="Delete Selected"
+                                                        icon-name="utility:delete"
+                                                        onclick={handleBulkDelete}>
+                                                    </lightning-button>
+                                                </div>
+                                            </template>
+                                            <div class="transaction-scroll">
+                                                <div class="transaction-list" aria-label="Expenses">
+                                                    <template for:each={transactionGroups} for:item="group">
+                                                        <section key={group.key} class="transaction-day">
+                                                            <div class="transaction-day-header">
+                                                                <div>
+                                                                    <p class="transaction-day-label">{group.label}</p>
+                                                                    <p class="transaction-day-count">{group.countLabel}</p>
+                                                                </div>
+                                                                <strong>{group.totalFormatted}</strong>
+                                                            </div>
+
+                                                            <div class="transaction-day-rows">
+                                                                <template for:each={group.rows} for:item="row">
+                                                                    <article key={row.id} class="transaction-row">
+                                                                        <label class="transaction-select" title="Select expense">
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                data-id={row.id}
+                                                                                checked={row.isSelected}
+                                                                                onchange={handleTransactionSelect} />
+                                                                        </label>
+
+                                                                        <div class="transaction-main">
+                                                                            <a class="transaction-name" href={row.recordLink} target="_blank" rel="noopener noreferrer">
+                                                                                {row.name}
+                                                                            </a>
+                                                                            <div class="transaction-meta">
+                                                                                <span>{row.categoryDisplay}</span>
+                                                                                <span>{row.bankDisplay}</span>
+                                                                                <span>{row.transactionTypeDisplay}</span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="transaction-when">
+                                                                            <span>{row.transactionTimeDisplay}</span>
+                                                                            <span>{row.expenseDateFormatted}</span>
+                                                                        </div>
+
+                                                                        <div class="transaction-amount">
+                                                                            {row.amountFormatted}
+                                                                        </div>
+
+                                                                        <div class="transaction-actions" aria-label="Expense actions">
+                                                                            <lightning-button-menu
+                                                                                alternative-text="Expense actions"
+                                                                                icon-size="x-small"
+                                                                                menu-alignment="right"
+                                                                                variant="border-filled"
+                                                                                data-id={row.id}
+                                                                                onselect={handleTransactionAction}>
+                                                                                <lightning-menu-item
+                                                                                    value="edit"
+                                                                                    label="Edit"
+                                                                                    icon-name="utility:edit">
+                                                                                </lightning-menu-item>
+                                                                                <lightning-menu-item
+                                                                                    value="duplicate"
+                                                                                    label="Duplicate"
+                                                                                    icon-name="utility:copy_to_clipboard">
+                                                                                </lightning-menu-item>
+                                                                                <lightning-menu-item
+                                                                                    value="delete"
+                                                                                    label="Delete"
+                                                                                    icon-name="utility:delete">
+                                                                                </lightning-menu-item>
+                                                                            </lightning-button-menu>
+                                                                        </div>
+                                                                    </article>
+                                                                </template>
+                                                            </div>
+                                                        </section>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <div class="transaction-table-footer">
+                                                <span class="table-status">{visibleRowsSummary}</span>
+                                                <template lwc:if={hasMoreRows}>
+                                                    <lightning-button
+                                                        variant="neutral"
+                                                        label={loadMoreLabel}
+                                                        icon-name="utility:chevrondown"
+                                                        onclick={handleLoadMore}
+                                                        disabled={isLoadingMore}>
+                                                    </lightning-button>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </section>
