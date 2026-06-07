@@ -494,21 +494,26 @@
 
                         <div class="recurring-summary-grid">
                             <template for:each={recurringSummaryCards} for:item="card">
-                                <section key={card.key} class="recurring-summary-card">
-                                    <span>{card.label}</span>
-                                    <strong>{card.value}</strong>
-                                    <small>{card.detail}</small>
+                                <section key={card.key} class="recurring-summary-card slds-box slds-theme_default">
+                                    <div class="recurring-summary-icon">
+                                        <lightning-icon icon-name={card.iconName} size="x-small"></lightning-icon>
+                                    </div>
+                                    <div class="recurring-summary-copy">
+                                        <span>{card.label}</span>
+                                        <strong title={card.valueTitle}>{card.value}</strong>
+                                        <small title={card.detailTitle}>{card.detail}</small>
+                                    </div>
                                 </section>
                             </template>
                         </div>
 
-                        <section class="recurring-panel">
+                        <section class="recurring-panel slds-box slds-theme_default slds-p-around_none">
                             <div class="recurring-panel-header">
                                 <div>
                                     <p class="eyebrow">Templates</p>
                                     <h3>{selectedExpenseGroupName}</h3>
                                 </div>
-                                <span>{recurringCountLabel}</span>
+                                <span class="recurring-count">{recurringCountLabel}</span>
                             </div>
 
                             <template lwc:if={isRecurringLoading}>
@@ -524,7 +529,7 @@
                                             <div class="recurring-main">
                                                 <div class="recurring-title-row">
                                                     <a href={row.recordLink} target="_blank" rel="noopener noreferrer">{row.name}</a>
-                                                    <span class="recurring-status">{row.statusLabel}</span>
+                                                    <span class={row.statusClass}>{row.statusLabel}</span>
                                                     <template lwc:if={row.dueToday}>
                                                         <span class="recurring-due">Due</span>
                                                     </template>
@@ -557,27 +562,30 @@
                                             </div>
 
                                             <div class="recurring-dates">
+                                                <span class="recurring-date-label">Active window</span>
                                                 <span>{row.startDateFormatted} - {row.endDateFormatted}</span>
                                             </div>
 
                                             <div class="recurring-actions">
-                                                <button
-                                                    type="button"
-                                                    title="Edit"
+                                                <lightning-button-menu
+                                                    alternative-text="Recurring expense actions"
+                                                    icon-size="x-small"
+                                                    menu-alignment="right"
+                                                    variant="border-filled"
                                                     data-id={row.id}
-                                                    data-action="edit"
-                                                    onclick={handleRecurringAction}>
-                                                    <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    title="Deactivate"
-                                                    data-id={row.id}
-                                                    data-action="deactivate"
-                                                    onclick={handleRecurringAction}
-                                                    disabled={row.deactivateDisabled}>
-                                                    <lightning-icon icon-name="utility:block_visitor" size="xx-small"></lightning-icon>
-                                                </button>
+                                                    onselect={handleRecurringAction}>
+                                                    <lightning-menu-item
+                                                        value="edit"
+                                                        label="Edit"
+                                                        icon-name="utility:edit">
+                                                    </lightning-menu-item>
+                                                    <lightning-menu-item
+                                                        value="deactivate"
+                                                        label="Deactivate"
+                                                        icon-name="utility:block_visitor"
+                                                        disabled={row.deactivateDisabled}>
+                                                    </lightning-menu-item>
+                                                </lightning-button-menu>
                                             </div>
                                         </article>
                                     </template>

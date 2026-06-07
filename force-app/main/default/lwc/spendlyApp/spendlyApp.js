@@ -401,8 +401,13 @@ export default class SpendlyApp extends LightningElement {
                 nextRunDateFormatted: formatDate(row.nextRunDate),
                 endDateFormatted: formatDate(row.endDate),
                 statusLabel: row.active ? 'Active' : 'Inactive',
+                statusClass: `recurring-status ${row.active ? 'is-active' : 'is-inactive'}`,
                 deactivateDisabled: !row.active,
-                rowClass: `recurring-row ${row.dueToday ? 'is-due' : ''}`
+                rowClass: [
+                    'recurring-row',
+                    row.dueToday ? 'is-due' : '',
+                    row.active ? '' : 'is-inactive'
+                ].filter(Boolean).join(' ')
             }));
         } catch (error) {
             this.showToast('Error', this.getErrorMessage(error, 'Failed to load recurring expenses.'), 'error');
@@ -705,23 +710,30 @@ export default class SpendlyApp extends LightningElement {
         return [
             {
                 key: 'active',
+                iconName: 'utility:check',
                 label: 'Active templates',
                 value: this.activeRecurringCount,
                 detail: `${this.recurringRows.length} total templates`
             },
             {
                 key: 'due',
+                iconName: 'utility:event',
                 label: 'Due today',
                 value: this.dueRecurringCount,
                 detail: 'Ready for the next batch run'
             },
             {
                 key: 'monthly',
+                iconName: 'utility:money',
                 label: 'Monthly estimate',
                 value: this.recurringMonthlyTotal,
                 detail: 'Normalized active recurring total'
             }
-        ];
+        ].map(card => ({
+            ...card,
+            valueTitle: String(card.value),
+            detailTitle: String(card.detail)
+        }));
     }
 
     get runRecurringLabel() {
@@ -954,7 +966,8 @@ export default class SpendlyApp extends LightningElement {
     }
 
     async handleRecurringAction(event) {
-        const { action, id } = event.currentTarget.dataset;
+        const action = event.detail?.value || event.currentTarget.dataset.action;
+        const { id } = event.currentTarget.dataset;
 
         if (action === 'edit') {
             window.open(`/${id}`, '_blank', 'noopener');
