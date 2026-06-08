@@ -8,6 +8,7 @@ private class SpendlySettingsServiceTest {
 
         System.assertNotEquals(null, settings.settingsId);
         System.assertEquals(true, settings.recurringExpensesEnabled);
+        System.assertEquals('08:00', settings.globalRecurringRunTime);
         System.assertEquals(1, [SELECT COUNT() FROM Spendly_Settings__c]);
     }
 
@@ -22,6 +23,30 @@ private class SpendlySettingsServiceTest {
         System.assertEquals(false, settings.recurringExpensesEnabled);
         System.assertEquals(false, SpendlySettingsService.areRecurringExpensesEnabled());
         System.assertEquals(1, [SELECT COUNT() FROM Spendly_Settings__c]);
+    }
+
+    @IsTest
+    static void testSaveSettingsUpdatesGlobalRunTimeAndSchedule() {
+        SpendlySettingsService.getSettings();
+
+        SpendlySettingsService.SettingsState settings = SpendlySettingsService.saveSettings(true, '10:30');
+
+        System.assertEquals('10:30', settings.globalRecurringRunTime);
+
+        Spendly_Settings__c settingsRecord = [
+            SELECT Global_Recurring_Run_Time__c
+            FROM Spendly_Settings__c
+            LIMIT 1
+        ];
+        System.assertEquals(Time.newInstance(10, 30, 0, 0), settingsRecord.Global_Recurring_Run_Time__c);
+
+        CronTrigger scheduledJob = [
+            SELECT CronExpression, CronJobDetail.Name
+            FROM CronTrigger
+            WHERE CronJobDetail.Name = 'Spendly Recurring Expense Daily'
+            LIMIT 1
+        ];
+        System.assertEquals('0 30 10 * * ?', scheduledJob.CronExpression);
     }
 
     @IsTest

@@ -139,6 +139,11 @@
 
     <!-- Spendly_Settings__c Field Permissions -->
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Spendly_Settings__c.Global_Recurring_Run_Time__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Spendly_Settings__c.Last_Recurring_Run_DateTime__c</field>
         <readable>true</readable>

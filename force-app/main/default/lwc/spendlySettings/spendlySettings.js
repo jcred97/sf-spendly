@@ -20,6 +20,7 @@ function formatDateTime(value) {
 export default class SpendlySettings extends LightningElement {
     settingsId;
     recurringExpensesEnabled = true;
+    globalRecurringRunTime = '08:00';
     lastRunStatus = '-';
     lastRunDateTime;
     lastRunMessage = '-';
@@ -38,6 +39,20 @@ export default class SpendlySettings extends LightningElement {
 
     get isRunDisabled() {
         return this.isRunning || this.isSaving || !this.recurringExpensesEnabled;
+    }
+
+    get scheduleText() {
+        return `Daily at ${this.formattedGlobalRunTime}`;
+    }
+
+    get formattedGlobalRunTime() {
+        const [hourValue, minuteValue] = (this.globalRecurringRunTime || '08:00').split(':');
+        const date = new Date();
+        date.setHours(Number(hourValue), Number(minuteValue), 0, 0);
+        return new Intl.DateTimeFormat('en-PH', {
+            hour: 'numeric',
+            minute: '2-digit'
+        }).format(date);
     }
 
     get lastRecurringRunStatus() {
@@ -67,11 +82,16 @@ export default class SpendlySettings extends LightningElement {
         this.recurringExpensesEnabled = event.target.checked;
     }
 
+    handleGlobalRunTimeChange(event) {
+        this.globalRecurringRunTime = event.target.value || '08:00';
+    }
+
     async handleSave() {
         this.isSaving = true;
         try {
             const settings = await saveSettings({
-                recurringExpensesEnabled: this.recurringExpensesEnabled
+                recurringExpensesEnabled: this.recurringExpensesEnabled,
+                globalRecurringRunTime: this.globalRecurringRunTime
             });
             this.applySettings(settings);
             this.showToast('Saved', 'Spendly Settings saved.', 'success');
@@ -102,6 +122,7 @@ export default class SpendlySettings extends LightningElement {
     applySettings(settings) {
         this.settingsId = settings?.settingsId;
         this.recurringExpensesEnabled = settings?.recurringExpensesEnabled ?? true;
+        this.globalRecurringRunTime = settings?.globalRecurringRunTime || '08:00';
         this.lastRunStatus = settings?.lastRecurringRunStatus || '-';
         this.lastRunDateTime = settings?.lastRecurringRunDateTime;
         this.lastRunMessage = settings?.lastRecurringRunMessage || '-';

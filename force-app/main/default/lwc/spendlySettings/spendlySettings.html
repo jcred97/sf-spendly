@@ -30,6 +30,14 @@
                     onchange={handleRecurringToggle}>
                 </lightning-input>
 
+                <lightning-input
+                    class="run-time-input"
+                    type="time"
+                    label="Global Run Time"
+                    value={globalRecurringRunTime}
+                    onchange={handleGlobalRunTimeChange}>
+                </lightning-input>
+
                 <div class="run-actions">
                     <lightning-button
                         variant="neutral"
@@ -38,7 +46,7 @@
                         onclick={handleRunRecurringExpenses}
                         disabled={isRunDisabled}>
                     </lightning-button>
-                    <span class="schedule-text">Daily at 8:00 AM</span>
+                    <span class="schedule-text">{scheduleText}</span>
                 </div>
             </section>
 

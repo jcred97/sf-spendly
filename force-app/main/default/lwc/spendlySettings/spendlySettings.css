@@ -57,6 +57,11 @@
     margin-top: 1rem;
 }
 
+.run-time-input {
+    margin-top: 1rem;
+    max-width: 16rem;
+}
+
 .schedule-text {
     color: #706e6b;
     font-size: 0.875rem;
@@ -97,6 +102,10 @@
     .run-actions {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .run-time-input {
+        max-width: none;
     }
 
     .settings-grid {

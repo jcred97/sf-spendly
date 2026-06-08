@@ -14,6 +14,10 @@
                 <behavior>Edit</behavior>
                 <field>Recurring_Expenses_Enabled__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Global_Recurring_Run_Time__c</field>
+            </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
