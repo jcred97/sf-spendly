@@ -69,16 +69,21 @@ public with sharing class SpendlySettingsService {
     public static void markRecurringRunQueued(Id jobId) {
         updateRecurringRunStatus(
             'Queued',
-            'Recurring expense generation queued. Job Id: ' + String.valueOf(jobId)
+            'Recurring expense generation is queued.'
         );
     }
 
     public static void markRecurringRunCompleted(Integer expensesCreated, Integer recurringExpensesProcessed) {
+        Integer expenseCount = expensesCreated == null ? 0 : expensesCreated;
+        Integer templateCount = recurringExpensesProcessed == null ? 0 : recurringExpensesProcessed;
+        String message = expenseCount == 0
+            ? 'No recurring expenses were due.'
+            : 'Created ' + String.valueOf(expenseCount) + ' ' + pluralize('expense', expenseCount) +
+                ' from ' + String.valueOf(templateCount) + ' recurring ' + pluralize('template', templateCount) + '.';
+
         updateRecurringRunStatus(
             'Completed',
-            'Created ' + String.valueOf(expensesCreated) +
-                ' expense(s) from ' + String.valueOf(recurringExpensesProcessed) +
-                ' recurring template(s).'
+            message
         );
     }
 
@@ -149,6 +154,10 @@ public with sharing class SpendlySettingsService {
         Time effectiveRunTime = getEffectiveRunTime(runTime);
         return '0 ' + String.valueOf(effectiveRunTime.minute()) + ' ' +
             String.valueOf(effectiveRunTime.hour()) + ' * * ?';
+    }
+
+    private static String pluralize(String singularValue, Integer count) {
+        return count == 1 ? singularValue : singularValue + 's';
     }
 
     private static CronTrigger getRecurringSchedule() {

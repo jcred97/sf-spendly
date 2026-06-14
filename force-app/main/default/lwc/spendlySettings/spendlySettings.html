@@ -2,16 +2,25 @@
     <div class="settings-page">
         <div class="settings-header">
             <div>
-                <h1 class="settings-title">Spendly Settings</h1>
+                <h1 class="settings-title">Settings</h1>
                 <p class="settings-subtitle">Automation and app controls</p>
             </div>
-            <lightning-button
-                variant="brand"
-                label="Save"
-                icon-name="utility:save"
-                onclick={handleSave}
-                disabled={isSaving}>
-            </lightning-button>
+            <div class="header-actions">
+                <lightning-button
+                    variant="neutral"
+                    label={refreshButtonLabel}
+                    icon-name="utility:refresh"
+                    onclick={handleRefresh}
+                    disabled={isRefreshDisabled}>
+                </lightning-button>
+                <lightning-button
+                    variant="brand"
+                    label="Save"
+                    icon-name="utility:save"
+                    onclick={handleSave}
+                    disabled={isSaving}>
+                </lightning-button>
+            </div>
         </div>
 
         <div class="settings-grid">
@@ -69,7 +78,7 @@
                         <dd>{scheduleTimeZoneDisplay}</dd>
                     </div>
                     <div>
-                        <dt>Scheduler State</dt>
+                        <dt>Automation Status</dt>
                         <dd>{scheduleStateDisplay}</dd>
                     </div>
                 </dl>

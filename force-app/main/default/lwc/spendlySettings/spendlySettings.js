@@ -29,7 +29,6 @@ export default class SpendlySettings extends LightningElement {
     scheduleState = 'Not scheduled';
     scheduleNextRunDateTime;
     scheduleTimeZone = '-';
-    scheduleCronExpression = '-';
 
     isLoading = true;
     isSaving = false;
@@ -43,8 +42,16 @@ export default class SpendlySettings extends LightningElement {
         return this.isRunning ? 'Running...' : 'Run Recurring';
     }
 
+    get refreshButtonLabel() {
+        return this.isLoading ? 'Refreshing...' : 'Refresh';
+    }
+
     get isRunDisabled() {
         return this.isRunning || this.isSaving || !this.recurringExpensesEnabled;
+    }
+
+    get isRefreshDisabled() {
+        return this.isLoading || this.isSaving || this.isRunning;
     }
 
     get scheduleText() {
@@ -78,7 +85,7 @@ export default class SpendlySettings extends LightningElement {
             return 'Disabled';
         }
 
-        return this.scheduleActive ? 'Scheduled' : 'Needs attention';
+        return this.scheduleActive ? 'Ready' : 'Needs attention';
     }
 
     get scheduleStatusClass() {
@@ -90,7 +97,20 @@ export default class SpendlySettings extends LightningElement {
     }
 
     get scheduleStateDisplay() {
-        return this.scheduleState || 'Not scheduled';
+        if (!this.recurringExpensesEnabled) {
+            return 'Automation is paused.';
+        }
+
+        const stateMap = {
+            ACQUIRED: 'Automation is running now.',
+            COMPLETE: 'Automation finished its scheduled work.',
+            DELETED: 'Automation is not scheduled.',
+            ERROR: 'Automation needs attention.',
+            PAUSED: 'Automation is paused.',
+            WAITING: 'Automation is ready.'
+        };
+
+        return stateMap[this.scheduleState] || 'Automation is not scheduled.';
     }
 
     get scheduleNextRunDisplay() {
@@ -114,6 +134,10 @@ export default class SpendlySettings extends LightningElement {
         } finally {
             this.isLoading = false;
         }
+    }
+
+    async handleRefresh() {
+        await this.loadSettings();
     }
 
     handleRecurringToggle(event) {
@@ -168,7 +192,6 @@ export default class SpendlySettings extends LightningElement {
         this.scheduleState = settings?.recurringScheduleState || 'Not scheduled';
         this.scheduleNextRunDateTime = settings?.recurringScheduleNextRunDateTime;
         this.scheduleTimeZone = settings?.recurringScheduleTimeZone || '-';
-        this.scheduleCronExpression = settings?.recurringScheduleCronExpression || '-';
     }
 
     getErrorMessage(error, fallback) {

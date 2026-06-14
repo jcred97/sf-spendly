@@ -52,7 +52,7 @@ private class SpendlyRecurringExpenseBatchTest {
         ];
         System.assertEquals('Completed', settings.Last_Recurring_Run_Status__c);
         System.assert(
-            settings.Last_Recurring_Run_Message__c.contains('Created 250 expense(s)'),
+            settings.Last_Recurring_Run_Message__c.contains('Created 250 expenses'),
             'Batch finish should record the generated expense count'
         );
     }

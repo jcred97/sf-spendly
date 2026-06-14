@@ -93,6 +93,21 @@ private class SpendlySettingsServiceTest {
 
         System.assertNotEquals(null, settings.Last_Recurring_Run_DateTime__c);
         System.assertEquals('Completed', settings.Last_Recurring_Run_Status__c);
-        System.assert(settings.Last_Recurring_Run_Message__c.contains('Created 3 expense(s)'));
+        System.assert(settings.Last_Recurring_Run_Message__c.contains('Created 3 expenses from 2 recurring templates.'));
+    }
+
+    @IsTest
+    static void testCompletedRunMessageWhenNothingIsDue() {
+        Test.startTest();
+        SpendlySettingsService.markRecurringRunCompleted(0, 0);
+        Test.stopTest();
+
+        Spendly_Settings__c settings = [
+            SELECT Last_Recurring_Run_Message__c
+            FROM Spendly_Settings__c
+            LIMIT 1
+        ];
+
+        System.assertEquals('No recurring expenses were due.', settings.Last_Recurring_Run_Message__c);
     }
 }
