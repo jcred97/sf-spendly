@@ -10,6 +10,11 @@ public with sharing class SpendlySettingsService {
         @AuraEnabled public Datetime lastRecurringRunDateTime;
         @AuraEnabled public String lastRecurringRunStatus;
         @AuraEnabled public String lastRecurringRunMessage;
+        @AuraEnabled public Boolean recurringScheduleActive;
+        @AuraEnabled public String recurringScheduleState;
+        @AuraEnabled public Datetime recurringScheduleNextRunDateTime;
+        @AuraEnabled public String recurringScheduleTimeZone;
+        @AuraEnabled public String recurringScheduleCronExpression;
 
         public SettingsState(Spendly_Settings__c settings) {
             this.settingsId = settings.Id;
@@ -18,6 +23,13 @@ public with sharing class SpendlySettingsService {
             this.lastRecurringRunDateTime = settings.Last_Recurring_Run_DateTime__c;
             this.lastRecurringRunStatus = settings.Last_Recurring_Run_Status__c;
             this.lastRecurringRunMessage = settings.Last_Recurring_Run_Message__c;
+
+            CronTrigger recurringSchedule = getRecurringSchedule();
+            this.recurringScheduleActive = recurringSchedule != null && recurringSchedule.NextFireTime != null;
+            this.recurringScheduleState = recurringSchedule == null ? 'Not scheduled' : recurringSchedule.State;
+            this.recurringScheduleNextRunDateTime = recurringSchedule?.NextFireTime;
+            this.recurringScheduleTimeZone = recurringSchedule == null ? UserInfo.getTimeZone().getID() : recurringSchedule.TimeZoneSidKey;
+            this.recurringScheduleCronExpression = recurringSchedule?.CronExpression;
         }
     }
 
@@ -137,6 +149,19 @@ public with sharing class SpendlySettingsService {
         Time effectiveRunTime = getEffectiveRunTime(runTime);
         return '0 ' + String.valueOf(effectiveRunTime.minute()) + ' ' +
             String.valueOf(effectiveRunTime.hour()) + ' * * ?';
+    }
+
+    private static CronTrigger getRecurringSchedule() {
+        List<CronTrigger> recurringSchedules = [
+            SELECT CronExpression, NextFireTime, State, TimeZoneSidKey
+            FROM CronTrigger
+            WHERE CronJobDetail.Name = :RECURRING_SCHEDULE_NAME
+            AND State != 'DELETED'
+            ORDER BY NextFireTime ASC
+            LIMIT 1
+        ];
+
+        return recurringSchedules.isEmpty() ? null : recurringSchedules[0];
     }
 
     private static void rescheduleRecurringExpenses(Time runTime) {

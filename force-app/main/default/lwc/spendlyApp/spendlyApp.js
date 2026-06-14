@@ -39,13 +39,6 @@ const VIEW_CONFIG = [
         title: 'Recurring',
         subtitle: 'Monitor recurring expense templates',
         iconName: 'utility:sync'
-    },
-    {
-        key: 'settings',
-        label: 'Settings',
-        title: 'Settings',
-        subtitle: 'Automation and workspace preferences',
-        iconName: 'utility:settings'
     }
 ];
 
@@ -231,10 +224,6 @@ export default class SpendlyApp extends LightningElement {
 
     get isRecurringView() {
         return this.activeView === 'recurring';
-    }
-
-    get isSettingsView() {
-        return this.activeView === 'settings';
     }
 
     get selectedExpenseGroupName() {

@@ -51,6 +51,31 @@
             </section>
 
             <section class="settings-panel">
+                <div class="panel-header panel-header_split">
+                    <div class="panel-title">
+                        <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
+                        <h2>Schedule</h2>
+                    </div>
+                    <span class={scheduleStatusClass}>{scheduleStatusLabel}</span>
+                </div>
+
+                <dl class="status-list">
+                    <div>
+                        <dt>Next Run</dt>
+                        <dd>{scheduleNextRunDisplay}</dd>
+                    </div>
+                    <div>
+                        <dt>Timezone</dt>
+                        <dd>{scheduleTimeZoneDisplay}</dd>
+                    </div>
+                    <div>
+                        <dt>Scheduler State</dt>
+                        <dd>{scheduleStateDisplay}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="settings-panel">
                 <div class="panel-header">
                     <lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
                     <h2>Last Run</h2>

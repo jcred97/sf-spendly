@@ -9,6 +9,10 @@ private class SpendlySettingsServiceTest {
         System.assertNotEquals(null, settings.settingsId);
         System.assertEquals(true, settings.recurringExpensesEnabled);
         System.assertEquals('08:00', settings.globalRecurringRunTime);
+        System.assertEquals(false, settings.recurringScheduleActive);
+        System.assertEquals('Not scheduled', settings.recurringScheduleState);
+        System.assertEquals(null, settings.recurringScheduleNextRunDateTime);
+        System.assertNotEquals(null, settings.recurringScheduleTimeZone);
         System.assertEquals(1, [SELECT COUNT() FROM Spendly_Settings__c]);
     }
 
@@ -32,6 +36,11 @@ private class SpendlySettingsServiceTest {
         SpendlySettingsService.SettingsState settings = SpendlySettingsService.saveSettings(true, '10:30');
 
         System.assertEquals('10:30', settings.globalRecurringRunTime);
+        System.assertEquals(true, settings.recurringScheduleActive);
+        System.assertEquals('WAITING', settings.recurringScheduleState);
+        System.assertNotEquals(null, settings.recurringScheduleNextRunDateTime);
+        System.assertNotEquals(null, settings.recurringScheduleTimeZone);
+        System.assertEquals('0 30 10 * * ?', settings.recurringScheduleCronExpression);
 
         Spendly_Settings__c settingsRecord = [
             SELECT Global_Recurring_Run_Time__c

@@ -10,7 +10,8 @@ const DATE_TIME_FORMAT = new Intl.DateTimeFormat('en-PH', {
     month: 'short',
     day: '2-digit',
     hour: 'numeric',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZoneName: 'short'
 });
 
 function formatDateTime(value) {
@@ -24,6 +25,11 @@ export default class SpendlySettings extends LightningElement {
     lastRunStatus = '-';
     lastRunDateTime;
     lastRunMessage = '-';
+    scheduleActive = false;
+    scheduleState = 'Not scheduled';
+    scheduleNextRunDateTime;
+    scheduleTimeZone = '-';
+    scheduleCronExpression = '-';
 
     isLoading = true;
     isSaving = false;
@@ -42,7 +48,7 @@ export default class SpendlySettings extends LightningElement {
     }
 
     get scheduleText() {
-        return `Daily at ${this.formattedGlobalRunTime}`;
+        return `Daily at ${this.formattedGlobalRunTime} (${this.scheduleTimeZoneDisplay})`;
     }
 
     get formattedGlobalRunTime() {
@@ -65,6 +71,38 @@ export default class SpendlySettings extends LightningElement {
 
     get lastRecurringRunMessage() {
         return this.lastRunMessage || '-';
+    }
+
+    get scheduleStatusLabel() {
+        if (!this.recurringExpensesEnabled) {
+            return 'Disabled';
+        }
+
+        return this.scheduleActive ? 'Scheduled' : 'Needs attention';
+    }
+
+    get scheduleStatusClass() {
+        if (!this.recurringExpensesEnabled) {
+            return 'status-pill status-pill_neutral';
+        }
+
+        return this.scheduleActive ? 'status-pill status-pill_success' : 'status-pill status-pill_warning';
+    }
+
+    get scheduleStateDisplay() {
+        return this.scheduleState || 'Not scheduled';
+    }
+
+    get scheduleNextRunDisplay() {
+        if (!this.recurringExpensesEnabled) {
+            return 'Paused by setting';
+        }
+
+        return formatDateTime(this.scheduleNextRunDateTime);
+    }
+
+    get scheduleTimeZoneDisplay() {
+        return this.scheduleTimeZone || '-';
     }
 
     async loadSettings() {
@@ -126,6 +164,11 @@ export default class SpendlySettings extends LightningElement {
         this.lastRunStatus = settings?.lastRecurringRunStatus || '-';
         this.lastRunDateTime = settings?.lastRecurringRunDateTime;
         this.lastRunMessage = settings?.lastRecurringRunMessage || '-';
+        this.scheduleActive = settings?.recurringScheduleActive || false;
+        this.scheduleState = settings?.recurringScheduleState || 'Not scheduled';
+        this.scheduleNextRunDateTime = settings?.recurringScheduleNextRunDateTime;
+        this.scheduleTimeZone = settings?.recurringScheduleTimeZone || '-';
+        this.scheduleCronExpression = settings?.recurringScheduleCronExpression || '-';
     }
 
     getErrorMessage(error, fallback) {

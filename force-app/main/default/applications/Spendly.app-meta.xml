@@ -9,12 +9,10 @@
     <label>Spendly</label>
     <navType>Standard</navType>
     <tabs>Spendly</tabs>
+    <tabs>Expense_Group__c</tabs>
     <tabs>Expense__c</tabs>
     <tabs>Recurring_Expense__c</tabs>
     <tabs>Category__c</tabs>
-    <tabs>Expense_Group__c</tabs>
-    <tabs>standard-report</tabs>
-    <tabs>standard-Dashboard</tabs>
     <tabs>Spendly_Settings</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Spendly_UtilityBar</utilityBar>
