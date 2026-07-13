@@ -163,7 +163,6 @@
         <field>Spendly_Settings__c.Recurring_Expenses_Enabled__c</field>
         <readable>true</readable>
     </fieldPermissions>
-
     <!-- Tab Visibility -->
     <tabSettings>
         <tab>Expense__c</tab>
@@ -189,7 +188,6 @@
         <tab>Spendly_Settings</tab>
         <visibility>Visible</visibility>
     </tabSettings>
-
     <!-- Apex Class Access -->
     <classAccesses>
         <apexClass>SpendlyController</apexClass>
@@ -211,5 +209,4 @@
         <apexClass>SpendlySettingsService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
-
 </PermissionSet>
