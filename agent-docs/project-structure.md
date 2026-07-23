@@ -1,0 +1,79 @@
+# Project Structure
+
+```text
+sf-spendly/
+  AGENTS.md
+  README.md
+  package.json
+  sfdx-project.json
+  jest.config.js
+  eslint.config.js
+  config/
+    project-scratch-def.json
+  manifest/
+    package.xml
+  destructive/
+    package.xml
+    destructiveChanges.xml
+  force-app/main/default/
+    applications/
+      Spendly.app-meta.xml
+    classes/
+      RecurringExpenseTriggerTest.cls
+      SpendlyController.cls
+      SpendlyControllerTest.cls
+      SpendlyRecurringExpenseBatch.cls
+      SpendlyRecurringExpenseBatchTest.cls
+      SpendlyRecurringExpenseCalculator.cls
+      SpendlyRecurringExpenseCalculatorTest.cls
+      SpendlyRecurringExpenseScheduler.cls
+      SpendlyRecurringExpenseSchedulerTest.cls
+      SpendlyRecurringExpenseService.cls
+      SpendlyRecurringExpenseServiceTest.cls
+      SpendlySettingsService.cls
+      SpendlySettingsServiceTest.cls
+    contentassets/
+      spendly1.asset
+    flexipages/
+      Spendly.flexipage-meta.xml
+      Spendly_Settings.flexipage-meta.xml
+      Spendly_UtilityBar.flexipage-meta.xml
+      Expense_Record_Page.flexipage-meta.xml
+    globalValueSets/
+      Bank.globalValueSet-meta.xml
+    layouts/
+      Category__c-Category Layout.layout-meta.xml
+      Expense__c-Expense Layout.layout-meta.xml
+      Expense_Group__c-Expense Group Layout.layout-meta.xml
+      Recurring_Expense__c-Recurring Expense Layout.layout-meta.xml
+      Spendly_Settings__c-Spendly Settings Layout.layout-meta.xml
+    lwc/
+      spendlyApp/
+      spendlyBarChart/
+      spendlyExpenseModal/
+      spendlySummaryCards/
+      spendlySettings/
+      spendlyTrendChart/
+    objects/
+      Expense_Group__c/
+      Category__c/
+      Expense__c/
+      Recurring_Expense__c/
+      Spendly_Settings__c/
+    permissionsets/
+      Spendly_Admin.permissionset-meta.xml
+      Spendly_All_Access.permissionset-meta.xml
+      Spendly_User.permissionset-meta.xml
+    staticresources/
+      RemoveDateFormatStyle.css
+    tabs/
+      Spendly.tab-meta.xml
+      Category__c.tab-meta.xml
+      Expense__c.tab-meta.xml
+      Expense_Group__c.tab-meta.xml
+      Recurring_Expense__c.tab-meta.xml
+      Spendly_Settings.tab-meta.xml
+    triggers/
+      RecurringExpenseTrigger.trigger
+      SpendlySettingsTrigger.trigger
+```
