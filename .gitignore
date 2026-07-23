@@ -52,3 +52,8 @@ $RECYCLE.BIN/
 
 # Local destructive deployment package
 destructive/
+
+# Project agent documentation
+!AGENTS.md
+!agent-docs/
+!agent-docs/**
